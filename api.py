@@ -239,6 +239,106 @@ def api_proxy_autopopulate():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+# ─── Telegram Scraper Endpoints ────────────────────────────
+
+@app.route("/api/telegram/search", methods=["POST"])
+def api_telegram_search():
+    """
+    Search Telegram channels for credential combos via Telethon.
+    Requires TG_API_ID and TG_API_HASH env vars configured.
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+    
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+    
+    try:
+        from telegram_scraper import TelegramIntelScraper
+        tg = TelegramIntelScraper()
+        
+        if not tg.enabled:
+            return jsonify({
+                "success": False,
+                "error": "Telegram not configured. Set TG_API_ID and TG_API_HASH",
+                "hint": "Get them from https://my.telegram.org/apps"
+            }), 400
+        
+        channels = data.get("channels", None)
+        max_per = data.get("max_per_channel", 20)
+        max_age = data.get("max_age_days", 30)
+        
+        # Run in a thread with timeout
+        import threading
+        result_holder = []
+        error_holder = []
+        done = threading.Event()
+        
+        def _run():
+            try:
+                combos = tg.scrape(keyword, channels=channels, max_per_channel=max_per)
+                result_holder.extend(combos)
+            except Exception as e:
+                error_holder.append(str(e))
+            finally:
+                done.set()
+        
+        t = threading.Thread(target=_run, daemon=True)
+        t.start()
+        
+        if not done.wait(timeout=60):
+            return jsonify({"success": False, "error": "Telegram search timed out (>60s)"}), 504
+        
+        if error_holder:
+            return jsonify({"success": False, "error": error_holder[0]}), 500
+        
+        combos = result_holder
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                "keyword": keyword,
+                "total": len(combos),
+                "combos": [
+                    {
+                        "email": c.email,
+                        "password": c.password[:15] + "***" if len(c.password) > 15 else c.password,
+                        "domain": c.domain,
+                        "source": c.source_type,
+                        "date": c.discovered_date,
+                    }
+                    for c in combos[:100]
+                ],
+                "took_seconds": 0,
+                "stats": tg.get_stats(),
+            }
+        })
+    except ImportError:
+        return jsonify({"success": False, "error": "telegram_scraper module not available"}), 500
+    except Exception as e:
+        logger.exception("Telegram search error")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/telegram/status", methods=["GET"])
+def api_telegram_status():
+    """Check if Telegram scraper is configured."""
+    try:
+        from telegram_scraper import TelegramIntelScraper
+        tg = TelegramIntelScraper()
+        return jsonify({
+            "success": True,
+            "data": {
+                "enabled": tg.enabled,
+                "api_id_configured": bool(os.environ.get("TG_API_ID", "")),
+                "api_hash_configured": bool(os.environ.get("TG_API_HASH", "")),
+                "hint": "Set TG_API_ID and TG_API_HASH in .env from https://my.telegram.org/apps" if not tg.enabled else "",
+            }
+        })
+    except ImportError:
+        return jsonify({"success": False, "error": "telegram_scraper not available"}), 500
+
+
 # ─── Combo Intelligence Endpoints ──────────────────────────
 
 # Track server start time for uptime reporting
@@ -289,7 +389,7 @@ def api_search():
     
     categories = data.get("categories", None)
     use_apis = data.get("use_apis", True)
-    use_sample = data.get("sample", True)
+    use_sample = data.get("sample", False)
     
     try:
         result = enhanced_engine.search(
@@ -298,6 +398,25 @@ def api_search():
             categories=categories,
             sample=use_sample,
         )
+        
+        # ─── Also fetch real dump combos from DumpFinder ───
+        try:
+            finder = _get_dump_finder()
+            if finder:
+                dump_result = finder.search_fast(
+                    keyword=keyword,
+                    max_dorks=8,
+                    max_fetches=5,
+                    save_to_disk=True,
+                )
+                if dump_result.get("filtered_combos_count", 0) > 0:
+                    result.setdefault("real_combos", [])
+                    result["real_combos"] = dump_result.get("combos_sample", [])
+                    result.setdefault("summary", {})
+                    result["summary"]["dump_combos_found"] = dump_result["filtered_combos_count"]
+                    result["summary"]["dump_took_seconds"] = dump_result.get("took_seconds", 0)
+        except Exception as e:
+            logger.debug(f"DumpFinder merge error: {e}")
         
         return jsonify({
             "success": True,
@@ -1358,6 +1477,42 @@ def api_dump_cache_clear():
 
 # ─── Main ────────────────────────────────────────────────────
 
+
+# ─── Auto-init on startup ──────────────────────────────────
+def _auto_init_proxies():
+    """Auto-populate proxy pool on server start (background thread)."""
+    import threading
+    
+    def _run():
+        try:
+            logger.info("🔄 [AutoInit] Auto-populating proxy pool...")
+            engine = _get_proxy_engine_ws()
+            if engine:
+                # Quick scrape first
+                result = engine.scrape_proxies()
+                scraped = result.get("total", 0)
+                sources = len(result.get("by_source", {}))
+                logger.info(f"🔄 [AutoInit] Scraped {scraped} proxies from {sources} sources")
+                
+                # Test if we have enough
+                if scraped > 50:
+                    logger.info("🔄 [AutoInit] Testing proxies...")
+                    engine.test_proxies()
+                    stats = engine.pool.stats()
+                    logger.info(f"🔄 [AutoInit] Pool ready: {stats['alive']} alive, {stats['dead']} dead")
+                else:
+                    logger.info(f"🔄 [AutoInit] Only {scraped} proxies — skipping test (need 50+)")
+        except Exception as e:
+            logger.debug(f"AutoInit proxy error: {e}")
+    
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+
+
+# ─── Fire auto-init in background ───
+_auto_init_proxies()
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     debug = os.environ.get("DEBUG", "").lower() in ("true", "1", "yes")
@@ -1365,7 +1520,8 @@ if __name__ == "__main__":
     logger.info("🚀 Oracle Intelligence API v2.0 starting on port %d", port)
     logger.info("📡 External API connectors available via IntelOrchestrator")
     logger.info("📊 Deploy status endpoint at /api/deploy/status")
+    logger.info("🔌 WebSocket support available at /socket.io/")
+    logger.info("🔄 Auto-init: proxies will populate in background")
     
     # Use socketio.run for WebSocket support
-    logger.info("🔌 WebSocket support available at /socket.io/")
     socketio.run(app, host="0.0.0.0", port=port, debug=debug)

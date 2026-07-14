@@ -17,7 +17,8 @@ services:
     startCommand: gunicorn api:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 5 --access-logfile -
     
     # Health check — Render pings this every 5 seconds
-    healthCheckPath: /api/stats
+    # /api/ping es ultraligero (<5ms, sin psutil, sin DB, sin engine)
+    healthCheckPath: /api/ping
     
     # Source
     repo: https://github.com/aonetworkcrm-art/oraculo-inteligencia

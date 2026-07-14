@@ -166,12 +166,31 @@ class ProxyManager:
     Siempre definido a nivel de módulo, porque los scrapers internos
     (PasteScraper, ForumScraper, TelegramScraper) lo usan
     independientemente de si proxy_engine.py está disponible.
+
+    AHORA: Carga automáticamente proxies desde proxies_vivos.txt
+    para que DumpFinder y todos los scrapers usen los proxies
+    scrapeados por ProxyEngine sin configuración adicional.
     """
+
+    _PROXIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proxies_vivos.txt")
+
     def __init__(self):
         self.proxies = []
         self._dead = set()
         self._lock = threading.Lock()
         self._load_from_env()
+        # Auto-load proxies from file (if exists)
+        self._auto_load_file()
+
+    def _auto_load_file(self):
+        """Carga proxies desde proxies_vivos.txt automáticamente.
+        Delega en load_from_file() para mantener la lógica en un solo lugar.
+        Esto integra DumpFinder con ProxyEngine sin configuración extra."""
+        try:
+            if os.path.exists(self._PROXIES_FILE):
+                self.load_from_file(self._PROXIES_FILE)
+        except Exception as e:
+            logger.debug(f"Auto-load proxies file: {e}")
 
     def _load_from_env(self):
         proxy_list = os.environ.get("COMBO_PROXIES", "")
@@ -183,12 +202,15 @@ class ProxyManager:
 
     def load_from_file(self, path: str):
         try:
+            count = 0
             with open(path, "r") as f:
                 for line in f:
                     line = line.strip()
-                    if line and not line.startswith("#"):
+                    if line and not line.startswith("#") and line not in self.proxies:
                         self.proxies.append(line)
-            logger.info(f"📥 Loaded {len(self.proxies)} proxies from {path}")
+                        count += 1
+            if count > 0:
+                logger.info(f"📥 Loaded {count} proxies from {path}")
         except Exception as e:
             logger.warning(f"⚠️ Proxy file load failed: {e}")
 
@@ -245,31 +267,62 @@ class RateLimiter:
 class ComboParser:
     """
     Extracts credential combos from raw text.
-    Handles multiple formats: email:pass, user:pass, json, csv, custom.
+    Handles multiple formats: email:pass, user:pass, json, csv, custom,
+    AND URL-based formats como:
+      http://service.tld:email:password
+      http://service.tld/path:email:password
+      https://service.tld:email:password
+
+    Basado en el análisis de Joker Combo Leecher, Hacku Dumper,
+    y dumps reales de Pastebin/Telegram.
     """
 
-    # Pattern: email:password (most common)
+    # ── Pattern 1: Classic email:password (most common) ──
     PATTERN_EMAIL_PASS = re.compile(
         r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s*[:;|]\s*(\S+)',
         re.IGNORECASE
     )
 
-    # Pattern: username:password
+    # ── Pattern 2: URL-based format ──
+    # http://domain.tld:email:pass
+    # http://domain.tld/path:email:pass
+    # Captura el service_url completo para tracking
+    # Usa [^:]* en vez de [^\s]*? para evitar backtracking O(n²)
+    PATTERN_URL_COMBO = re.compile(
+        r'(https?://[^\s:]+(?:/[^:]*)?):([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}):(\S+)',
+        re.IGNORECASE
+    )
+
+    # ── Pattern 3: URL-based with no @ (user instead of email) ──
+    # http://domain.tld:username:pass
+    # ⚠️ Rechaza usernames puramente numéricos (puertos) para evitar FP
+    PATTERN_URL_USER_PASS = re.compile(
+        r'(https?://[^\s:]+(?:/[^:]*)?):([a-zA-Z0-9._-]{4,50}):(\S{4,})',
+        re.IGNORECASE
+    )
+
+    # ── Pattern 4: username:password ──
     PATTERN_USER_PASS = re.compile(
         r'^([a-zA-Z0-9._-]{4,})\s*[:;|]\s*(\S+)',
         re.MULTILINE
     )
 
-    # Pattern: "email":"password" (JSON-like)
+    # ── Pattern 5: "email":"password" (JSON-like) ──
     PATTERN_JSON_COMBO = re.compile(
         r'"(?:email|user|username|mail|login)"\s*:\s*"([^"]+)"\s*,\s*"(?:pass|password|passwd|pwd)"\s*:\s*"([^"]+)"',
         re.IGNORECASE
     )
 
-    # Pattern: email | password (pipe-separated CSV)
+    # ── Pattern 6: email | password (pipe-separated CSV) ──
     PATTERN_CSV_COMBO = re.compile(
         r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s*[|]\s*(\S+)',
         re.IGNORECASE
+    )
+
+    # ── Pattern 7: service.com:email:pass (no http prefix) ──
+    PATTERN_SERVICE_COMBO = re.compile(
+        r'^([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}):([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}):(\S+)$',
+        re.MULTILINE
     )
 
     # Common password blacklist (avoid noise)
@@ -285,6 +338,7 @@ class ComboParser:
         self.stats = {
             "total_lines": 0,
             "parsed_combos": 0,
+            "url_based_combos": 0,  # NEW: track URL-based format count
             "filtered_duplicates": 0,
             "filtered_noise": 0,
         }
@@ -293,6 +347,10 @@ class ComboParser:
                    source_type: str = "unknown", keyword: str = "") -> List[ComboEntry]:
         """
         Parse raw text and extract all combo entries.
+        Now handles URL-based formats como:
+          http://service.tld:email:password
+          http://service.tld/path:email:password
+          service.tld:email:password  (sin http)
         Returns deduplicated list of ComboEntry.
         """
         entries = []
@@ -311,7 +369,53 @@ class ComboParser:
         # Full text as single string for regex
         full_text = text[:500000]  # 500KB limit
 
-        # ── 1. Extract email:password patterns ──
+        # ── 1. EXTRACT URL-BASED COMBOS (NEW - highest priority) ──
+        # http://domain.tld:email:password
+        # http://domain.tld/path:email:password
+        for match in self.PATTERN_URL_COMBO.finditer(full_text):
+            service_url, email, password = match.groups()
+            password = password.strip().strip('"').strip("'")
+            if self._is_valid_combo(email, password, seen, allow_no_at=False):
+                domain = email.split("@")[-1] if "@" in email else ""
+                entry = ComboEntry(
+                    email=email.strip(),
+                    password=password,
+                    domain=domain,
+                    source_url=source_url,
+                    source_type=source_type,
+                    record_type="email:pass",
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    extra_data={"service_url": service_url},
+                )
+                entries.append(entry)
+                seen.add(f"{email.lower()}:{password}")
+                self.stats["url_based_combos"] += 1
+
+        # ── 2. EXTRACT SERVICE:email:pass (NEW - no http prefix) ──
+        # format: service.tld:email:password
+        for match in self.PATTERN_SERVICE_COMBO.finditer(full_text):
+            service_host, email, password = match.groups()
+            password = password.strip().strip('"').strip("'")
+            if self._is_valid_combo(email, password, seen, allow_no_at=False):
+                domain = email.split("@")[-1] if "@" in email else ""
+                service_url = f"http://{service_host}"
+                entry = ComboEntry(
+                    email=email.strip(),
+                    password=password,
+                    domain=domain,
+                    source_url=source_url,
+                    source_type=source_type,
+                    record_type="email:pass",
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    extra_data={"service_url": service_url},
+                )
+                entries.append(entry)
+                seen.add(f"{email.lower()}:{password}")
+                self.stats["url_based_combos"] += 1
+
+        # ── 3. Extract email:password patterns ──
         for match in self.PATTERN_EMAIL_PASS.finditer(full_text):
             email, password = match.groups()
             password = password.strip().strip('"').strip("'")
@@ -329,7 +433,7 @@ class ComboParser:
                 ))
                 seen.add(f"{email.lower()}:{password}")
 
-        # ── 2. Extract JSON combos ──
+        # ── 4. Extract JSON combos ──
         for match in self.PATTERN_JSON_COMBO.finditer(full_text):
             email, password = match.groups()
             if self._is_valid_combo(email, password, seen):
@@ -346,7 +450,7 @@ class ComboParser:
                 ))
                 seen.add(f"{email.lower()}:{password}")
 
-        # ── 3. Extract user:password (for non-email usernames) ──
+        # ── 5. Extract user:password (for non-email usernames) ──
         # Only if keyword matches
         if keyword:
             kw_lower = keyword.lower()
@@ -356,7 +460,19 @@ class ComboParser:
                 # Must contain keyword or be a reasonable combo
                 if kw_lower in username.lower() or kw_lower in password.lower():
                     combo_key = f"{username.lower()}:{password}"
-                    if combo_key not in seen and len(password) >= 4:
+                    # VALIDATE: password must not contain URL artifacts
+                    if "://" in password or "/" in password:
+                        self.stats["filtered_noise"] += 1
+                        continue
+                    # VALIDATE: password should be reasonable length
+                    if len(password) < 4 or len(password) > 80:
+                        self.stats["filtered_noise"] += 1
+                        continue
+                    # VALIDATE: username should not contain URL artifacts
+                    if "://" in username:
+                        self.stats["filtered_noise"] += 1
+                        continue
+                    if combo_key not in seen:
                         entries.append(ComboEntry(
                             username=username.strip(),
                             password=password,
@@ -369,13 +485,25 @@ class ComboParser:
                         seen.add(combo_key)
 
         self.stats["parsed_combos"] = len(entries)
-        logger.info(f"🔍 Parsed {len(entries)} combos from {source_type} "
+        url_count = self.stats["url_based_combos"]
+        url_msg = f" ({url_count} URL-based)" if url_count > 0 else ""
+        logger.info(f"🔍 Parsed {len(entries)} combos from {source_type}{url_msg} "
                     f"({self.stats['filtered_noise']} filtered, "
                     f"{self.stats['filtered_duplicates']} duplicates)")
         return entries
 
-    def _is_valid_combo(self, email: str, password: str, seen: set) -> bool:
-        """Validate a potential combo entry."""
+    def _is_valid_combo(self, email: str, password: str, seen: set,
+                        allow_no_at: bool = True) -> bool:
+        """
+        Validate a potential combo entry.
+        
+        Args:
+            email: Email or username string
+            password: Password string
+            seen: Set of already-seen combos
+            allow_no_at: If True, allows strings without @ ("user:pass" style)
+                         If False, requires @ (for URL-based formats which always have email)
+        """
         email = email.strip()
         password = password.strip().strip('"').strip("'")
 
@@ -389,7 +517,19 @@ class ComboParser:
         if len(password) > 100:
             self.stats["filtered_noise"] += 1
             return False
+
+        # For URL-based formats, always require @ (they always have email)
+        if not allow_no_at and "@" not in email:
+            self.stats["filtered_noise"] += 1
+            return False
+
+        # For general combos, require @
         if "@" not in email:
+            self.stats["filtered_noise"] += 1
+            return False
+
+        # REJECT if email contains URL artifacts like :// or / or multiple ::
+        if "://" in email or "/" in email or email.count(":") > 0:
             self.stats["filtered_noise"] += 1
             return False
 
@@ -404,7 +544,7 @@ class ComboParser:
             self.stats["filtered_duplicates"] += 1
             return False
 
-        # Check if email looks real
+        # Check if email looks real (STRICT)
         if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
             self.stats["filtered_noise"] += 1
             return False

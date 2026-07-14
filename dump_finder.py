@@ -790,7 +790,7 @@ class LocalSaver:
                 f.write(f"# Generated: {datetime.now().isoformat()}\n")
                 f.write(f"# Total combos: {len(combos)}\n")
                 f.write(f"# Date range: {year or 'all'}-{month or 'all'}\n")
-                f.write("# Format: email:password\n\n")
+                f.write("# Format: email:password  or  http://service:email:password\n\n")
 
                 for combo in combos:
                     identifier = combo.email or combo.username or ""
@@ -798,8 +798,13 @@ class LocalSaver:
                     source = combo.source_type or ""
                     src_url = combo.source_url or ""
                     date = combo.discovered_date or ""
+                    service_url = combo.extra_data.get("service_url", "") if hasattr(combo, 'extra_data') else ""
                     if identifier and combo.password:
-                        f.write(f"{identifier}:{combo.password}  #{domain} | {source} | {date}\n")
+                        # If combo has a service_url, output in URL-based format
+                        if service_url:
+                            f.write(f"{service_url}:{identifier}:{combo.password}  #{domain} | {source} | {date}\n")
+                        else:
+                            f.write(f"{identifier}:{combo.password}  #{domain} | {source} | {date}\n")
 
             files_created.append(merge_file)
 

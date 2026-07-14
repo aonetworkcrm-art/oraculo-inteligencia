@@ -74,6 +74,8 @@ async function executeSearch() {
   const keyword = input.value.trim();
   const category = document.getElementById('searchCategory').value;
   const useSample = document.getElementById('useSampleData').checked;
+  const useDumpFinder = document.getElementById('useDumpFinder').checked;
+  const useTelegram = document.getElementById('useTelegram').checked;
   
   if (!keyword) {
     showToast('❌ Ingresa una palabra clave para buscar', 'var(--red)');
@@ -85,54 +87,152 @@ async function executeSearch() {
   btn.classList.add('loading');
   btn.disabled = true;
   document.getElementById('scanBar').classList.add('active');
+  document.getElementById('scanFill').style.width = '5%';
   document.getElementById('resultsPanel').classList.remove('active');
   
   state.lastKeyword = keyword;
   
   try {
-    // Try API first
+    // ─── REQUEST REAL DATA FROM MULTIPLE SOURCES IN PARALLEL ───
     let records = [];
     let sources = [];
     let stats = {};
     
-    try {
-      const resp = await fetch('/api/search', {
+    // Update scanbar label to show multi-source loading
+    document.getElementById('scanFill').style.width = '30%';
+    
+    // Fire ALL requests in PARALLEL with Promise.all
+    const promises = [];
+    
+    // 1. Main search API
+    const mainPromise = fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        keyword: keyword,
+        categories: category ? [category] : null,
+        sample: false,
+        max_dorks: 8,
+      }),
+      signal: AbortSignal.timeout(15000),
+    }).then(r => r.ok ? r.json() : null).catch(() => null);
+    promises.push(mainPromise);
+    
+    // 2. DumpFinder (Pastebin)
+    let dumpPromise = Promise.resolve(null);
+    if (useDumpFinder) {
+      dumpPromise = fetch('/api/dump/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           keyword: keyword,
-          categories: category ? [category] : null,
-          sample: useSample,
-          max_dorks: 5,
+          max_dorks: 10,
+          max_fetches: 8,
+          save_to_disk: true,
         }),
-        signal: AbortSignal.timeout(5000),
-      });
-      
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.success) {
-          records = data.data.records || [];
-          sources = data.data.sources || [];
-          stats = data.data.stats || {};
-        }
-      }
-    } catch (e) {
-      // API unavailable — use local sample data
-      console.log('API unavailable, using local data');
+        signal: AbortSignal.timeout(30000),
+      }).then(r => r.ok ? r.json() : null).catch(() => null);
+      promises.push(dumpPromise);
     }
     
-    // If no records from API, generate locally
-    if (records.length === 0) {
-      records = generateSampleRecords(keyword, 30 + Math.floor(Math.random() * 40));
-      sources = ['local_generator', 'sample_data'];
-      
-      const byType = {};
-      const bySeverity = {};
+    // 3. Telegram
+    let tgPromise = Promise.resolve(null);
+    if (useTelegram) {
+      tgPromise = fetch('/api/telegram/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keyword: keyword,
+          max_per_channel: 15,
+        }),
+        signal: AbortSignal.timeout(60000),
+      }).then(r => r.ok ? r.json() : null).catch(() => null);
+      promises.push(tgPromise);
+    }
+    
+    // Wait for ALL parallel requests
+    document.getElementById('scanFill').style.width = '60%';
+    const [mainResult, dumpResult, tgResult] = await Promise.all(promises);
+    document.getElementById('scanFill').style.width = '80%';
+    
+    // Process main API result
+    if (mainResult && mainResult.success) {
+      records = mainResult.data.all_records || mainResult.data.records || [];
+      sources = mainResult.data.summary?.sources || [];
+      stats = mainResult.data.stats || {};
+    }
+    
+    // Process DumpFinder result
+    if (dumpResult && dumpResult.success && dumpResult.data) {
+      const dumpCombos = dumpResult.data.combos_sample || [];
+      if (dumpCombos.length > 0) {
+        dumpCombos.forEach(c => {
+          records.push({
+            id: Math.random().toString(36).substring(2, 10),
+            keyword: keyword,
+            source_url: '',
+            source_type: c.source || 'dump_finder',
+            record_type: 'email:pass',
+            content_preview: (c.email || '') + ':' + ((c.password || '').substring(0, 12) + '***'),
+            discovered_at: c.date || new Date().toISOString(),
+            discovered_date: c.date || new Date().toISOString().split('T')[0],
+            severity: 'high',
+            domain: c.domain || '',
+            email: c.email || '',
+            username: (c.email || '').split('@')[0],
+            password: c.password || '',
+          });
+        });
+        if (!sources.includes('dump_finder')) sources.push('dump_finder');
+        console.log(`📦 DumpFinder: ${dumpCombos.length} real combos`);
+      }
+    }
+    
+    // Process Telegram result
+    if (tgResult && tgResult.success && tgResult.data) {
+      const tgCombos = tgResult.data.combos || [];
+      tgCombos.forEach(c => {
+        records.push({
+          id: Math.random().toString(36).substring(2, 10),
+          keyword: keyword,
+          source_url: '',
+          source_type: 'telegram',
+          record_type: 'email:pass',
+          content_preview: (c.email || '') + ':' + ((c.password || '').substring(0, 12) + '***'),
+          discovered_at: c.date || new Date().toISOString(),
+          discovered_date: c.date || new Date().toISOString().split('T')[0],
+          severity: 'high',
+          domain: c.domain || '',
+          email: c.email || '',
+          password: c.password || '',
+        });
+      });
+      if (!sources.includes('telegram')) sources.push('telegram');
+      console.log(`💬 Telegram: ${tgCombos.length} real combos`);
+    }
+    
+    // Recalculate stats with ALL records merged
+    if (records.length > 0) {
+      const byType = {}, bySeverity = {};
       records.forEach(r => {
         byType[r.record_type] = (byType[r.record_type] || 0) + 1;
         bySeverity[r.severity] = (bySeverity[r.severity] || 0) + 1;
       });
       stats = { by_type: byType, by_severity: bySeverity };
+    }
+    
+    // Fallback: only sample data if explicitly checked
+    if (records.length === 0 && useSample) {
+      records = generateSampleRecords(keyword, 30 + Math.floor(Math.random() * 40));
+      sources = ['local_generator', 'sample_data'];
+      const byType = {}, bySeverity = {};
+      records.forEach(r => {
+        byType[r.record_type] = (byType[r.record_type] || 0) + 1;
+        bySeverity[r.severity] = (bySeverity[r.severity] || 0) + 1;
+      });
+      stats = { by_type: byType, by_severity: bySeverity };
+    } else if (records.length === 0) {
+      showToast('⚠️ Sin datos reales. Configura APIs en .env o activa "Usar datos de muestra"', 'var(--yellow)');
     }
     
     // Store and display
