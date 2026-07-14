@@ -1,0 +1,552 @@
+"""
+╔══════════════════════════════════════════════════════════════╗
+║  ORÁCULO DE INTELIGENCIA — API Server v2.0                   ║
+║  Flask REST API + External API Connectors                    ║
+╚══════════════════════════════════════════════════════════════╝
+"""
+import os
+import json
+import logging
+from datetime import datetime
+
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+
+from oracle_engine import OracleEngine, SampleDataGenerator, EnhancedOracleEngine
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("OracleAPI")
+
+app = Flask(__name__, static_folder="static")
+CORS(app)
+
+# Initialize the enhanced oracle engine
+enhanced_engine = EnhancedOracleEngine()
+base_engine = enhanced_engine.base_engine
+
+# ─── Serve Static Files ──────────────────────────────────────
+
+@app.route("/")
+def serve_index():
+    return send_from_directory("static", "index.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    if not path:
+        return send_from_directory("static", "index.html")
+    full_path = os.path.join("static", path)
+    if os.path.exists(full_path):
+        return send_from_directory("static", path)
+    return jsonify({"success": False, "error": "Not found"}), 404
+
+
+# ─── Core Search Endpoint ────────────────────────────────────
+
+@app.route("/api/search", methods=["POST"])
+def api_search():
+    """
+    Execute a search across OSINT dorking AND external APIs.
+    
+    Body: {
+        "keyword": "comcast",
+        "categories": ["logs","credentials"],
+        "use_apis": true,
+        "sample": true
+    }
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+    
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+    
+    categories = data.get("categories", None)
+    use_apis = data.get("use_apis", True)
+    use_sample = data.get("sample", True)
+    
+    try:
+        result = enhanced_engine.search(
+            keyword=keyword,
+            use_apis=use_apis,
+            categories=categories,
+            sample=use_sample,
+        )
+        
+        return jsonify({
+            "success": True,
+            "data": result,
+        })
+    except Exception as e:
+        logger.exception("Search error")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── Query Endpoint ──────────────────────────────────────────
+
+@app.route("/api/query", methods=["POST"])
+def api_query():
+    """Query the indexed intelligence records with filters."""
+    data = request.get_json(silent=True) or {}
+    
+    results = base_engine.query_index(
+        keyword=data.get("keyword"),
+        date_from=data.get("date_from"),
+        date_to=data.get("date_to"),
+        record_type=data.get("record_type"),
+        severity=data.get("severity"),
+        domain=data.get("domain"),
+        page=data.get("page", 1),
+        per_page=data.get("per_page", 50),
+    )
+    
+    return jsonify({"success": True, "data": results})
+
+
+# ─── ES-Powered Search Endpoint ────────────────────────────
+
+@app.route("/api/es/search", methods=["POST"])
+def api_es_search():
+    """
+    Full-text search across the Elasticsearch index.
+    
+    Body: {
+        "query": "user@comcast.net",
+        "keyword": "comcast",
+        "record_type": "email:pass",
+        "severity": "critical",
+        "domain": "comcast.net",
+        "date_from": "2023-01-01",
+        "date_to": "2024-12-31",
+        "page": 1,
+        "per_page": 50
+    }
+    
+    Returns: {
+        "total", "results", "stats" (by_type, by_severity, by_domain),
+        "took_ms", "using_elasticsearch"
+    }
+    """
+    data = request.get_json(silent=True) or {}
+    
+    try:
+        from elastic_index import get_index
+        es_idx = get_index()
+        from_ = (max(data.get("page", 1), 1) - 1) * min(data.get("per_page", 50), 200)
+        
+        result = es_idx.search(
+            query_text=data.get("query", ""),
+            keyword=data.get("keyword"),
+            record_type=data.get("record_type"),
+            severity=data.get("severity"),
+            source_type=data.get("source_type"),
+            domain=data.get("domain"),
+            date_from=data.get("date_from"),
+            date_to=data.get("date_to"),
+            from_=from_,
+            size=min(data.get("per_page", 50), 200),
+            include_stats=True,
+        )
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                **result,
+                "page": data.get("page", 1),
+                "per_page": data.get("per_page", 50),
+            }
+        })
+    except ImportError:
+        return jsonify({"success": False, "error": "elastic_index module not available"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── ES Stats Endpoint ──────────────────────────────────────
+
+@app.route("/api/es/stats", methods=["GET"])
+def api_es_stats():
+    """Get detailed stats from Elasticsearch aggregations."""
+    try:
+        from elastic_index import get_index
+        es_idx = get_index()
+        stats = es_idx.get_stats()
+        return jsonify({"success": True, "data": stats})
+    except ImportError:
+        return jsonify({"success": False, "error": "elastic_index module not available"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── Stats Endpoints ─────────────────────────────────────────
+
+@app.route("/api/stats", methods=["GET"])
+def api_stats():
+    """Get overall system statistics."""
+    stats = base_engine.get_index_stats()
+    apis = []
+    try:
+        from intel_connectors import IntelOrchestrator
+        orch = IntelOrchestrator()
+        apis = orch.available_apis
+    except:
+        pass
+    
+    return jsonify({
+        "success": True,
+        "data": {
+            **stats,
+            "apis_configured": apis,
+        }
+    })
+
+
+@app.route("/api/history", methods=["GET"])
+def api_history():
+    """Get search history."""
+    return jsonify({"success": True, "data": base_engine.get_search_history()})
+
+
+@app.route("/api/categories", methods=["GET"])
+def api_categories():
+    """Get available dork categories."""
+    categories = list(base_engine.dork_templates.keys())
+    descriptions = {
+        "logs": "🔍 Logs y registros expuestos",
+        "credentials": "🔑 Credenciales y contraseñas",
+        "databases": "🗄️ Bases de datos expuestas",
+        "config_files": "⚙️ Archivos de configuración",
+        "paste_sites": "📋 Paste sites (Pastebin, etc.)",
+        "exposed_directories": "📁 Directorios expuestos",
+        "code_repos": "💻 Repositorios de código",
+        "exploit_db": "💥 Bases de exploits",
+    }
+    return jsonify({
+        "success": True,
+        "data": [
+            {"id": c, "name": c.replace("_", " ").title(), "description": descriptions.get(c, "")}
+            for c in categories
+        ]
+    })
+
+
+# ─── External API Status ─────────────────────────────────────
+
+@app.route("/api/apis/status", methods=["GET"])
+def api_apis_status():
+    """Check which external APIs are configured and available."""
+    try:
+        from intel_connectors import IntelOrchestrator
+        orch = IntelOrchestrator()
+        configured = orch.available_apis
+        return jsonify({
+            "success": True,
+            "data": {
+                "configured_apis": configured,
+                "total": len(configured),
+                "all_apis": ["shodan", "hunter", "hibp", "virustotal", "censys"],
+                "configured": {api: api in configured for api in 
+                              ["shodan", "hunter", "hibp", "virustotal", "censys"]},
+                "env_vars": {
+                    "shodan": "SHODAN_API_KEY",
+                    "hunter": "HUNTER_API_KEY",
+                    "hibp": "HIBP_API_KEY",
+                    "virustotal": "VT_API_KEY",
+                    "censys": "CENSYS_TOKEN or CENSYS_API_ID + SECRET",
+                }
+            }
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+# ─── Shodan Endpoints ────────────────────────────────────────
+
+@app.route("/api/shodan/search", methods=["POST"])
+def api_shodan_search():
+    """Search Shodan for exposed services."""
+    try:
+        from intel_connectors import ShodanConnector
+        data = request.get_json(silent=True) or {}
+        query = data.get("query", "").strip()
+        limit = data.get("limit", 20)
+        
+        if not query:
+            return jsonify({"success": False, "error": "Query is required"}), 400
+        
+        connector = ShodanConnector()
+        result = connector.search(query, limit=limit)
+        return jsonify({"success": result["success"], "data": result})
+    except ImportError:
+        return jsonify({"success": False, "error": "intel_connectors module not available"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/shodan/host", methods=["POST"])
+def api_shodan_host():
+    """Get Shodan details for a specific IP."""
+    try:
+        from intel_connectors import ShodanConnector
+        data = request.get_json(silent=True) or {}
+        ip = data.get("ip", "").strip()
+        if not ip:
+            return jsonify({"success": False, "error": "IP is required"}), 400
+        connector = ShodanConnector()
+        result = connector.host(ip)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── Hunter.io Endpoints ─────────────────────────────────────
+
+@app.route("/api/hunter/domain", methods=["POST"])
+def api_hunter_domain():
+    """Discover email addresses for a domain via Hunter.io."""
+    try:
+        from intel_connectors import HunterConnector
+        data = request.get_json(silent=True) or {}
+        domain = data.get("domain", "").strip()
+        limit = data.get("limit", 25)
+        if not domain:
+            return jsonify({"success": False, "error": "Domain is required"}), 400
+        connector = HunterConnector()
+        result = connector.domain_search(domain, limit=limit)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/hunter/verify", methods=["POST"])
+def api_hunter_verify():
+    """Verify an email address via Hunter.io."""
+    try:
+        from intel_connectors import HunterConnector
+        data = request.get_json(silent=True) or {}
+        email = data.get("email", "").strip()
+        if not email:
+            return jsonify({"success": False, "error": "Email is required"}), 400
+        connector = HunterConnector()
+        result = connector.verify_email(email)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── HaveIBeenPwned Endpoints ────────────────────────────────
+
+@app.route("/api/hibp/email", methods=["POST"])
+def api_hibp_email():
+    """Check if an email appears in known breaches via HIBP."""
+    try:
+        from intel_connectors import HIBPConnector
+        data = request.get_json(silent=True) or {}
+        email = data.get("email", "").strip()
+        if not email:
+            return jsonify({"success": False, "error": "Email is required"}), 400
+        connector = HIBPConnector()
+        result = connector.check_email(email)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/hibp/domain", methods=["POST"])
+def api_hibp_domain():
+    """Check all breaches for a domain via HIBP."""
+    try:
+        from intel_connectors import HIBPConnector
+        data = request.get_json(silent=True) or {}
+        domain = data.get("domain", "").strip()
+        if not domain:
+            return jsonify({"success": False, "error": "Domain is required"}), 400
+        connector = HIBPConnector()
+        result = connector.check_domain(domain)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── VirusTotal Endpoints ────────────────────────────────────
+
+@app.route("/api/vt/domain", methods=["POST"])
+def api_vt_domain():
+    """Get VirusTotal threat report for a domain."""
+    try:
+        from intel_connectors import VirusTotalConnector
+        data = request.get_json(silent=True) or {}
+        domain = data.get("domain", "").strip()
+        if not domain:
+            return jsonify({"success": False, "error": "Domain is required"}), 400
+        connector = VirusTotalConnector()
+        result = connector.analyze_domain(domain)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/vt/ip", methods=["POST"])
+def api_vt_ip():
+    """Get VirusTotal threat report for an IP address."""
+    try:
+        from intel_connectors import VirusTotalConnector
+        data = request.get_json(silent=True) or {}
+        ip = data.get("ip", "").strip()
+        if not ip:
+            return jsonify({"success": False, "error": "IP is required"}), 400
+        connector = VirusTotalConnector()
+        result = connector.analyze_ip(ip)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── Censys Endpoints ────────────────────────────────────────
+
+@app.route("/api/censys/search", methods=["POST"])
+def api_censys_search():
+    """Search Censys for hosts matching a query."""
+    try:
+        from intel_connectors import CensysConnector
+        data = request.get_json(silent=True) or {}
+        query = data.get("query", "").strip()
+        limit = data.get("limit", 20)
+        if not query:
+            return jsonify({"success": False, "error": "Query is required"}), 400
+        connector = CensysConnector()
+        result = connector.search_hosts(query, limit=limit)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/censys/host", methods=["POST"])
+def api_censys_host():
+    """Get Censys details for a specific host/IP."""
+    try:
+        from intel_connectors import CensysConnector
+        data = request.get_json(silent=True) or {}
+        ip = data.get("ip", "").strip()
+        if not ip:
+            return jsonify({"success": False, "error": "IP is required"}), 400
+        connector = CensysConnector()
+        result = connector.view_host(ip)
+        return jsonify({"success": result["success"], "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─── Chat Endpoint ───────────────────────────────────────────
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """AI-powered chat endpoint for the Oracle Assistant."""
+    data = request.get_json(silent=True) or {}
+    message = data.get("message", "").strip()
+    context = data.get("context", {})
+    
+    if not message:
+        return jsonify({"success": False, "error": "Message is required"}), 400
+    
+    response = _generate_chat_response(message, context)
+    
+    return jsonify({
+        "success": True,
+        "data": {
+            "response": response,
+            "timestamp": datetime.now().isoformat(),
+        }
+    })
+
+
+def _generate_chat_response(message: str, context: dict) -> str:
+    """Generate a contextual response for the chat assistant."""
+    msg_lower = message.lower()
+    stats = base_engine.get_index_stats()
+    
+    # API status
+    if "api" in msg_lower and ("status" in msg_lower or "configuradas" in msg_lower or "disponibles" in msg_lower):
+        apis_status = []
+        try:
+            from intel_connectors import IntelOrchestrator
+            orch = IntelOrchestrator()
+            if orch.shodan.enabled: apis_status.append("🔍 Shodan")
+            if orch.hunter.enabled: apis_status.append("📧 Hunter.io")
+            if orch.hibp.enabled: apis_status.append("🔒 HaveIBeenPwned")
+            if orch.virustotal.enabled: apis_status.append("🦠 VirusTotal")
+            if orch.censys.enabled: apis_status.append("🌐 Censys")
+        except:
+            pass
+        
+        if apis_status:
+            return "🔌 **APIs de inteligencia configuradas:**\n\n" + "\n".join(f"• {api}" for api in apis_status) + \
+                   "\n\n_Nota: Las APIs no configuradas simplemente se omiten sin errores._"
+        else:
+            return "🔌 **No hay APIs de inteligencia configuradas.**\n\nPara activarlas, configura las variables de entorno:\n" + \
+                   "• `SHODAN_API_KEY` — Shodan\n" + \
+                   "• `HUNTER_API_KEY` — Hunter.io\n" + \
+                   "• `HIBP_API_KEY` — HaveIBeenPwned\n" + \
+                   "• `VT_API_KEY` — VirusTotal\n" + \
+                   "• `CENSYS_TOKEN` — Censys"
+    
+    # Keyword search command
+    if msg_lower.startswith("/buscar ") or msg_lower.startswith("buscar "):
+        keyword = msg_lower.replace("/buscar ", "").replace("buscar ", "").strip()
+        if keyword:
+            return f"🔍 Iniciando búsqueda multi-fuente para **'{keyword}'**... Se consultarán todas las APIs disponibles además del dorking OSINT."
+    
+    # Stats query
+    if "cuantos" in msg_lower and "registro" in msg_lower:
+        return f"📊 Total en índice: **{stats['total_records']}** registros en **{stats['total_keywords']}** búsquedas."
+    
+    # Help
+    if "ayuda" in msg_lower or "comandos" in msg_lower or "qué puedes" in msg_lower:
+        return (
+            "🤖 **Comandos disponibles:**\n\n"
+            "🔍 `buscar <keyword>` — Búsqueda multi-fuente\n"
+            "📊 `¿Cuántos registros?` — Estadísticas\n"
+            "🔌 `APIs disponibles` — Estado de conectores\n"
+            "📋 `resumen` — Resumen completo\n"
+            "❓ `ayuda` — Esta ayuda\n\n"
+            "_Las APIs externas se consultan automáticamente si están configuradas._"
+        )
+    
+    # Summary
+    if "resumen" in msg_lower or "general" in msg_lower:
+        apis_count = 0
+        try:
+            from intel_connectors import IntelOrchestrator
+            apis_count = len(IntelOrchestrator().available_apis)
+        except:
+            pass
+        
+        return (
+            "📋 **RESUMEN DEL ORÁCULO**\n\n"
+            f"📊 Registros indexados: **{stats['total_records']}**\n"
+            f"🔑 Palabras clave: **{stats['total_keywords']}**\n"
+            f"🔄 Búsquedas: **{stats['total_searches']}**\n"
+            f"🔌 APIs externas: **{apis_count}/5** configuradas\n\n"
+            "_Realiza una búsqueda para activar todas las fuentes._"
+        )
+    
+    # Default
+    return (
+        "🤔 No entendí tu pregunta. Prueba con:\n\n"
+        "• `buscar comcast` — Búsqueda multi-fuente\n"
+        "• `APIs disponibles` — Estado de conectores\n"
+        "• `¿Cuántos registros?` — Estadísticas\n"
+        "• `resumen` — Panorama general\n"
+        "• `ayuda` — Todos los comandos"
+    )
+
+
+# ─── Main ────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    debug = os.environ.get("DEBUG", "").lower() in ("true", "1", "yes")
+    
+    logger.info("🚀 Oracle Intelligence API v2.0 starting on port %d", port)
+    logger.info("📡 External API connectors available via IntelOrchestrator")
+    
+    app.run(host="0.0.0.0", port=port, debug=debug)

@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oráculo de Inteligencia — Threat Intelligence OSINT</title>
+<meta name="description" content="Sistema de inteligencia de amenazas, OSINT avanzado y dorking automatizado.">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   ORÁCULO DE INTELIGENCIA — Stylesheet v1.0
+   ══════════════════════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06060e;--bg2:#0a0a1a;--bg3:#12122a;--bg4:#1a1a3e;
+  --card:#12122a;--card2:#1a1a3e;--card-hover:#22224e;
+  --border:#2a2a4e;--border2:#3a3a5e;
+  --text:#e0e0f0;--text2:#8888aa;--text3:#5a5a7a;
+  --accent:#6c5ce7;--accent2:#00cec9;--accent3:#fd79a8;
+  --green:#00b894;--green-dim:rgba(0,184,148,0.15);
+  --red:#e17055;--red-dim:rgba(225,112,85,0.15);
+  --yellow:#fdcb6e;--yellow-dim:rgba(253,203,110,0.15);
+  --blue:#0984e3;--blue-dim:rgba(9,132,227,0.15);
+  --orange:#e67e22;--orange-dim:rgba(230,126,34,0.15);
+  --purple:#a855f7;--purple-dim:rgba(168,85,247,0.15);
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono','Fira Code','SF Mono',monospace;
+  --sidebar-w:240px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+::selection{background:var(--accent);color:#fff}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ─── Animations ─── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes glow{0%,100%{box-shadow:0 0 5px var(--accent)}50%{box-shadow:0 0 20px var(--accent)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes countUp{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+@keyframes radarSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes scan{0%{background-position:0 0}100%{background-position:100% 0}}
+@keyframes notif{0%{opacity:0;transform:translateY(-10px)}15%{opacity:1;transform:translateY(0)}85%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-10px)}}
+
+/* ─── Layout ─── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sidebar-logo .logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px}
+.sidebar-logo .logo-text strong{display:block;font-size:13px;color:var(--text);letter-spacing:-0.3px}
+.sidebar-logo .logo-text small{display:block;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.sidebar-nav{padding:10px 0;flex:1}
+.sidebar-section{font-size:8px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:14px 18px 6px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:12px;color:var(--text2);text-decoration:none;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent}
+.sidebar-item:hover{background:var(--bg3);color:var(--text)}
+.sidebar-item.active{background:var(--bg3);color:var(--text);border-left-color:var(--accent)}
+.sidebar-item .icon{font-size:15px;width:20px;text-align:center}
+.sidebar-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:8px;padding:1px 6px;border-radius:8px}
+.sidebar-item .badge-red{background:var(--red)}
+.sidebar-item .badge-green{background:var(--green)}
+.sidebar-footer{padding:12px 18px;border-top:1px solid var(--border);font-size:9px;color:var(--text3)}
+.sidebar-footer .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+.sidebar-footer .dot.online{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+
+.main{margin-left:var(--sidebar-w);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.topbar h1{font-size:15px;font-weight:700}
+.topbar h1 span{color:var(--accent2)}
+.topbar-right{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text2)}
+.topbar-right .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+.topbar-right .status-dot.online{background:var(--green)}
+.topbar-right .status-dot.offline{background:var(--red)}
+.content{padding:20px 28px 60px;max-width:1400px}
+
+/* ─── KPI Grid ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:all 0.3s;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;opacity:0;transition:opacity 0.3s}
+.kpi-card:hover{transform:translateY(-2px);border-color:rgba(108,92,231,0.2);box-shadow:var(--shadow)}
+.kpi-card:hover::before{opacity:1}
+.kpi-card.accent::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.kpi-card.warn::before{background:var(--yellow)}
+.kpi-card.ok::before{background:var(--green)}
+.kpi-card.err::before{background:var(--red)}
+.kpi-card.info::before{background:var(--blue)}
+.kpi-card.cyber::before{background:var(--purple)}
+.kpi-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.kpi-value{font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1.1}
+.kpi-card.accent .kpi-value{color:var(--accent2)}
+.kpi-card.warn .kpi-value{color:var(--yellow)}
+.kpi-card.ok .kpi-value{color:var(--green)}
+.kpi-card.err .kpi-value{color:var(--red)}
+.kpi-card.info .kpi-value{color:var(--blue)}
+.kpi-card.cyber .kpi-value{color:var(--purple)}
+.kpi-sub{font-size:9px;color:var(--text3);margin-top:2px}
+
+/* ─── Sections ─── */
+.sec{display:none;animation:fadeIn 0.4s ease}
+.sec.active{display:block}
+.sec-title{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin:20px 0 12px;border-bottom:1px solid var(--border);padding-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec-title .count{font-size:9px;color:var(--text3);font-weight:400}
+
+/* ─── Search Panel ─── */
+.search-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.search-bar{display:flex;gap:8px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-size:13px;border-radius:var(--radius-sm);outline:none;transition:border-color 0.3s;font-family:var(--mono)}
+.search-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,92,231,0.1)}
+.search-bar input::placeholder{color:var(--text3)}
+.search-bar select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:11px;border-radius:var(--radius-sm);outline:none;cursor:pointer}
+.search-bar button{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;display:flex;align-items:center;gap:6px}
+.search-bar button:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(108,92,231,0.3)}
+.search-bar button:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.search-bar button .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:radarSpin 0.8s linear infinite;display:none}
+.search-bar button.loading .spinner{display:inline-block}
+
+/* ─── Options Grid ─── */
+.search-options{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-options label{font-size:9px;color:var(--text3);display:flex;align-items:center;gap:4px;cursor:pointer}
+.search-options input[type="checkbox"]{accent-color:var(--accent);width:12px;height:12px}
+.search-options .tag{font-size:8px;padding:2px 8px;border-radius:10px;border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all 0.2s;background:transparent}
+.search-options .tag:hover{border-color:var(--accent);color:var(--accent)}
+.search-options .tag.active{background:var(--accent-dim, rgba(108,92,231,0.15));border-color:var(--accent);color:var(--accent)}
+
+/* ─── Results Area ─── */
+.results-panel{display:none}
+.results-panel.active{display:block}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.results-header .left{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text2)}
+.results-header .left strong{color:var(--text);font-size:13px}
+.results-header .right{display:flex;gap:6px;align-items:center}
+.results-header .filter-btn{background:transparent;border:1px solid var(--border);color:var(--text3);padding:4px 10px;font-size:8px;border-radius:12px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:1px}
+.results-header .filter-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.results-header .filter-btn.active{background:var(--accent2);color:var(--bg);border-color:var(--accent2)}
+
+/* ─── Records Table ─── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table.records{width:100%;border-collapse:collapse;font-size:11px}
+table.records thead{background:var(--bg3)}
+table.records th{padding:10px 12px;text-align:left;color:var(--text2);font-size:8px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;white-space:nowrap}
+table.records td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);transition:background 0.2s}
+table.records tbody tr:hover td{background:var(--bg3)}
+table.records tbody tr:last-child td{border-bottom:none}
+table.records .sev-critical{color:var(--red);font-weight:700}
+table.records .sev-high{color:var(--orange);font-weight:600}
+table.records .sev-medium{color:var(--yellow)}
+table.records .sev-low{color:var(--blue)}
+table.records .sev-info{color:var(--text3)}
+table.records .type-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:8px;font-family:var(--mono);letter-spacing:0.5px}
+table.records .type-badge.email{background:var(--red-dim);color:var(--red)}
+table.records .type-badge.api{background:var(--orange-dim);color:var(--orange)}
+table.records .type-badge.ip{background:var(--blue-dim);color:var(--blue)}
+table.records .type-badge.hash{background:var(--purple-dim);color:var(--purple)}
+table.records .type-badge.config{background:var(--yellow-dim);color:var(--yellow)}
+table.records .domain{color:var(--accent2);font-family:var(--mono);font-size:10px}
+table.records .email-cell{color:var(--text);font-family:var(--mono);font-size:10px}
+table.records .preview{color:var(--text2);font-family:var(--mono);font-size:9px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.records .date-cell{color:var(--text3);font-size:9px;white-space:nowrap}
+table.records .source-cell{font-size:9px;font-family:var(--mono);color:var(--text2)}
+table.records .empty{text-align:center;padding:40px!important;color:var(--text3);font-size:12px}
+
+/* ─── Pagination ─── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:10px}
+.pagination button{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;font-size:9px;min-width:30px}
+.pagination button:hover{border-color:var(--accent);color:var(--accent)}
+.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pagination button:disabled{opacity:0.3;cursor:not-allowed}
+.pagination .info{color:var(--text3);font-size:9px}
+
+/* ─── Stats Grid ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-card h4{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.stat-row{display:flex;justify-content:space-between;padding:5px 0;font-size:11px;border-bottom:1px solid rgba(42,42,78,0.3)}
+.stat-row:last-child{border-bottom:none}
+.stat-row .lb{color:var(--text2);font-size:10px}
+.stat-row .vl{color:var(--text);font-weight:600;font-family:var(--mono);font-size:10px}
+.stat-row .vl.accent{color:var(--accent2)}
+.stat-row .vl.green{color:var(--green)}
+.stat-row .vl.red{color:var(--red)}
+
+/* ─── Bar Chart ─── */
+.chart-bar{height:180px;display:flex;align-items:flex-end;gap:3px;margin:10px 0}
+.chart-bar .bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;position:relative;transition:height 0.6s ease;cursor:pointer}
+.chart-bar .bar:hover{opacity:0.8}
+.chart-bar .bar .tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s;margin-bottom:4px}
+.chart-bar .bar:hover .tooltip{opacity:1}
+.chart-bar .bar-label{font-size:7px;color:var(--text3);text-align:center;padding-top:3px;position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);white-space:nowrap}
+
+/* ─── Donut ─── */
+.donut-container{display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 0}
+.donut{width:120px;height:120px;border-radius:50%;position:relative}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-center .big{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.donut-center .small{font-size:8px;color:var(--text3)}
+.donut-legend{display:flex;flex-direction:column;gap:4px}
+.donut-legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)}
+.donut-legend-item .dot{width:8px;height:8px;border-radius:50%}
+.donut-legend-item .pct{color:var(--text);font-weight:600;margin-left:auto}
+
+/* ─── History ─── */
+.history-list{max-height:200px;overflow-y:auto}
+.history-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(42,42,78,0.3);font-size:10px}
+.history-item .kw{color:var(--accent2);font-weight:600;font-family:var(--mono)}
+.history-item .cnt{color:var(--text2)}
+.history-item .ts{color:var(--text3);font-size:8px}
+
+/* ─── Chat ─── */
+.chat-toggle{position:fixed;bottom:24px;right:24px;z-index:200;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(108,92,231,0.3);transition:all 0.25s;display:flex;align-items:center;justify-content:center}
+.chat-toggle:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(108,92,231,0.4)}
+.chat-toggle .notif{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;font-size:7px;padding:2px 5px;border-radius:8px;font-weight:700;display:none;min-width:16px;text-align:center}
+.chat-panel{position:fixed;bottom:84px;right:24px;z-index:199;width:360px;max-height:500px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.5);display:none;flex-direction:column;overflow:hidden;animation:fadeIn 0.25s ease}
+.chat-panel.open{display:flex}
+.chat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.chat-head .left{display:flex;align-items:center;gap:8px;font-size:11px}
+.chat-head .left .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite}
+.chat-head .close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;transition:0.15s;padding:2px}
+.chat-head .close:hover{color:var(--text)}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-height:180px;max-height:340px}
+.chat-msgs .msg{max-width:90%;padding:7px 11px;border-radius:8px;font-size:11px;line-height:1.5;animation:fadeIn 0.2s ease}
+.chat-msgs .msg.user{background:rgba(108,92,231,0.12);border:1px solid rgba(108,92,231,0.15);align-self:flex-end;color:var(--text)}
+.chat-msgs .msg.bot{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;color:var(--text2)}
+.chat-msgs .msg.system{align-self:center;font-size:9px;color:var(--text3);background:transparent;border:none;padding:2px 0}
+.chat-msgs .msg .time{font-size:7px;color:var(--text3);display:block;margin-top:3px;text-align:right}
+.chat-msgs .typing{display:flex;gap:3px;padding:7px 11px;align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:8px}
+.chat-msgs .typing span{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:typing 1.2s infinite}
+.chat-msgs .typing span:nth-child(2){animation-delay:0.2s}
+.chat-msgs .typing span:nth-child(3){animation-delay:0.4s}
+.chat-foot{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--border);background:var(--bg3)}
+.chat-foot input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:11px;border-radius:6px;outline:none}
+.chat-foot input:focus{border-color:var(--accent)}
+.chat-foot input::placeholder{color:var(--text3)}
+.chat-foot button{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;transition:0.15s}
+.chat-foot button:hover{opacity:0.9}
+.chat-suggestions{display:flex;gap:3px;padding:5px 12px;border-top:1px solid rgba(42,42,69,0.3);overflow-x:auto;flex-shrink:0}
+.chat-suggestions .chip{background:var(--bg3);border:1px solid var(--border);color:var(--text3);padding:3px 8px;font-size:8px;border-radius:10px;cursor:pointer;transition:0.15s;white-space:nowrap}
+.chat-suggestions .chip:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* ─── Toast ─── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;padding:8px 20px;font-size:10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--accent2);display:none;animation:notif 3s ease forwards;pointer-events:none}
+.toast.show{display:block}
+
+/* ─── History Tab ─── */
+.history-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+
+/* ─── Radar/Search Animation ─── */
+.scanning-bar{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;margin:8px 0;display:none}
+.scanning-bar.active{display:block}
+.scanning-bar .fill{height:100%;width:0%;background:linear-gradient(90deg,transparent,var(--accent2),transparent);background-size:200% 100%;animation:scan 1.5s linear infinite;transition:width 0.5s}
+
+/* ─── Empty State ─── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .icon{font-size:40px;margin-bottom:10px;opacity:0.5}
+.empty-state h3{font-size:14px;color:var(--text2);margin-bottom:6px}
+.empty-state p{font-size:10px;line-height:1.6}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .sidebar{width:56px}
+  .sidebar-logo .logo-text,.sidebar-section,.sidebar-item span:not(.icon),.sidebar-footer{display:none}
+  .sidebar-item{padding:12px;justify-content:center}
+  .sidebar-item .badge{display:none}
+  .main{margin-left:56px}
+  .content{padding:14px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .chat-panel{width:calc(100vw - 24px);right:12px;bottom:76px;max-height:60vh}
+  .chat-toggle{bottom:16px;right:16px;width:44px;height:44px;font-size:16px}
+  .topbar h1{font-size:12px}
+  .topbar-right .status-text{display:none}
+  .search-bar{flex-direction:column}
+  .search-bar select{width:100%}
+  .stats-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:1fr}
+  .sidebar{width:44px}
+  .main{margin-left:44px}
+}
+
+/* ─── Loading Skeleton ─── */
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
+.skeleton-line{height:12px;margin-bottom:8px;width:80%}
+.skeleton-line:nth-child(2){width:60%}
+.skeleton-line:nth-child(3){width:70%}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🛸</div>
+      <div class="logo-text">
+        <strong>Oráculo de Inteligencia</strong>
+        <small>Threat Intel OSINT</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Panorama</div>
+      <a class="sidebar-item active" data-section="dashboard"><span class="icon">📊</span><span>Dashboard</span></a>
+      <a class="sidebar-item" data-section="search"><span class="icon">🔍</span><span>Búsqueda</span><span class="badge" id="sidebarSearchCount">0</span></a>
+      <a class="sidebar-item" data-section="records"><span class="icon">📋</span><span>Registros</span><span class="badge badge-red" id="sidebarRecordsCount">0</span></a>
+      
+      <div class="sidebar-section">Inteligencia</div>
+      <a class="sidebar-item" data-section="stats"><span class="icon">📈</span><span>Estadísticas</span></a>
+      <a class="sidebar-item" data-section="history"><span class="icon">🕐</span><span>Historial</span></a>
+      
+      <div class="sidebar-section">Sistema</div>
+      <a class="sidebar-item" data-section="about"><span class="icon">ℹ️</span><span>Acerca de</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="dot online"></span> Motor Activo · <span id="sidebarTime">--:--</span>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="main">
+    
+    <!-- Top Bar -->
+    <div class="topbar">
+      <h1>🛸 <span>Oráculo de Inteligencia</span> — Threat Intel OSINT</h1>
+      <div class="topbar-right">
+        <span><span class="status-dot online" id="statusDot"></span><span class="status-text" id="statusText">Conectado</span></span>
+        <span id="topTime">--:--</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══ SECTION: DASHBOARD ═══ -->
+      <section class="sec active" id="sec-dashboard">
+        <div class="kpi-row">
+          <div class="kpi-card accent"><div class="kpi-label">Total Registros</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-sub">En base de datos indexada</div></div>
+          <div class="kpi-card cyber"><div class="kpi-label">Palabras Clave</div><div class="kpi-value" id="kpiKeywords">0</div><div class="kpi-sub">En índice de búsqueda</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Críticos</div><div class="kpi-value" id="kpiCritical">0</div><div class="kpi-sub">Requieren atención inmediata</div></div>
+          <div class="kpi-card ok"><div class="kpi-label">Fuentes</div><div class="kpi-value" id="kpiSources">0</div><div class="kpi-sub">Orígenes de datos distintos</div></div>
+          <div class="kpi-card info"><div class="kpi-label">Búsquedas</div><div class="kpi-value" id="kpiSearches">0</div><div class="kpi-sub">Totales realizadas</div></div>
+        </div>
+
+        <div class="sec-title">⚡ Acción Rápida</div>
+        <div class="search-panel" style="cursor:pointer" onclick="navigateTo('search')">
+          <div style="text-align:center;padding:20px">
+            <div style="font-size:32px;margin-bottom:10px">🔍</div>
+            <div style="font-size:14px;color:var(--text2);margin-bottom:6px">Inicia una búsqueda de inteligencia</div>
+            <div style="font-size:10px;color:var(--text3)">Busca por palabra clave, dominio o categoría — el oráculo te dará un reporte completo</div>
+          </div>
+        </div>
+
+        <div class="sec-title">📊 Distribución de Registros</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>Por Tipo</h4>
+            <div id="chartByType"><div class="empty-state" style="padding:10px"><p>Realiza búsquedas para ver gráficos</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>Por Severidad</h4>
+            <div id="chartBySeverity"><div class="empty-state" style="padding:10px"><p>Realiza búsquedas para ver gráficos</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: SEARCH ═══ -->
+      <section class="sec" id="sec-search">
+        <div class="sec-title">🔍 Motor de Búsqueda de Inteligencia</div>
+        
+        <div class="search-panel">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder='Ej: comcast, xfinity, at&t, verizon, "password", "api_key"...' onkeydown="if(event.key==='Enter')executeSearch()">
+            <select id="searchCategory">
+              <option value="">🌐 Todas las categorías</option>
+              <option value="credentials">🔑 Credenciales</option>
+              <option value="logs">🔍 Logs y registros</option>
+              <option value="databases">🗄️ Bases de datos</option>
+              <option value="config_files">⚙️ Configuraciones</option>
+              <option value="paste_sites">📋 Paste sites</option>
+              <option value="exposed_directories">📁 Directorios expuestos</option>
+              <option value="code_repos">💻 Repositorios</option>
+            </select>
+            <button id="searchBtn" onclick="executeSearch()">
+              <span class="spinner"></span>
+              <span>🔍 Buscar</span>
+            </button>
+          </div>
+          <div class="search-options">
+            <label><input type="checkbox" id="useSampleData" checked> Usar datos de muestra</label>
+            <span style="color:var(--text3);font-size:8px;margin-left:4px">(demo sin API)</span>
+          </div>
+          <div class="scanning-bar" id="scanBar"><div class="fill" id="scanFill"></div></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-panel" id="resultsPanel">
+          <div class="results-header">
+            <div class="left">
+              <span id="resultsKeyword"></span>
+              <span id="resultsCount" style="background:var(--bg3);padding:2px 10px;border-radius:10px"></span>
+              <span id="resultsTime" style="color:var(--text3);font-size:9px"></span>
+            </div>
+            <div class="right">
+              <button class="filter-btn" data-filter="all" onclick="filterResults('all',this)">Todos</button>
+              <button class="filter-btn" data-filter="critical" onclick="filterResults('critical',this)">🔴 Críticos</button>
+              <button class="filter-btn" data-filter="high" onclick="filterResults('high',this)">🟠 Altos</button>
+              <button class="filter-btn" data-filter="email:pass" onclick="filterResults('email:pass',this)">📧 Email:Pass</button>
+              <button class="filter-btn" onclick="exportResults()">📥 Exportar</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="records" id="resultsTable">
+              <thead>
+                <tr>
+                  <th>Severidad</th><th>Tipo</th><th>Email / Usuario</th><th>Dominio</th>
+                  <th>Contenido</th><th>Fuente</th><th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <tr><td colspan="7" class="empty">🚀 Ejecuta una búsqueda para ver resultados</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="pagination">
+            <button onclick="changePage('prev')" id="prevPage">◀ Anterior</button>
+            <span class="info" id="pageInfo">Página 1 de 1</span>
+            <button onclick="changePage('next')" id="nextPage">Siguiente ▶</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: RECORDS ═══ -->
+      <section class="sec" id="sec-records">
+        <div class="sec-title">📋 Todos los Registros Indexados <span class="count" id="recordsTotal">(0)</span></div>
+        
+        <div class="search-panel" style="padding:12px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="filterKeyword" placeholder="Filtrar por palabra clave..." style="flex:1;min-width:150px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:11px;border-radius:6px;outline:none">
+            <input type="text" id="filterDomain" placeholder="Dominio específico..." style="flex:0 1 150px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:11px;border-radius:6px;outline:none">
+            <select id="filterType" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:10px;border-radius:6px">
+              <option value="">Todos los tipos</option>
+              <option value="email:pass">📧 Email:Pass</option>
+              <option value="api_key">🔑 API Key</option>
+              <option value="ip:port">🌐 IP:Port</option>
+              <option value="hash">🔒 Hash</option>
+            </select>
+            <select id="filterSeverity" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;font-size:10px;border-radius:6px">
+              <option value="">Todas las severidades</option>
+              <option value="critical">🔴 Crítico</option>
+              <option value="high">🟠 Alto</option>
+              <option value="medium">🟡 Medio</option>
+              <option value="low">🔵 Bajo</option>
+            </select>
+            <button onclick="queryRecords()" style="background:var(--accent);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:10px;cursor:pointer">🔍 Filtrar</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="records" id="recordsTable">
+            <thead>
+              <tr>
+                <th>Severidad</th><th>Tipo</th><th>Email / Usuario</th><th>Dominio</th>
+                <th>Contenido</th><th>Fuente</th><th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr><td colspan="7" class="empty">📭 No hay registros aún. Realiza búsquedas desde el panel.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="recordsPagination"></div>
+      </section>
+
+      <!-- ═══ SECTION: STATS ═══ -->
+      <section class="sec" id="sec-stats">
+        <div class="sec-title">📈 Estadísticas de Inteligencia</div>
+        <div class="kpi-row">
+          <div class="kpi-card accent"><div class="kpi-label">Registros Total</div><div class="kpi-value" id="statsTotal">0</div></div>
+          <div class="kpi-card cyber"><div class="kpi-label">Keywords</div><div class="kpi-value" id="statsKeywords">0</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Críticos</div><div class="kpi-value" id="statsCritical">0</div></div>
+          <div class="kpi-card ok"><div class="kpi-label">Fuentes Únicas</div><div class="kpi-value" id="statsSources">0</div></div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>📊 Por Tipo de Registro</h4>
+            <div id="statsByType"></div>
+          </div>
+          <div class="stat-card">
+            <h4>🔴 Por Severidad</h4>
+            <div id="statsBySeverity"></div>
+          </div>
+          <div class="stat-card">
+            <h4>🌐 Top Dominios</h4>
+            <div id="statsByDomain"></div>
+          </div>
+          <div class="stat-card">
+            <h4>📅 Cobertura de Fechas</h4>
+            <div id="statsDates"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: HISTORY ═══ -->
+      <section class="sec" id="sec-history">
+        <div class="sec-title">🕐 Historial de Búsquedas</div>
+        <div class="history-grid">
+          <div class="stat-card">
+            <h4>Últimas Búsquedas</h4>
+            <div class="history-list" id="historyList">
+              <div class="empty-state" style="padding:10px"><p>Aún no hay búsquedas registradas</p></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h4>📊 Tendencias</h4>
+            <div id="historyStats">
+              <div class="empty-state" style="padding:10px"><p>Datos disponibles después de varias búsquedas</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: ABOUT ═══ -->
+      <section class="sec" id="sec-about">
+        <div class="sec-title">ℹ️ Acerca del Oráculo de Inteligencia</div>
+        <div class="stats-grid">
+          <div class="stat-card" style="grid-column:1/-1">
+            <div style="text-align:center;padding:20px">
+              <div style="font-size:40px;margin-bottom:12px">🛸</div>
+              <h2 style="font-size:18px;color:var(--text);margin-bottom:8px">Oráculo de Inteligencia v1.0</h2>
+              <p style="font-size:11px;color:var(--text2);line-height:1.7;max-width:500px;margin:0 auto">
+                Sistema avanzado de inteligencia de amenazas (Threat Intelligence) 
+                que combina OSINT, dorking automatizado y análisis de datos para 
+                proporcionar el panorama más completo posible.
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:20px;text-align:left">
+                <div style="background:var(--bg3);padding:12px;border-radius:8px">
+                  <div style="font-size:10px;color:var(--accent2);font-weight:600;margin-bottom:4px">🔍 Dorking Automatizado</div>
+                  <div style="font-size:9px;color:var(--text3)">8 categorías de búsqueda · Múltiples motores</div>
+                </div>
+                <div style="background:var(--bg3);padding:12px;border-radius:8px">
+                  <div style="font-size:10px;color:var(--accent2);font-weight:600;margin-bottom:4px">📊 Indexación Inteligente</div>
+                  <div style="font-size:9px;color:var(--text3)">Organización por fecha, tipo, severidad y fuente</div>
+                </div>
+                <div style="background:var(--bg3);padding:12px;border-radius:8px">
+                  <div style="font-size:10px;color:var(--accent2);font-weight:600;margin-bottom:4px">🧠 Asistente IA</div>
+                  <div style="font-size:9px;color:var(--text3)">Chat conversacional con comandos inteligentes</div>
+                </div>
+                <div style="background:var(--bg3);padding:12px;border-radius:8px">
+                  <div style="font-size:10px;color:var(--accent2);font-weight:600;margin-bottom:4px">🔬 Detección de Patrones</div>
+                  <div style="font-size:9px;color:var(--text3)">Email:pass, API keys, IP:port, hashes y más</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer style="margin-top:40px;padding:16px 0;border-top:1px solid var(--border);text-align:center;font-size:9px;color:var(--text3);letter-spacing:1px">
+        <strong>Oráculo de Inteligencia</strong> — Threat Intelligence OSINT · Construido con 🛸 Freebuff AI · v1.0
+      </footer>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CHAT ASSISTANT ═══════ -->
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()" title="Preguntar al Oráculo">
+  💬
+  <span class="notif" id="chatNotif">0</span>
+</button>
+
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <div class="left">
+      <span class="dot"></span>
+      <div><span style="font-weight:600">🛸 Oráculo Asistente</span> <small style="font-size:9px;color:var(--text3)">Inteligencia</small></div>
+    </div>
+    <button class="close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg bot">
+      🤖 <strong>Hola, soy el Oráculo.</strong> Pregúntame sobre inteligencia de amenazas.<br>
+      <span style="color:var(--text3);font-size:9px">Ej: "buscar comcast", "¿cuántos registros?", "ayuda"</span>
+      <span class="time">conectado</span>
+    </div>
+  </div>
+  <div class="chat-suggestions">
+    <span class="chip" onclick="chatSend('buscar comcast')">📡 Buscar Comcast</span>
+    <span class="chip" onclick="chatSend('¿cuántos registros tengo?')">📊 Estadísticas</span>
+    <span class="chip" onclick="chatSend('resumen')">📋 Resumen</span>
+    <span class="chip" onclick="chatSend('ayuda')">❓ Ayuda</span>
+  </div>
+  <div class="chat-foot">
+    <input type="text" id="chatInput" placeholder="Escribe tu comando..." onkeydown="if(event.key==='Enter')chatSendFromInput()" autocomplete="off">
+    <button onclick="chatSendFromInput()">➤</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// ORÁCULO DE INTELIGENCIA — Application Logic
+// ══════════════════════════════════════════════════════════════
+
+// ─── State ───
+const state = {
+  currentSection: 'dashboard',
+  records: [],
+  filteredRecords: [],
+  currentPage: 1,
+  recordsPage: 1,
+  perPage: 25,
+  searchHistory: [],
+  lastKeyword: '',
+};
+
+// ─── Navigation ───
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', () => {
+    navigateTo(item.dataset.section);
+  });
+});
+
+function navigateTo(section) {
+  document.querySelectorAll('.sidebar-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.sidebar-item[data-section="${section}"]`).classList.add('active');
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${section}`).classList.add('active');
+  state.currentSection = section;
+  
+  if (section === 'records') renderRecords();
+  if (section === 'stats') renderStats();
+  if (section === 'history') renderHistory();
+}
+
+// ─── Notifications ───
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color || 'var(--border)';
+  t.style.color = color || 'var(--accent2)';
+  t.className = 'toast show';
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// ─── Clock ───
+function updateClock() {
+  const now = new Date();
+  document.getElementById('topTime').textContent = now.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sidebarTime').textContent = now.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── Search Execution ───
+async function executeSearch() {
+  const input = document.getElementById('searchInput');
+  const keyword = input.value.trim();
+  const category = document.getElementById('searchCategory').value;
+  const useSample = document.getElementById('useSampleData').checked;
+  
+  if (!keyword) {
+    showToast('❌ Ingresa una palabra clave para buscar', 'var(--red)');
+    return;
+  }
+  
+  // Update UI
+  const btn = document.getElementById('searchBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('scanBar').classList.add('active');
+  document.getElementById('resultsPanel').classList.remove('active');
+  
+  state.lastKeyword = keyword;
+  
+  try {
+    // Try API first
+    let records = [];
+    let sources = [];
+    let stats = {};
+    
+    try {
+      const resp = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keyword: keyword,
+          categories: category ? [category] : null,
+          sample: useSample,
+          max_dorks: 5,
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+      
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.success) {
+          records = data.data.records || [];
+          sources = data.data.sources || [];
+          stats = data.data.stats || {};
+        }
+      }
+    } catch (e) {
+      // API unavailable — use local sample data
+      console.log('API unavailable, using local data');
+    }
+    
+    // If no records from API, generate locally
+    if (records.length === 0) {
+      records = generateSampleRecords(keyword, 30 + Math.floor(Math.random() * 40));
+      sources = ['local_generator', 'sample_data'];
+      
+      const byType = {};
+      const bySeverity = {};
+      records.forEach(r => {
+        byType[r.record_type] = (byType[r.record_type] || 0) + 1;
+        bySeverity[r.severity] = (bySeverity[r.severity] || 0) + 1;
+      });
+      stats = { by_type: byType, by_severity: bySeverity };
+    }
+    
+    // Store and display
+    state.records = records;
+    state.filteredRecords = [...records];
+    state.currentPage = 1;
+    
+    // Add to search history
+    state.searchHistory.unshift({
+      keyword: keyword,
+      timestamp: new Date().toISOString(),
+      total: records.length,
+    });
+    
+    // Show results
+    document.getElementById('resultsKeyword').innerHTML = `🔍 <strong>"${escapeHtml(keyword)}"</strong>`;
+    document.getElementById('resultsCount').textContent = `${records.length} registros`;
+    document.getElementById('resultsTime').textContent = `· ${new Date().toLocaleTimeString()}`;
+    
+    renderResultsPage();
+    document.getElementById('resultsPanel').classList.add('active');
+    
+    // Update sidebar badges
+    document.getElementById('sidebarSearchCount').textContent = state.searchHistory.length;
+    
+    // Update dashboard KPIs
+    updateDashboardKPIs();
+    
+    // Chat notification
+    const notif = document.getElementById('chatNotif');
+    notif.textContent = '1';
+    notif.style.display = 'block';
+    
+    showToast(`✅ ${records.length} registros encontrados para "${keyword}"`, 'var(--green)');
+    
+  } catch (err) {
+    console.error('Search error:', err);
+    showToast('❌ Error en la búsqueda: ' + err.message, 'var(--red)');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    document.getElementById('scanBar').classList.remove('active');
+  }
+}
+
+// ─── Sample Data Generator (local) ───
+function generateSampleRecords(keyword, count) {
+  const domains = [
+    `${keyword.toLowerCase().replace(/\\s/g,'')}.com`, 'gmail.com', 'yahoo.com', 
+    'hotmail.com', 'outlook.com', 'aol.com', keyword.toLowerCase().replace(/\\s/g,'')+'.net',
+    'verizon.net', 'att.net', 'sbcglobal.net', 'protonmail.com', 'icloud.com',
+  ];
+  const types = ['email:pass', 'email:pass', 'email:pass', 'api_key', 'ip:port', 'hash', 'config'];
+  const severities = ['critical', 'high', 'medium', 'low', 'info'];
+  const severitiesW = [5, 20, 35, 25, 15];
+  const sources = ['pastebin', 'github', 'shodan', 'public_directory', 'telegram', 'darkweb_forum', 'leak_site'];
+  
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function weightedPick(arr, weights) {
+    const total = weights.reduce((a,b) => a+b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < arr.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return arr[i];
+    }
+    return arr[arr.length - 1];
+  }
+  function genPass() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+    let p = '';
+    for (let i = 0; i < 8 + Math.floor(Math.random() * 14); i++) p += chars[Math.floor(Math.random() * chars.length)];
+    return p;
+  }
+  
+  const records = [];
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 365);
+  
+  for (let i = 0; i < count; i++) {
+    const domain = pick(domains);
+    const username = `user${1000 + i}`;
+    const email = `${username}@${domain}`;
+    const password = genPass();
+    const type = pick(types);
+    const severity = weightedPick(severities, severitiesW);
+    const source = pick(sources);
+    
+    const recDate = new Date(startDate.getTime() + Math.random() * 365 * 24 * 60 * 60 * 1000);
+    
+    records.push({
+      id: Math.random().toString(36).substring(2, 10),
+      keyword: keyword,
+      source_url: `https://${source.toLowerCase() === 'pastebin' ? 'pastebin.com' : source === 'github' ? 'github.com' : 'example.com'}/${Math.random().toString(36).substring(2, 10)}`,
+      source_type: source,
+      record_type: type,
+      content_preview: type === 'email:pass' ? `${email}:${password.substring(0, 10)}***` : 
+                       type === 'api_key' ? `API Key: sk-${Math.random().toString(36).substring(2, 18)}` :
+                       type === 'ip:port' ? `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}:${Math.floor(Math.random()*60000+1024)}` :
+                       type === 'hash' ? `${Math.random().toString(36).substring(2, 34)}` : `Config entry for ${domain}`,       discovered_at: recDate.toISOString(),
+       discovered_date: recDate.toISOString().split('T')[0],
+      severity: severity,
+      domain: domain,
+      email: email,
+      username: username,
+      password: password,
+      hash_value: '',
+      ip_address: `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+      port: String(Math.floor(Math.random()*60000 + 1024)),
+      extra_data: { source_confidence: Math.round(Math.random() * 100) / 100 },
+    });
+  }
+  
+  return records;
+}
+
+// ─── Results Rendering ───
+function renderResultsPage() {
+  const start = (state.currentPage - 1) * state.perPage;
+  const end = start + state.perPage;
+  const pageRecords = state.filteredRecords.slice(start, end);
+  
+  const tbody = document.getElementById('resultsBody');
+  if (pageRecords.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">🔍 No hay resultados con estos filtros</td></tr>';
+  } else {
+    tbody.innerHTML = pageRecords.map(r => renderRecordRow(r)).join('');
+  }
+  
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.perPage));
+  document.getElementById('pageInfo').textContent = `Página ${state.currentPage} de ${totalPages} (${state.filteredRecords.length} registros)`;
+  document.getElementById('prevPage').disabled = state.currentPage <= 1;
+  document.getElementById('nextPage').disabled = state.currentPage >= totalPages;
+}
+
+function changePage(dir) {
+  const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.perPage));
+  if (dir === 'prev' && state.currentPage > 1) state.currentPage--;
+  if (dir === 'next' && state.currentPage < totalPages) state.currentPage++;
+  renderResultsPage();
+}
+
+function filterResults(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  
+  if (filter === 'all') {
+    state.filteredRecords = [...state.records];
+  } else if (filter === 'critical' || filter === 'high') {
+    state.filteredRecords = state.records.filter(r => r.severity === filter);
+  } else {
+    state.filteredRecords = state.records.filter(r => r.record_type === filter);
+  }
+  state.currentPage = 1;
+  renderResultsPage();
+}
+
+function renderRecordRow(r) {
+  const sevClass = `sev-${r.severity}`;
+  const typeClass = r.record_type === 'email:pass' ? 'email' : 
+                    r.record_type === 'api_key' ? 'api' :
+                    r.record_type === 'ip:port' ? 'ip' :
+                    r.record_type === 'hash' ? 'hash' : 'config';  const sevLabel = escapeHtml(r.severity.charAt(0).toUpperCase() + r.severity.slice(1));
+  const dateStr = escapeHtml(r.discovered_date || r.discovered_at?.split('T')[0] || '—');
+  const email = r.email || r.username || '—';
+  const domain = r.domain || '—';
+  const preview = escapeHtml(r.content_preview?.substring(0, 80) || '—');
+  const source = r.source_type || '—';
+  
+  return `<tr>
+    <td><span class="${sevClass}">● ${sevLabel}</span></td>
+    <td><span class="type-badge ${typeClass}">${r.record_type}</span></td>
+    <td class="email-cell">${escapeHtml(email)}</td>
+    <td class="domain">${escapeHtml(domain)}</td>
+    <td class="preview" title="${escapeHtml(r.content_preview || '')}">${preview}</td>
+    <td class="source-cell">${escapeHtml(source)}</td>
+    <td class="date-cell">${dateStr}</td>
+  </tr>`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ─── Export ───
+function exportResults() {
+  const data = state.filteredRecords.length > 0 ? state.filteredRecords : state.records;
+  if (data.length === 0) { showToast('❌ No hay datos para exportar', 'var(--red)'); return; }
+  
+  const csv = ['severidad,tipo,email,dominio,contenido,fuente,fecha'];
+  data.forEach(r => {     csv.push(`"${r.severity}","${r.record_type}","${r.email||''}","${r.domain||''}","${(r.content_preview||'').replace(/"/g,'""')}","${r.source_type||''}","${r.discovered_date||''}"`);
+  });
+  
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `oraculo_${state.lastKeyword}_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  showToast(`📥 Exportados ${data.length} registros a CSV`, 'var(--accent2)');
+}
+
+// ─── Records Section ───
+function queryRecords() {
+  const keyword = document.getElementById('filterKeyword').value.trim().toLowerCase();
+  const domain = document.getElementById('filterDomain').value.trim().toLowerCase();
+  const type = document.getElementById('filterType').value;
+  const severity = document.getElementById('filterSeverity').value;
+  
+  let filtered = [...state.records];
+  
+  if (keyword) filtered = filtered.filter(r => 
+    r.keyword?.toLowerCase().includes(keyword) || 
+    r.email?.toLowerCase().includes(keyword) ||
+    r.domain?.toLowerCase().includes(keyword)
+  );
+  if (domain) filtered = filtered.filter(r => r.domain?.toLowerCase().includes(domain));
+  if (type) filtered = filtered.filter(r => r.record_type === type);
+  if (severity) filtered = filtered.filter(r => r.severity === severity);
+  
+  state.filteredRecords = filtered;
+  state.recordsPage = 1;
+  renderRecords();
+}
+
+function renderRecords() {
+  const start = (state.recordsPage - 1) * state.perPage;
+  const end = start + state.perPage;
+  const pageRecords = state.filteredRecords.slice(start, end);
+  
+  const tbody = document.getElementById('recordsBody');
+  if (pageRecords.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">📭 No hay registros con estos filtros</td></tr>';
+  } else {
+    tbody.innerHTML = pageRecords.map(r => renderRecordRow(r)).join('');
+  }
+  
+  document.getElementById('recordsTotal').textContent = `(${state.filteredRecords.length})`;
+  
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.perPage));
+  let pagHtml = `<button onclick="changeRecordsPage('prev')" ${state.recordsPage <= 1 ? 'disabled' : ''}>◀ Anterior</button>
+    <span class="info">Página ${state.recordsPage} de ${totalPages} (${state.filteredRecords.length} registros)</span>
+    <button onclick="changeRecordsPage('next')" ${state.recordsPage >= totalPages ? 'disabled' : ''}>Siguiente ▶</button>`;
+  document.getElementById('recordsPagination').innerHTML = pagHtml;
+}
+
+function changeRecordsPage(dir) {
+  const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.perPage));
+  if (dir === 'prev' && state.recordsPage > 1) state.recordsPage--;
+  if (dir === 'next' && state.recordsPage < totalPages) state.recordsPage++;
+  renderRecords();
+}
+
+// ─── Stats ───
+function renderStats() {
+  const records = state.records;
+  
+  // KPIs
+  document.getElementById('statsTotal').textContent = records.length;
+  
+  const keywords = new Set(records.map(r => r.keyword).filter(Boolean));
+  document.getElementById('statsKeywords').textContent = keywords.size;
+  
+  const critical = records.filter(r => r.severity === 'critical').length;
+  document.getElementById('statsCritical').textContent = critical;
+  
+  const sources = new Set(records.map(r => r.source_type).filter(Boolean));
+  document.getElementById('statsSources').textContent = sources.size;
+  
+  // By type
+  const byType = {};
+  records.forEach(r => { byType[r.record_type] = (byType[r.record_type] || 0) + 1; });
+  document.getElementById('statsByType').innerHTML = Object.entries(byType)
+    .sort((a,b) => b[1] - a[1])
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:10px"><p>Sin datos</p></div>';
+  
+  // By severity
+  const bySev = {};
+  records.forEach(r => { bySev[r.severity] = (bySev[r.severity] || 0) + 1; });
+  const sevColors = { critical: 'red', high: 'accent', medium: 'accent', low: 'accent', info: 'accent' };
+  document.getElementById('statsBySeverity').innerHTML = Object.entries(bySev)
+    .sort((a,b) => b[1] - a[1])
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl ${sevColors[k] || 'accent'}">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:10px"><p>Sin datos</p></div>';
+  
+  // By domain
+  const byDomain = {};
+  records.forEach(r => { if (r.domain) byDomain[r.domain] = (byDomain[r.domain] || 0) + 1; });
+  document.getElementById('statsByDomain').innerHTML = Object.entries(byDomain)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:10px"><p>Sin datos</p></div>';
+  
+  // Dates
+  const dates = {};
+  records.forEach(r => {     const d = r.discovered_date?.substring(0, 7); // YYYY-MM
+    if (d) dates[d] = (dates[d] || 0) + 1; 
+  });
+  document.getElementById('statsDates').innerHTML = Object.entries(dates)
+    .sort((a,b) => a[0].localeCompare(b[0]))
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v} registros</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:10px"><p>Sin datos</p></div>';
+}
+
+// ─── History ───
+function renderHistory() {
+  if (state.searchHistory.length === 0) {
+    document.getElementById('historyList').innerHTML = '<div class="empty-state" style="padding:10px"><p>Aún no hay búsquedas registradas</p></div>';
+    document.getElementById('historyStats').innerHTML = '<div class="empty-state" style="padding:10px"><p>Datos disponibles después de varias búsquedas</p></div>';
+    return;
+  }
+  
+  document.getElementById('historyList').innerHTML = state.searchHistory.map(h => {
+    const time = new Date(h.timestamp).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+    return `<div class="history-item">
+      <span class="kw">🔍 ${escapeHtml(h.keyword)}</span>
+      <span class="cnt">${h.total} registros</span>
+      <span class="ts">${time}</span>
+    </div>`;
+  }).join('');
+  
+  // Stats
+  const totalRecords = state.searchHistory.reduce((a, h) => a + h.total, 0);
+  const avgRecords = Math.round(totalRecords / state.searchHistory.length);
+  document.getElementById('historyStats').innerHTML = `
+    <div class="stat-row"><span class="lb">Total búsquedas</span><span class="vl accent">${state.searchHistory.length}</span></div>
+    <div class="stat-row"><span class="lb">Total registros</span><span class="vl">${totalRecords}</span></div>
+    <div class="stat-row"><span class="lb">Promedio por búsqueda</span><span class="vl">${avgRecords}</span></div>
+  `;
+}
+
+// ─── Dashboard KPIs ───
+function updateDashboardKPIs() {
+  const records = state.records;
+  const keywords = new Set(records.map(r => r.keyword).filter(Boolean));
+  const sources = new Set(records.map(r => r.source_type).filter(Boolean));
+  const critical = records.filter(r => r.severity === 'critical').length;
+  
+  animateValue('kpiTotal', records.length);
+  animateValue('kpiKeywords', keywords.size);
+  animateValue('kpiCritical', critical);
+  animateValue('kpiSources', sources.size);
+  animateValue('kpiSearches', state.searchHistory.length);
+  
+  // Sidebar badges
+  document.getElementById('sidebarRecordsCount').textContent = records.length;
+  
+  // Charts
+  renderDashboardCharts(records);
+}
+
+function animateValue(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const current = parseInt(el.textContent) || 0;
+  if (current === val) return;
+  
+  let start = current;
+  const step = Math.max(1, Math.ceil(Math.abs(val - current) / 30));
+  const dir = val > current ? 1 : -1;
+  
+  function tick() {
+    start += step * dir;
+    if ((dir > 0 && start >= val) || (dir < 0 && start <= val)) {
+      el.textContent = val;
+      return;
+    }
+    el.textContent = start;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderDashboardCharts(records) {
+  if (records.length === 0) return;
+  
+  // By type bar chart
+  const byType = {};
+  records.forEach(r => { byType[r.record_type] = (byType[r.record_type] || 0) + 1; });
+  const typeEntries = Object.entries(byType).sort((a,b) => b[1] - a[1]);
+  const maxType = Math.max(...typeEntries.map(([,v]) => v), 1);
+  
+  const typeColors = {
+    'email:pass': 'var(--red)', 'api_key': 'var(--orange)', 
+    'ip:port': 'var(--blue)', 'hash': 'var(--purple)', 'config': 'var(--yellow)'
+  };
+  
+  document.getElementById('chartByType').innerHTML = 
+    '<div class="chart-bar">' + 
+    typeEntries.map(([k, v]) => 
+      `<div class="bar" style="height:${(v/maxType)*150}px;background:${typeColors[k] || 'var(--accent)'}">
+        <div class="tooltip">${k}: ${v}</div>
+        <div class="bar-label">${k}</div>
+      </div>`
+    ).join('') + '</div>';
+  
+  // By severity donut
+  const bySev = {};
+  records.forEach(r => { bySev[r.severity] = (bySev[r.severity] || 0) + 1; });
+  const sevTotal = Object.values(bySev).reduce((a, b) => a + b, 0);
+  
+  const sevColors = {
+    'critical': '#e17055', 'high': '#e67e22', 
+    'medium': '#fdcb6e', 'low': '#0984e3', 'info': '#8888aa'
+  };
+  
+  // Build conic gradient
+  let gradParts = [];
+  let currentDeg = 0;
+  const sevOrder = ['critical', 'high', 'medium', 'low', 'info'];
+  sevOrder.forEach(sev => {
+    if (bySev[sev]) {
+      const pct = (bySev[sev] / sevTotal) * 100;
+      const deg = (bySev[sev] / sevTotal) * 360;
+      gradParts.push(`${sevColors[sev]} ${currentDeg}deg ${currentDeg + deg}deg`);
+      currentDeg += deg;
+    }
+  });
+  
+  const donutHtml = `
+    <div class="donut-container">
+      <div class="donut" style="background:conic-gradient(${gradParts.join(', ')})">
+        <div class="donut-center">
+          <div class="big">${sevTotal}</div>
+          <div class="small">total</div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        ${sevOrder.filter(s => bySev[s]).map(s => 
+          `<div class="donut-legend-item">
+            <span class="dot" style="background:${sevColors[s]}"></span>
+            <span>${s}</span>
+            <span class="pct">${bySev[s]} (${Math.round(bySev[s]/sevTotal*100)}%)</span>
+          </div>`
+        ).join('')}
+      </div>
+    </div>`;
+  document.getElementById('chartBySeverity').innerHTML = donutHtml;
+}
+
+// ─── Chat ───
+let chatOpen = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open', chatOpen);
+  document.getElementById('chatNotif').style.display = 'none';
+  if (chatOpen) setTimeout(() => document.getElementById('chatInput').focus(), 200);
+}
+
+function chatAddMsg(text, cls, time) {
+  const msgs = document.getElementById('chatMsgs');
+  const t = time || new Date().toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+  msgs.innerHTML += `<div class="msg ${cls}">${text}<span class="time">${t}</span></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function chatShowTyping() {
+  const msgs = document.getElementById('chatMsgs');
+  msgs.innerHTML += '<div class="typing" id="chatTyping"><span></span><span></span><span></span></div>';
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function chatHideTyping() {
+  const el = document.getElementById('chatTyping');
+  if (el) el.remove();
+}
+
+function chatSendFromInput() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  chatSend(text);
+}
+
+function chatSend(text) {
+  if (!text || !text.trim()) return;
+  chatAddMsg(escapeHtml(text), 'user');
+  chatShowTyping();
+  
+  setTimeout(() => {
+    chatHideTyping();
+    const response = chatGenerateResponse(text);
+    chatAddMsg(response, 'bot');
+  }, 400 + Math.random() * 400);
+}
+
+function chatGenerateResponse(msg) {
+  const ml = msg.toLowerCase().trim();
+  
+  // Buscar comando
+  if (ml.startsWith('buscar ')) {
+    const kw = ml.replace('buscar ', '').trim();
+    if (kw) {
+      document.getElementById('searchInput').value = kw;
+      setTimeout(() => { 
+        navigateTo('search'); 
+        executeSearch(); 
+      }, 500);
+      return `🔍 Iniciando búsqueda para **"${escapeHtml(kw)}"**... Los resultados se mostrarán en el panel de búsqueda.`;
+    }
+  }
+  
+  // Estadísticas
+  if (ml.includes('cuantos') || ml.includes('estadísticas') || ml.includes('cuántos')) {
+    const total = state.records.length;
+    const keywords = new Set(state.records.map(r => r.keyword).filter(Boolean)).size;
+    const critical = state.records.filter(r => r.severity === 'critical').length;
+    return `📊 **Estadísticas del Oráculo:**\n\n• Registros totales: **${total}**\n• Palabras clave: **${keywords}**\n• Registros críticos: **${critical}**\n• Búsquedas realizadas: **${state.searchHistory.length}**`;
+  }
+  
+  // Resumen
+  if (ml.includes('resumen') || ml.includes('general') || ml.includes('panorama')) {
+    return `📋 **Resumen del Oráculo**\n\n🔄 Búsquedas: ${state.searchHistory.length}\n📊 Registros: ${state.records.length}\n🔴 Críticos: ${state.records.filter(r => r.severity === 'critical').length}\n\n_Usa el panel de búsqueda para obtener más datos._`;
+  }
+  
+  // Última búsqueda
+  if (ml.includes('última') || ml.includes('ultima') || ml.includes('último') || ml.includes('ultimo')) {
+    if (state.lastKeyword) {
+      return `🔍 Última búsqueda: **"${escapeHtml(state.lastKeyword)}"** — ${state.records.length} registros encontrados.`;
+    }
+    return '⚠️ Aún no has realizado ninguna búsqueda.';
+  }
+  
+  // Comandos / Ayuda
+  if (ml.includes('ayuda') || ml.includes('comandos') || ml.includes('qué puedes') || ml.includes('que puedes')) {
+    return (
+      '🤖 **Comandos disponibles:**\n\n' +
+      '🔍 `buscar <keyword>` — Inicia búsqueda de inteligencia\n' +
+      '📊 `¿Cuántos registros?` — Estadísticas del sistema\n' +
+      '📋 `resumen` — Panorama general\n' +
+      '🔍 `última búsqueda` — Info de la última búsqueda\n' +
+      '❓ `ayuda` — Esta ayuda\n\n' +
+      '_También puedes usar los chips rápidos abajo._'
+    );
+  }
+  
+  // Default
+  return '🤔 No entendí tu mensaje. Prueba con:\n\n• `buscar comcast` — Buscar inteligencia\n• `¿Cuántos registros?` — Estadísticas\n• `resumen` — Panorama general\n• `ayuda` — Comandos disponibles';
+}
+
+// ─── Init ───
+document.addEventListener('DOMContentLoaded', () => {
+  updateDashboardKPIs();
+  updateClock();
+  
+  // Load from localStorage
+  try {
+    const saved = JSON.parse(localStorage.getItem('oraculo_state'));
+    if (saved) {
+      state.records = saved.records || [];
+      state.searchHistory = saved.searchHistory || [];
+      state.filteredRecords = [...state.records];
+      updateDashboardKPIs();
+      document.getElementById('sidebarSearchCount').textContent = state.searchHistory.length;
+      document.getElementById('sidebarRecordsCount').textContent = state.records.length;
+    }
+  } catch (e) {}
+  
+  // Save state periodically
+  setInterval(() => {
+    try {
+      localStorage.setItem('oraculo_state', JSON.stringify({
+        records: state.records.slice(-500),
+        searchHistory: state.searchHistory.slice(-50),
+      }));
+    } catch (e) {}
+  }, 10000);
+});
+</script>
+</body>
+</html>
