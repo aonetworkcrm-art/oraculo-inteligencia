@@ -201,6 +201,33 @@ def cli_telegram_login():
     cli_login()
 
 
+def cli_github(keyword):
+    """CLI GitHub Dorker."""
+    from github_dorker import GitHubDorker
+
+    dorker = GitHubDorker()
+    print(f"\n🐙 GitHub Dorker for: {keyword}\n")
+    print(f"🔑 Token: {'✅' if dorker.token else '❌ Sin token (10 req/min)'}")
+    if not dorker.token:
+        print("   Sugerencia: set GITHUB_TOKEN env var para 30 req/min")
+    print()
+
+    combos = dorker.scrape_all(keyword, max_per_source=15)
+
+    print(f"\n📊 Total: {len(combos)}")
+    for combo in combos[:10]:
+        pw = combo.password[:10] + "***" if len(combo.password) > 10 else combo.password
+        repo = combo.extra_data.get("github_repo", "")
+        src_str = f" [{repo}]" if repo else ""
+        print(f"  📧 {combo.email:<35} : {pw:<15}{src_str}")
+
+    if len(combos) > 10:
+        print(f"\n   ... y {len(combos) - 10} mas")
+
+    print(f"\n📊 Stats: {dorker.get_stats()}")
+    print(f"\n✅ GitHub search complete")
+
+
 def cli_telegram_search(keyword):
     """Search Telegram for credential combos."""
     from telegram_scraper import TelegramIntelScraper
@@ -259,6 +286,7 @@ Ejemplos:
     parser.add_argument("--check-apis", action="store_true", help="Verificar APIs configuradas")
     parser.add_argument("--telegram-login", action="store_true", help="Login a Telegram")
     parser.add_argument("--telegram-search", type=str, default=None, metavar="KEYWORD", help="Search Telegram for combos")
+    parser.add_argument("--github", type=str, default=None, metavar="KEYWORD", help="GitHub Dorking")
     parser.add_argument("--version", action="store_true", help="Mostrar versión")
 
     args = parser.parse_args()
@@ -283,6 +311,8 @@ Ejemplos:
         cli_proxy("test")
     elif args.check_apis:
         cli_check_apis()
+    elif args.github:
+        cli_github(args.github)
     elif args.telegram_search:
         cli_telegram_search(args.telegram_search)
     elif args.telegram_login:

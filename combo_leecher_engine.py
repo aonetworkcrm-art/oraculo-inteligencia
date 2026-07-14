@@ -1536,7 +1536,7 @@ class ComboLeecherEngine:
 
         Args:
             keyword: Search term (e.g., "comcast", "netflix")
-            sources: Sources to use: ["paste", "telegram", "discord", "forum", "dorking", "api"]
+            sources: Sources to use: ["paste", "telegram", "discord", "forum", "dorking", "api", "github"]
             validate: Whether to validate combos via SMTP/HTTP
             max_per_source: Max combos per source
 
@@ -1632,7 +1632,21 @@ class ComboLeecherEngine:
                 errors.append(f"dorking: {e}")
                 logger.error(f"Dorking error: {e}")
 
-        # ─── SOURCE 6: External APIs (via IntelOrchestrator) ───
+        # ─── SOURCE 6: GitHub (nuevo!) ───
+        if "github" in sources:
+            try:
+                logger.info(f"🐙 Scraping GitHub for '{keyword}'...")
+                from github_dorker import GitHubDorker
+                gh = GitHubDorker()
+                gh_combos = gh.scrape_all(keyword, max_per_source=max_per_source)
+                all_combos.extend(gh_combos)
+                used_sources.append("github")
+                logger.info(f"  → {len(gh_combos)} combos from GitHub")
+            except Exception as e:
+                errors.append(f"github: {e}")
+                logger.error(f"GitHub error: {e}")
+
+        # ─── SOURCE 7: External APIs (via IntelOrchestrator) ───
         if "api" in sources:
             try:
                 from intel_connectors import IntelOrchestrator

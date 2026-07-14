@@ -119,6 +119,14 @@ DUMP_DORKS = [
     {"name": "discord_dump",   "dork": "site:discord.com/channels \"{keyword}\" (\"combo\" OR \"dump\" OR \"leak\" OR \"password\")"},
     {"name": "discord_gg",     "dork": "site:discord.gg \"{keyword}\" (\"combo\" OR \"leak\" OR \"password\")"},
 
+    # ── GitHub ──
+    {"name": "github_code_pass", "dork": "site:github.com \"{keyword}\" \"password\" extension:txt extension:env extension:cfg"},
+    {"name": "github_dump_txt", "dork": "site:github.com \"{keyword}\" (\"email:pass\" OR \"combo\" OR \"dump\") extension:txt"},
+    {"name": "github_gist",     "dork": "site:gist.github.com \"{keyword}\" (\"email\" OR \"password\" OR \"combo\" OR \"leak\")"},
+    {"name": "github_issue",    "dork": "site:github.com/\"{keyword}\"/issues (\"password\" OR \"leak\" OR \"credentials\")"},
+    {"name": "github_sql",      "dork": "site:github.com \"{keyword}\" (\"INSERT INTO\") (\"password\") extension:sql"},
+    {"name": "github_creds",    "dork": "site:github.com \"{keyword}\" (\"credentials\" OR \"password\" OR \"secret\") extension:json extension:yml"},
+
     # ── Deep Web: .onion (Tor) ──
     {"name": "onion_paste",    "dork": "site:pastebin.com \"{keyword}\" \".onion\" (\"combo\" OR \"leak\" OR \"dump\" OR \"creds\")"},
     {"name": "onion_forum",    "dork": "site:pastebin.com \"{keyword}\" \"onion\" (\"forum\" OR \"market\" OR \"shop\" OR \"exchange\")"},
