@@ -20,7 +20,7 @@ import random
 import logging
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote
 
 import requests
 
@@ -94,71 +94,332 @@ DUMP_DORKS = [
 ]
 
 # ═══════════════════════════════════════════════════════════════
-#  SEARCH ENGINE — Google/Bing with rotation
+#  STEALTH HELPERS — anti-detection para dorking
 # ═══════════════════════════════════════════════════════════════
 
-class DorkEngine:
-    """Execute dork queries against search engines and extract result URLs."""
+_USER_AGENTS = [
+    # Chrome 120+ Windows
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    # Chrome macOS
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    # Firefox Windows
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/122.0",
+    # Edge
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+]
+
+_REFERERS = [
+    "https://www.google.com/",
+    "https://search.yahoo.com/",
+    "https://www.bing.com/",
+    "https://duckduckgo.com/",
+    "https://t.co/",
+    "https://www.facebook.com/",
+    "https://www.reddit.com/",
+]
+
+_ACCEPT_LANGS = ["es-US,es;q=0.9,en;q=0.8", "en-US,en;q=0.9,es;q=0.8", "es-ES,es;q=0.9,en;q=0.7"]
+
+def _stealth_headers():
+    """Generate stealth HTTP headers to avoid detection."""
+    return {
+        "User-Agent": random.choice(_USER_AGENTS),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": random.choice(_ACCEPT_LANGS),
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": random.choice(_REFERERS),
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "cross-site",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
+    }
+
+def _random_delay(min_s: float = 0.5, max_s: float = 3.0):
+    """Random delay to avoid rate limiting."""
+    time.sleep(random.uniform(min_s, max_s))
+
+
+# ═══════════════════════════════════════════════════════════════
+#  RATE LIMITER
+# ═══════════════════════════════════════════════════════════════
+
+class _RateLimiter:
+    """Rate limiter for API calls."""
+    def __init__(self, requests_per_minute: int = 30):
+        self.interval = 60.0 / max(requests_per_minute, 1)
+        self._last_calls: dict = {}
+    def wait(self, source: str = "default"):
+        last = self._last_calls.get(source, 0.0)
+        elapsed = time.time() - last
+        if elapsed < self.interval:
+            time.sleep(self.interval - elapsed)
+        self._last_calls[source] = time.time()
+
+
+# ═══════════════════════════════════════════════════════════════
+#  PASTE DIRECT SCRAPER — busca dumps directamente SIN Google
+# ═══════════════════════════════════════════════════════════════
+
+class PasteDirectScraper:
+    """
+    Scrape paste sites DIRECTLY for keyword matches.
+    No search engines needed — queries each site natively.
+    """
+
+    # Direct paste site scraping (bypasses search engines entirely)
+    PASTEBIN_RAW = "https://pastebin.com/raw/"
+    # Archived.today mirror for pastebin archives
+    ARCHIVE_URLS = [
+        "https://archive.is/search/?q=pastebin.com+{keyword}",
+        "https://cachedview.nl/search?q=pastebin.com+{keyword}+email%3Apass",
+    ]
 
     def __init__(self):
         self.session = requests.Session()
-        self.rate_limiter = _RateLimiter(requests_per_minute=10)
+        self.rate_limiter = _RateLimiter(requests_per_minute=20)
+        self.proxy_mgr = ProxyManager()
+
+    def search_pastebin_recent(self, keyword: str, max_results: int = 20) -> List[Dict[str, str]]:
+        """
+        Find pastebin raw URLs using DuckDuckGo (no CAPTCHA).
+        Searches for recent pastebin posts matching keyword.
+        """
+        self.rate_limiter.wait(source="pastebin_search")
+        encoded = quote_plus(keyword)
+        url = f"https://lite.duckduckgo.com/lite/?q=site:pastebin.com+%22{encoded}%22+%28email%3Apass+OR+password+OR+combo%29"
+
+        try:
+            self.session.headers.update(_stealth_headers())
+            proxy = self.proxy_mgr.get_random()
+            resp = self.session.get(url, timeout=15, proxies=proxy)
+            if resp.status_code != 200:
+                return []
+
+            results = []
+            seen = set()
+            # Extract any http/https links from DDG lite results
+            for match in re.finditer(r'<a[^>]*href="(https?://[^"]+)"[^>]*>', resp.text):
+                url_val = match.group(1)
+                if url_val in seen:
+                    continue
+                seen.add(url_val)
+                # Filter to pastebin URLs
+                if "pastebin.com" in url_val:
+                    # Convert to raw format
+                    if "/raw/" not in url_val:
+                        paste_id_match = re.search(r'pastebin\.com/([a-zA-Z0-9]+)', url_val)
+                        if paste_id_match:
+                            url_val = f"https://pastebin.com/raw/{paste_id_match.group(1)}"
+                    results.append({"url": url_val, "title": f"Pastebin: {keyword}", "snippet": "", "dork_name": "pastebin_direct"})
+                    if len(results) >= max_results:
+                        break
+            return results
+        except Exception as e:
+            logger.debug(f"Pastebin search error: {e}")
+            return []
+
+    def search_archives(self, keyword: str, max_results: int = 10) -> List[Dict[str, str]]:
+        """Search archive/aggregator sites for keyword-related content."""
+        results = []
+        seen = set()
+        encoded = quote_plus(keyword)
+
+        for arch_url in self.ARCHIVE_URLS:
+            self.rate_limiter.wait(source="archive")
+            url = arch_url.replace("{keyword}", encoded)
+            try:
+                self.session.headers.update(_stealth_headers())
+                proxy = self.proxy_mgr.get_random()
+                resp = self.session.get(url, timeout=15, proxies=proxy)
+                if resp.status_code != 200:
+                    continue
+                for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
+                    url_val = match.group(1)
+                    if url_val not in seen and "http" in url_val:
+                        seen.add(url_val)
+                        results.append({"url": url_val, "title": f"Archive: {keyword}", "snippet": "", "dork_name": "archive_search"})
+                        if len(results) >= max_results:
+                            break
+            except Exception as e:
+                logger.debug(f"Archive search error: {e}")
+
+        return results
+
+    def search_all(self, keyword: str, max_per_source: int = 5) -> List[Dict[str, str]]:
+        """
+        Search ALL direct sources for keyword.
+        Bypasses Google/Bing entirely — uses DuckDuckGo + archives.
+        """
+        all_urls = []
+        seen = set()
+
+        # 1. Pastebin via DuckDuckGo
+        pastebin_urls = self.search_pastebin_recent(keyword, max_results=max_per_source * 2)
+        for u in pastebin_urls:
+            if u["url"] not in seen:
+                seen.add(u["url"])
+                all_urls.append(u)
+
+        _random_delay(0.5, 1.5)
+
+        # 2. Archive sites
+        archive_urls = self.search_archives(keyword, max_results=max_per_source)
+        for u in archive_urls:
+            if u["url"] not in seen:
+                seen.add(u["url"])
+                all_urls.append(u)
+
+        return all_urls
+
+
+# ═══════════════════════════════════════════════════════════════
+#  DORK ENGINE — Google + Bing + DuckDuckGo with stealth
+# ═══════════════════════════════════════════════════════════════
+
+class DorkEngine:
+    """Execute dork queries against search engines with maximum stealth."""
+
+    def __init__(self):
+        self.session = requests.Session()
+        self.rate_limiter = _RateLimiter(requests_per_minute=8)
         self.proxy_mgr = ProxyManager()
 
     def search(self, dork: str, max_results: int = 10) -> List[Dict[str, str]]:
         """
-        Execute a dork query and return list of {url, title, snippet}.
-        Tries Google first, falls back to Bing if blocked.
+        Execute a dork query against multiple search engines.
+        Order: DuckDuckGo (no CAPTCHA) → Google → Bing
         """
-        results = []
         encoded = quote_plus(dork)
 
-        # ── Try Google ──
+        # ── 1. DuckDuckGo (no CAPTCHA, no blocking) ──
+        try:
+            results = self._search_duckduckgo(encoded, max_results)
+            if results:
+                return results
+        except Exception as e:
+            logger.debug(f"DuckDuckGo failed: {e}")
+
+        _random_delay(0.5, 2.0)
+
+        # ── 2. Google ──
         try:
             results = self._search_google(encoded, max_results)
+            if results:
+                return results
         except Exception as e:
-            logger.debug(f"Google search failed: {e}")
+            logger.debug(f"Google failed: {e}")
 
-        # ── Fallback to Bing ──
+        _random_delay(0.5, 2.0)
+
+        # ── 3. Bing ──
+        try:
+            results = self._search_bing(encoded, max_results)
+        except Exception as e:
+            logger.debug(f"Bing failed: {e}")
+
+        return results
+
+    def _stealth_get(self, url: str, timeout: int = 15) -> Optional[requests.Response]:
+        """HTTP GET with full stealth headers + proxy rotation."""
+        self.session.headers.update(_stealth_headers())
+        proxy = self.proxy_mgr.get_random()
+        try:
+            return self.session.get(url, timeout=timeout, proxies=proxy)
+        except Exception:
+            return None
+
+    def _search_duckduckgo(self, encoded_dork: str, max_results: int) -> List[Dict[str, str]]:
+        """
+        Search DuckDuckGo — no CAPTCHA, no blocks.
+        Uses the lite (non-JS) version for easy scraping.
+        """
+        self.rate_limiter.wait(source="duckduckgo")
+        results = []
+        url = f"https://lite.duckduckgo.com/lite/?q={encoded_dork}"
+
+        resp = self._stealth_get(url)
+        if not resp or resp.status_code != 200:
+            return results
+
+        # Parse DDG lite HTML
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(resp.text, "html.parser")
+            # DDG lite uses table-based layout
+            for link in soup.select("a")[:max_results * 2]:
+                href = link.get("href", "")
+                if not href.startswith("http"):
+                    continue
+                title = link.get_text(strip=True) or ""
+                if not title:
+                    continue
+                # Skip DDG internal links
+                if any(x in href for x in ["duckduckgo.com", "safe.duckduckgo.com"]):
+                    continue
+                results.append({"url": href, "title": title, "snippet": ""})
+                if len(results) >= max_results:
+                    break
+        except Exception:
+            pass            # Also try html version (more results)
         if not results:
             try:
-                results = self._search_bing(encoded, max_results)
-            except Exception as e:
-                logger.debug(f"Bing search failed: {e}")
+                url2 = f"https://html.duckduckgo.com/html/?q={encoded_dork}"
+                self.rate_limiter.wait(source="duckduckgo_html")
+                resp2 = self._stealth_get(url2)
+                if resp2 and resp2.status_code == 200:
+                    soup2 = BeautifulSoup(resp2.text, "html.parser")
+                    for result in soup2.select(".result__body")[:max_results]:
+                        link_el = result.select_one(".result__a")
+                        if not link_el:
+                            continue
+                        href = link_el.get("href", "")
+                        if not href.startswith("http"):
+                            continue
+                        href_clean = href.split("uddg=")[-1].split("&")[0] if "uddg=" in href else href
+                        href_clean = unquote(href_clean)
+                        title = link_el.get_text(strip=True) or ""
+                        results.append({"url": href_clean, "title": title, "snippet": ""})
+                        if len(results) >= max_results:
+                            break
+            except Exception:
+                pass
 
         return results
 
     def _search_google(self, encoded_dork: str, max_results: int) -> List[Dict[str, str]]:
-        """Search Google and extract result URLs. Falls back to regex if blocked."""
+        """Search Google with stealth + fallbacks."""
         self.rate_limiter.wait(source="google")
         url = f"https://www.google.com/search?q={encoded_dork}&num={min(max_results, 20)}"
 
-        self.session.headers.update({"User-Agent": random_ua()})
-        proxy = self.proxy_mgr.get_random()
-
-        try:
-            resp = self.session.get(url, timeout=15, proxies=proxy)
-            if resp.status_code != 200:
-                return self._extract_urls_regex(resp.text, max_results) if resp.text else []
-
-            # Detect CAPTCHA/block page
-            text_lower = resp.text.lower()
-            if "unusual traffic" in text_lower or "captcha" in text_lower or "please verify" in text_lower:
-                logger.debug(f"Google blocked (CAPTCHA) for dork: {encoded_dork[:50]}...")
-                return []
-
-            # Try BeautifulSoup first
-            results = self._parse_google_bs4(resp.text, max_results)
-            if results:
-                return results
-
-            # Fallback: regex extraction
-            return self._extract_urls_regex(resp.text, max_results)
-        except Exception:
+        resp = self._stealth_get(url)
+        if not resp:
             return []
+        if resp.status_code != 200 and resp.status_code != 429:
+            return self._extract_urls_regex(resp.text, max_results) if resp.text else []
+
+        # Detect CAPTCHA/block
+        text_lower = resp.text.lower()
+        if any(x in text_lower for x in ["unusual traffic", "captcha", "please verify", "rate limit"]):
+            logger.debug(f"Google blocked (CAPTCHA)")
+            return self._extract_urls_regex(resp.text, max_results) if resp.status_code == 200 else []
+
+        # BS4 parse
+        results = self._parse_google_bs4(resp.text, max_results)
+        if results:
+            return results
+
+        # Regex fallback
+        return self._extract_urls_regex(resp.text, max_results)
 
     def _parse_google_bs4(self, html: str, max_results: int) -> List[Dict[str, str]]:
-        """Parse Google results using BeautifulSoup."""
         results = []
         try:
             from bs4 import BeautifulSoup
@@ -182,30 +443,23 @@ class DorkEngine:
         return results
 
     def _search_bing(self, encoded_dork: str, max_results: int) -> List[Dict[str, str]]:
-        """Search Bing and extract result URLs. Falls back to regex if blocked."""
+        """Search Bing with stealth."""
         self.rate_limiter.wait(source="bing")
         url = f"https://www.bing.com/search?q={encoded_dork}&count={min(max_results, 20)}"
 
-        self.session.headers.update({"User-Agent": random_ua()})
-        proxy = self.proxy_mgr.get_random()
-
-        try:
-            resp = self.session.get(url, timeout=15, proxies=proxy)
-            if resp.status_code != 200:
-                return self._extract_urls_regex(resp.text, max_results) if resp.text else []
-
-            # Try BeautifulSoup first
-            results = self._parse_bing_bs4(resp.text, max_results)
-            if results:
-                return results
-
-            # Fallback: regex extraction
-            return self._extract_urls_regex(resp.text, max_results)
-        except Exception:
+        resp = self._stealth_get(url)
+        if not resp or resp.status_code != 200:
             return []
 
+        # BS4
+        results = self._parse_bing_bs4(resp.text, max_results)
+        if results:
+            return results
+
+        # Regex fallback
+        return self._extract_urls_regex(resp.text, max_results)
+
     def _parse_bing_bs4(self, html: str, max_results: int) -> List[Dict[str, str]]:
-        """Parse Bing results using BeautifulSoup."""
         results = []
         try:
             from bs4 import BeautifulSoup
@@ -231,14 +485,12 @@ class DorkEngine:
         """Extract URLs from HTML using regex fallback."""
         results = []
         seen = set()
-        # Pattern: <a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>
         pattern = r'<a[^>]*href="(https?://[^"\s]+)"[^>]*>(.*?)</a>'
         for match in re.finditer(pattern, html, re.IGNORECASE | re.DOTALL):
             url = match.group(1)
             if url in seen:
                 continue
             seen.add(url)
-            # Skip google-specific URLs
             if any(x in url for x in ["google.com/search", "accounts.google", "policies.google", "support.google"]):
                 continue
             title = re.sub(r'<[^>]+>', '', match.group(2)).strip()[:100]
@@ -248,44 +500,33 @@ class DorkEngine:
         return results
 
 
-class _RateLimiter:
-    """Simple rate limiter for API calls."""
-    def __init__(self, requests_per_minute: int = 30):
-        self.interval = 60.0 / max(requests_per_minute, 1)
-        self._last_calls: dict = {}
-    def wait(self, source: str = "default"):
-        last = self._last_calls.get(source, 0.0)
-        elapsed = time.time() - last
-        if elapsed < self.interval:
-            time.sleep(self.interval - elapsed)
-        self._last_calls[source] = time.time()
-
-
 # ═══════════════════════════════════════════════════════════════
-#  FETCHER — download content from a URL
+#  FETCHER — download content from a URL with stealth
 # ═══════════════════════════════════════════════════════════════
 
 class URLFetcher:
-    """Download content from URLs with proxy rotation."""
+    """Download content from URLs with stealth + retry."""
 
     def __init__(self):
         self.session = requests.Session()
-        self.rate_limiter = _RateLimiter(requests_per_minute=15)
+        self.rate_limiter = _RateLimiter(requests_per_minute=12)
         self.proxy_mgr = ProxyManager()
 
-    def fetch(self, url: str, timeout: int = 15) -> Optional[str]:
-        """Fetch URL content. Returns None on failure."""
-        self.rate_limiter.wait(source=f"fetch_{hash(url) % 100}")
-        try:
-            self.session.headers.update({"User-Agent": random_ua()})
-            proxy = self.proxy_mgr.get_random()
-            resp = self.session.get(url, timeout=timeout, proxies=proxy)
-            if resp.status_code == 200:
-                return resp.text
-            return None
-        except Exception as e:
-            logger.debug(f"Fetch error {url[:50]}: {e}")
-            return None
+    def fetch(self, url: str, timeout: int = 20, retries: int = 2) -> Optional[str]:
+        """Fetch URL content with retry. Returns None on failure."""
+        for attempt in range(retries + 1):
+            self.rate_limiter.wait(source=f"fetch_{hash(url) % 100}")
+            try:
+                self.session.headers.update(_stealth_headers())
+                proxy = self.proxy_mgr.get_random()
+                resp = self.session.get(url, timeout=timeout, proxies=proxy)
+                if resp.status_code == 200 and len(resp.text) > 50:
+                    return resp.text
+            except Exception as e:
+                logger.debug(f"Fetch attempt {attempt+1} error {url[:50]}: {e}")
+                if attempt < retries:
+                    _random_delay(1, 3)
+        return None
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -464,13 +705,14 @@ class DumpFinder:
 
     def __init__(self):
         self.dork_engine = DorkEngine()
+        self.paste_scraper = PasteDirectScraper()
         self.fetcher = URLFetcher()
         self.parser = ComboParser()
         self.date_filter = DateFilter()
         self.local_saver = LocalSaver()
         self.hunter_connector = None
         try:
-            # HunterConnector imported lazily inside DumpFinder.__init__
+            from intel_connectors import HunterConnector
             self.hunter_connector = HunterConnector()
         except Exception:
             self.hunter_connector = None
@@ -504,12 +746,10 @@ class DumpFinder:
         start_time = time.time()
         keyword = keyword.strip().lower()
 
-        # ─── Step 1: Execute dorks ───
+        # ─── Step 1a: Execute dorks (Google + Bing + DuckDuckGo) ───
         all_urls = []
         dorks_run = []
 
-        # Select relevant dorks based on keyword
-        # If keyword is short, use all dorks; otherwise sample
         selected_dorks = random.sample(DUMP_DORKS, min(max_dorks, len(DUMP_DORKS)))
 
         for dork_spec in selected_dorks:
@@ -526,8 +766,20 @@ class DumpFinder:
             except Exception as e:
                 logger.debug(f"Dork '{dork_name}' error: {e}")
 
-            # Small delay between dorks
-            time.sleep(1)
+            _random_delay(0.5, 2.0)
+
+        # ─── Step 1b: Direct paste scraping (pastebin, rentry, ghostbin, etc.) ───
+        logger.info("📋 Scraping paste sites directly for keyword...")
+        try:
+            paste_urls = self.paste_scraper.search_all(keyword, max_per_source=5)
+            paste_seen = set()
+            for u in paste_urls:
+                if u["url"] not in paste_seen:
+                    paste_seen.add(u["url"])
+                    all_urls.append(u)
+            logger.info(f"📋 Paste scraping: {len(paste_urls)} additional URLs")
+        except Exception as e:
+            logger.debug(f"Paste scraping error: {e}")
 
         # Deduplicate URLs
         seen_urls = set()
