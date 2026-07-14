@@ -1242,12 +1242,17 @@ def api_ping():
 
 # ─── Dump Finder Endpoint ────────────────────────────
 
+# ─── DumpFinder singleton (safe lazy-init con try/except) ──
 DUMP_FINDER_INSTANCE = None
 DUMP_FINDER_FAILED = False
 DUMP_FINDER_LOCK = threading.Lock()
 
 def _get_dump_finder():
-    """Lazy-load the DumpFinder singleton with safe try/except (no threads)."""
+    """
+    Lazy-init del DumpFinder con try/except directo.
+    SIN threads daemon, SIN multiprocessing — solo try/except.
+    Si falla (OOM, timeout, etc.), lo deshabilita permanentemente.
+    """
     global DUMP_FINDER_INSTANCE, DUMP_FINDER_FAILED
     if DUMP_FINDER_FAILED:
         return None
@@ -1350,48 +1355,54 @@ def api_dump_export():
 @app.route("/api/dump/cron", methods=["POST"])
 def api_dump_cron():
     """
-    Ejecuta búsqueda en background ASÍNCRONO para pre-poblar cache.
-    Devuelve inmediatamente — las búsquedas corren en hilos separados.
-    Diseñado para ser llamado por UptimeRobot cada 30 min.
+    CRON endpoint — SIN threads, SIN background workers.
+    Ejecuta la búsqueda directamente (sincrónica) con timeout.
+    Diseñado para UptimeRobot cada 30 min.
     """
     data = request.get_json(silent=True) or {}
     keyword = data.get("keyword", "").strip()
 
-    def _run_search(kw):
-        """Ejecuta una búsqueda en background thread."""
-        try:
+    if not keyword:
+        keywords = ["comcast", "xfinity", "verizon"]
+        results = []
+        for kw in keywords:
             finder = _get_dump_finder()
             if finder:
-                r = finder.search_fast(keyword=kw, save_to_disk=True)
-                combos = r.get("filtered_combos_count", 0)
-                elapsed = r.get("took_seconds", 0)
-                cached = r.get("_from_cache", False)
-                logger.info(f"⏰ [CRON] '{kw}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
-        except Exception as e:
-            logger.error(f"⏰ [CRON] Error '{kw}': {e}")
+                try:
+                    r = finder.search_fast(keyword=kw, save_to_disk=True, max_dorks=3, max_fetches=3)
+                    results.append({"keyword": kw, "combos": r.get("filtered_combos_count", 0)})
+                except Exception as e:
+                    results.append({"keyword": kw, "error": str(e)})
+            else:
+                results.append({"keyword": kw, "error": "DumpFinder not available"})
+        return jsonify({"success": True, "data": {"results": results}})
 
-    if not keyword:
-        predefined = ["comcast", "xfinity", "verizon"]
-        for kw in predefined:
-            t = threading.Thread(target=_run_search, args=(kw,), daemon=True)
-            t.start()
-        return jsonify({"success": True, "data": {"message": f"Started {len(predefined)} background searches", "keywords": predefined}})
+    finder = _get_dump_finder()
+    if not finder:
+        return jsonify({"success": False, "error": "DumpFinder not available"}), 500
 
-    # Keyword específica
-    t = threading.Thread(target=_run_search, args=(keyword,), daemon=True)
-    t.start()
-    return jsonify({"success": True, "data": {"message": f"Background search started for '{keyword}'", "keyword": keyword}})
+    try:
+        r = finder.search_fast(keyword=keyword, save_to_disk=True, max_dorks=3, max_fetches=3)
+        return jsonify({
+            "success": True,
+            "data": {
+                "keyword": keyword,
+                "combos": r.get("filtered_combos_count", 0),
+                "took_seconds": r.get("took_seconds", 0),
+                "from_cache": r.get("_from_cache", False),
+            }
+        })
+    except Exception as e:
+        logger.exception("Cron search error")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # ─── Dump Finder: Direct Scrape Fallback ──────────────────
-# Cuando DuckDuckGo no responde (Render cloud IP), probamos scraping
-# directo de paste sites + archives como fallback sólido.
 
 @app.route("/api/dump/scrape", methods=["POST"])
 def api_dump_scrape():
     """
-    Scrapeo DIRECTO de paste sites sin usar buscadores.
-    Ideal para Render donde DuckDuckGo está bloqueado.
+    Scrapeo DIRECTO de paste sites (sin threads, sin eventlet issues).
     """
     data = request.get_json(silent=True) or {}
     keyword = data.get("keyword", "").strip()
@@ -1403,27 +1414,22 @@ def api_dump_scrape():
         return jsonify({"success": False, "error": "DumpFinder not available"}), 500
 
     try:
-        # Usar solo PasteDirectScraper (sin dorking, sin DDG)
         start = time.time()
-        urls = finder.paste_scraper.search_pastebin_recent(keyword, max_results=10)
+        urls = finder.paste_scraper.search_pastebin_recent(keyword, max_results=5)
         if not urls:
-            # Fallback a scraping directo de Pastebin archive reciente
-            urls = finder.paste_scraper._scrape_pastebin_direct(keyword)
+            urls = finder.paste_scraper._scrape_pastebin_direct(keyword, max_results=5)
         
         if not urls:
             return jsonify({"success": True, "data": {"keyword": keyword, "urls_found": 0, "combos": [], "message": "No URLs found via direct scrape"}})
         
-        # Fetch and parse
         combos = []
-        for u in urls[:5]:
-            content = finder.fetcher.fetch(u["url"], timeout=10)
+        for u in urls[:3]:
+            content = finder.fetcher.fetch(u["url"], timeout=8)
             if content:
                 parsed = finder.parser.parse_text(content, source_url=u["url"], source_type="direct_scrape", keyword=keyword)
                 combos.extend(parsed)
         
         elapsed = round(time.time() - start, 2)
-        
-        # Save combos
         save_info = finder.local_saver.save_combos(keyword, combos)
         
         return jsonify({
@@ -1437,7 +1443,7 @@ def api_dump_scrape():
                 "combos_sample": [
                     {"email": c.email, "password": c.password[:15]+"***" if c.password and len(c.password) > 15 else c.password,
                      "domain": c.domain, "source": c.source_type, "date": c.discovered_date}
-                    for c in combos[:50]
+                    for c in combos[:30]
                 ],
             }
         })
