@@ -923,6 +923,7 @@ class DumpFinder:
                     except Exception:
                         pass
             DiskCache.set(keyword, cached_result, year, month)
+            return cached_result  # Return with _cached_combos
 
         return result
 
