@@ -16,6 +16,12 @@ from typing import Optional, List, Dict, Any
 
 import requests
 
+# Fallback to local keys when env vars are not set
+from local_keys import (
+    get_shodan_key, get_hunter_key, get_hibp_key,
+    get_vt_key, get_censys_token,
+)
+
 logger = logging.getLogger("IntelConnectors")
 
 # ─── User-Agent Pool (rotaciÃ³n anti-detecciÃ³n) ──────────────
@@ -88,7 +94,7 @@ class ShodanConnector:
     BASE_URL = "https://api.shodan.io"
     
     def __init__(self):
-        self.api_key = os.environ.get("SHODAN_API_KEY", "")
+        self.api_key = get_shodan_key()
         self.enabled = bool(self.api_key)
         self.rate_limiter = RateLimiter(requests_per_minute=60)
         
@@ -216,7 +222,7 @@ class HunterConnector:
     BASE_URL = "https://api.hunter.io/v2"
     
     def __init__(self):
-        self.api_key = os.environ.get("HUNTER_API_KEY", "")
+        self.api_key = get_hunter_key()
         self.enabled = bool(self.api_key)
         self.rate_limiter = RateLimiter(requests_per_minute=60)
         
@@ -334,7 +340,7 @@ class HIBPConnector:
     BASE_URL = "https://haveibeenpwned.com/api/v3"
     
     def __init__(self):
-        self.api_key = os.environ.get("HIBP_API_KEY", "")
+        self.api_key = get_hibp_key()
         self.enabled = bool(self.api_key)
         self.rate_limiter = RateLimiter(requests_per_minute=30)  # Conservative
         self.session = rotate_session()
@@ -458,7 +464,7 @@ class VirusTotalConnector:
     BASE_URL = "https://www.virustotal.com/api/v3"
     
     def __init__(self):
-        self.api_key = os.environ.get("VT_API_KEY", "")
+        self.api_key = get_vt_key()
         self.enabled = bool(self.api_key)
         self.rate_limiter = RateLimiter(requests_per_minute=4)  # Free tier limit
         self.session = requests.Session()
@@ -582,7 +588,7 @@ class CensysConnector:
     BASE_URL = "https://api.platform.censys.io/v3/global"
     
     def __init__(self):
-        self.token = os.environ.get("CENSYS_TOKEN", "")
+        self.token = get_censys_token()
         self.api_id = os.environ.get("CENSYS_API_ID", "")
         self.api_secret = os.environ.get("CENSYS_API_SECRET", "")
         

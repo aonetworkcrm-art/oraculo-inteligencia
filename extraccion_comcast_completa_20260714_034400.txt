@@ -1,0 +1,212 @@
+ORÁCULO DE INTELIGENCIA - EXTRACCIÓN COMPLETA
+Keyword: comcast | 2026-07-14T03:44:00.599888
+Total: 200 registros
+Email:Pass: 32 combos
+================================================================================
+
+SEVERIDAD: {"info": 29, "low": 49, "critical": 14, "medium": 69, "high": 39}
+TIPOS: {"ip:port": 32, "email:pass": 32, "user:pass": 42, "config": 25, "api_key": 35, "hash": 34}
+
+================================================================================
+LISTADO COMPLETO:
+================================================================================
+   1. [    INFO] ip:port      user6301@icloud.com                 @icloud.com           pw:?                    src:pastebin
+   2. [     LOW] email:pass   user5508@comcast.com                @comcast.com          pw:7zv78Lt8$tlSnnQzelId src:telegram
+   3. [CRITICAL] email:pass   user5348@comcast.com                @comcast.com          pw:qArnSj#77VZlB#       src:telegram
+   4. [  MEDIUM] user:pass    user4749@comcast.com                @comcast.com          pw:?                    src:telegram
+   5. [  MEDIUM] ip:port      user8430@comcast.com                @comcast.com          pw:?                    src:pastebin
+   6. [  MEDIUM] config       user1281@comcast.com                @comcast.com          pw:?                    src:shodan
+   7. [  MEDIUM] user:pass    user4099@gmail.com                  @gmail.com            pw:?                    src:shodan
+   8. [    HIGH] user:pass    user8539@xfinity.com                @xfinity.com          pw:?                    src:github
+   9. [  MEDIUM] ip:port      user9947@outlook.com                @outlook.com          pw:?                    src:shodan
+  10. [     LOW] ip:port      user3036@comcast.com                @comcast.com          pw:?                    src:telegram
+  11. [  MEDIUM] config       user5990@comcast.net                @comcast.net          pw:?                    src:shodan
+  12. [    INFO] ip:port      user2716@comcast.com                @comcast.com          pw:?                    src:telegram
+  13. [    INFO] api_key      user6225@xfinity.com                @xfinity.com          pw:?                    src:pastebin
+  14. [     LOW] user:pass    user2912@comcast.com                @comcast.com          pw:?                    src:public_directory
+  15. [  MEDIUM] hash         user3311@comcast.com                @comcast.com          pw:?                    src:github
+  16. [  MEDIUM] config       user1699@att.net                    @att.net              pw:?                    src:shodan
+  17. [    HIGH] user:pass    user9797@outlook.com                @outlook.com          pw:?                    src:github
+  18. [    HIGH] hash         user5964@comcast.com                @comcast.com          pw:?                    src:pastebin
+  19. [     LOW] ip:port      user7858@comcast.com                @comcast.com          pw:?                    src:telegram
+  20. [    HIGH] api_key      user1382@att.net                    @att.net              pw:?                    src:public_directory
+  21. [  MEDIUM] api_key      user9137@comcast.com                @comcast.com          pw:?                    src:public_directory
+  22. [  MEDIUM] hash         user8108@sbcglobal.net              @sbcglobal.net        pw:?                    src:telegram
+  23. [     LOW] email:pass   user6693@sbcglobal.net              @sbcglobal.net        pw:laIvxRN!KwAMEC       src:telegram
+  24. [    INFO] api_key      user5611@comcast.com                @comcast.com          pw:?                    src:shodan
+  25. [  MEDIUM] user:pass    user9021@comcast.com                @comcast.com          pw:?                    src:public_directory
+  26. [     LOW] user:pass    user9005@xfinity.com                @xfinity.com          pw:?                    src:public_directory
+  27. [  MEDIUM] hash         user9868@att.net                    @att.net              pw:?                    src:github
+  28. [    INFO] email:pass   user4043@comcast.com                @comcast.com          pw:@4agu0wTqe7l         src:telegram
+  29. [     LOW] api_key      user2455@comcast.com                @comcast.com          pw:?                    src:public_directory
+  30. [    INFO] ip:port      user8225@xfinity.com                @xfinity.com          pw:?                    src:pastebin
+  31. [    HIGH] hash         user2422@verizon.net                @verizon.net          pw:?                    src:public_directory
+  32. [  MEDIUM] hash         user9375@comcast.com                @comcast.com          pw:?                    src:pastebin
+  33. [     LOW] email:pass   user6967@comcast.com                @comcast.com          pw:UafsS%1DWPwOtO1k     src:telegram
+  34. [CRITICAL] user:pass    user9611@yahoo.com                  @yahoo.com            pw:?                    src:shodan
+  35. [    HIGH] ip:port      user7316@att.net                    @att.net              pw:?                    src:public_directory
+  36. [    INFO] hash         user4053@sbcglobal.net              @sbcglobal.net        pw:?                    src:pastebin
+  37. [    INFO] user:pass    user2717@comcast.com                @comcast.com          pw:?                    src:shodan
+  38. [    HIGH] email:pass   user6655@comcast.com                @comcast.com          pw:%4fc2VPXPlPml9s7     src:public_directory
+  39. [     LOW] hash         user3163@comcast.com                @comcast.com          pw:?                    src:github
+  40. [    HIGH] user:pass    user5262@comcast.com                @comcast.com          pw:?                    src:github
+  41. [     LOW] user:pass    user7220@live.com                   @live.com             pw:?                    src:pastebin
+  42. [     LOW] hash         user1967@protonmail.com             @protonmail.com       pw:?                    src:shodan
+  43. [     LOW] user:pass    user4098@comcast.com                @comcast.com          pw:?                    src:shodan
+  44. [  MEDIUM] api_key      user2948@comcast.com                @comcast.com          pw:?                    src:public_directory
+  45. [     LOW] api_key      user3893@comcast.com                @comcast.com          pw:?                    src:telegram
+  46. [     LOW] ip:port      user5743@outlook.com                @outlook.com          pw:?                    src:pastebin
+  47. [CRITICAL] user:pass    user3961@sbcglobal.net              @sbcglobal.net        pw:?                    src:public_directory
+  48. [  MEDIUM] config       user4672@comcast.com                @comcast.com          pw:?                    src:telegram
+  49. [  MEDIUM] ip:port      user9187@hotmail.com                @hotmail.com          pw:?                    src:shodan
+  50. [     LOW] email:pass   user7643@comcast.com                @comcast.com          pw:5higx!QHzUu4D1X      src:pastebin
+  51. [CRITICAL] api_key      user6966@comcast.com                @comcast.com          pw:?                    src:telegram
+  52. [  MEDIUM] ip:port      user3863@hotmail.com                @hotmail.com          pw:?                    src:public_directory
+  53. [  MEDIUM] email:pass   user9467@protonmail.com             @protonmail.com       pw:8s8pe%9qqoPad        src:github
+  54. [  MEDIUM] hash         user2463@hotmail.com                @hotmail.com          pw:?                    src:public_directory
+  55. [     LOW] email:pass   user7076@verizon.net                @verizon.net          pw:Fy2AHxC7L91          src:shodan
+  56. [    HIGH] api_key      user7574@comcast.com                @comcast.com          pw:?                    src:telegram
+  57. [    HIGH] config       user5765@comcast.com                @comcast.com          pw:?                    src:shodan
+  58. [  MEDIUM] email:pass   user1141@protonmail.com             @protonmail.com       pw:@nhjwfybIRbDkSBAZYax src:shodan
+  59. [    HIGH] api_key      user2824@comcast.com                @comcast.com          pw:?                    src:telegram
+  60. [     LOW] user:pass    user6834@live.com                   @live.com             pw:?                    src:pastebin
+  61. [     LOW] api_key      user8609@comcast.com                @comcast.com          pw:?                    src:telegram
+  62. [CRITICAL] ip:port      user3032@comcast.com                @comcast.com          pw:?                    src:shodan
+  63. [    INFO] ip:port      user2784@comcast.com                @comcast.com          pw:?                    src:github
+  64. [    INFO] api_key      user4086@verizon.net                @verizon.net          pw:?                    src:github
+  65. [    INFO] config       user9615@hotmail.com                @hotmail.com          pw:?                    src:github
+  66. [     LOW] ip:port      user6837@comcast.com                @comcast.com          pw:?                    src:pastebin
+  67. [     LOW] email:pass   user5192@protonmail.com             @protonmail.com       pw:mtY@ZU0sDD#A         src:telegram
+  68. [  MEDIUM] api_key      user2973@sbcglobal.net              @sbcglobal.net        pw:?                    src:shodan
+  69. [     LOW] hash         user5614@comcast.com                @comcast.com          pw:?                    src:pastebin
+  70. [CRITICAL] config       user4736@comcast.com                @comcast.com          pw:?                    src:shodan
+  71. [  MEDIUM] user:pass    user4787@att.net                    @att.net              pw:?                    src:public_directory
+  72. [  MEDIUM] hash         user5603@comcast.com                @comcast.com          pw:?                    src:github
+  73. [  MEDIUM] ip:port      user8079@comcast.com                @comcast.com          pw:?                    src:public_directory
+  74. [  MEDIUM] email:pass   user6851@comcast.com                @comcast.com          pw:%Jj7OaM4oVZUi        src:github
+  75. [  MEDIUM] user:pass    user8768@comcast.com                @comcast.com          pw:?                    src:public_directory
+  76. [    INFO] user:pass    user9642@comcast.com                @comcast.com          pw:?                    src:public_directory
+  77. [CRITICAL] hash         user5486@hotmail.com                @hotmail.com          pw:?                    src:shodan
+  78. [     LOW] user:pass    user4707@hotmail.com                @hotmail.com          pw:?                    src:shodan
+  79. [    INFO] config       user6251@comcast.com                @comcast.com          pw:?                    src:pastebin
+  80. [  MEDIUM] ip:port      user6426@comcast.com                @comcast.com          pw:?                    src:pastebin
+  81. [     LOW] config       user3654@comcast.com                @comcast.com          pw:?                    src:github
+  82. [    HIGH] api_key      user3691@comcast.com                @comcast.com          pw:?                    src:shodan
+  83. [CRITICAL] email:pass   user8802@comcast.com                @comcast.com          pw:8Eq0n3Hm             src:public_directory
+  84. [CRITICAL] email:pass   user1816@verizon.net                @verizon.net          pw:TQu5#MMP9t           src:public_directory
+  85. [  MEDIUM] email:pass   user2376@live.com                   @live.com             pw:c79GAY$owrLtFDTFFyY  src:telegram
+  86. [  MEDIUM] ip:port      user3691@comcast.com                @comcast.com          pw:?                    src:telegram
+  87. [    INFO] api_key      user8387@xfinity.com                @xfinity.com          pw:?                    src:telegram
+  88. [  MEDIUM] hash         user6863@verizon.net                @verizon.net          pw:?                    src:pastebin
+  89. [    HIGH] user:pass    user3525@mail.com                   @mail.com             pw:?                    src:public_directory
+  90. [    HIGH] ip:port      user9286@outlook.com                @outlook.com          pw:?                    src:shodan
+  91. [  MEDIUM] api_key      user2922@sbcglobal.net              @sbcglobal.net        pw:?                    src:telegram
+  92. [    HIGH] api_key      user1332@sbcglobal.net              @sbcglobal.net        pw:?                    src:shodan
+  93. [  MEDIUM] config       user9728@comcast.com                @comcast.com          pw:?                    src:shodan
+  94. [    INFO] api_key      user3126@comcast.com                @comcast.com          pw:?                    src:public_directory
+  95. [  MEDIUM] hash         user3747@xfinity.com                @xfinity.com          pw:?                    src:github
+  96. [     LOW] hash         user4672@outlook.com                @outlook.com          pw:?                    src:telegram
+  97. [    INFO] config       user3740@icloud.com                 @icloud.com           pw:?                    src:shodan
+  98. [    HIGH] hash         user5169@protonmail.com             @protonmail.com       pw:?                    src:shodan
+  99. [     LOW] config       user4435@yahoo.com                  @yahoo.com            pw:?                    src:shodan
+ 100. [  MEDIUM] hash         user8510@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 101. [  MEDIUM] ip:port      user7099@xfinity.com                @xfinity.com          pw:?                    src:public_directory
+ 102. [    HIGH] user:pass    user6511@msn.com                    @msn.com              pw:?                    src:telegram
+ 103. [  MEDIUM] user:pass    user5620@msn.com                    @msn.com              pw:?                    src:github
+ 104. [     LOW] email:pass   user8595@aol.com                    @aol.com              pw:owtOCr89             src:pastebin
+ 105. [    HIGH] api_key      user6561@comcast.com                @comcast.com          pw:?                    src:github
+ 106. [  MEDIUM] config       user5041@icloud.com                 @icloud.com           pw:?                    src:public_directory
+ 107. [    HIGH] user:pass    user1875@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 108. [     LOW] api_key      user9332@yahoo.com                  @yahoo.com            pw:?                    src:shodan
+ 109. [     LOW] user:pass    user4180@msn.com                    @msn.com              pw:?                    src:github
+ 110. [CRITICAL] email:pass   user8035@xfinity.com                @xfinity.com          pw:VrfoxwBZZForILD2T8ht src:pastebin
+ 111. [    INFO] hash         user4897@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 112. [    INFO] email:pass   user4756@protonmail.com             @protonmail.com       pw:jnzXFkjXVkrL5        src:github
+ 113. [  MEDIUM] api_key      user4885@att.net                    @att.net              pw:?                    src:public_directory
+ 114. [  MEDIUM] config       user9221@outlook.com                @outlook.com          pw:?                    src:telegram
+ 115. [CRITICAL] email:pass   user8038@comcast.com                @comcast.com          pw:!3Td$Z#FesaG#!q1B    src:pastebin
+ 116. [CRITICAL] user:pass    user2515@mail.com                   @mail.com             pw:?                    src:shodan
+ 117. [  MEDIUM] ip:port      user8165@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 118. [    INFO] hash         user5068@aol.com                    @aol.com              pw:?                    src:pastebin
+ 119. [     LOW] ip:port      user1359@hotmail.com                @hotmail.com          pw:?                    src:telegram
+ 120. [    HIGH] hash         user8002@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 121. [  MEDIUM] hash         user8647@yahoo.com                  @yahoo.com            pw:?                    src:pastebin
+ 122. [    INFO] api_key      user5350@mail.com                   @mail.com             pw:?                    src:github
+ 123. [    INFO] config       user6181@comcast.com                @comcast.com          pw:?                    src:github
+ 124. [    HIGH] hash         user1515@comcast.com                @comcast.com          pw:?                    src:github
+ 125. [  MEDIUM] api_key      user7819@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 126. [    HIGH] user:pass    user7719@mail.com                   @mail.com             pw:?                    src:github
+ 127. [     LOW] config       user5276@comcast.com                @comcast.com          pw:?                    src:shodan
+ 128. [     LOW] ip:port      user6027@comcast.net                @comcast.net          pw:?                    src:github
+ 129. [  MEDIUM] hash         user6887@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 130. [     LOW] email:pass   user5717@comcast.com                @comcast.com          pw:QLN9ITxgQeDwYM09rE   src:public_directory
+ 131. [     LOW] api_key      user7861@comcast.net                @comcast.net          pw:?                    src:pastebin
+ 132. [  MEDIUM] email:pass   user7322@comcast.com                @comcast.com          pw:b3j4VIvg3r%DwY9pj    src:github
+ 133. [  MEDIUM] ip:port      user1005@xfinity.com                @xfinity.com          pw:?                    src:pastebin
+ 134. [    HIGH] user:pass    user9176@gmail.com                  @gmail.com            pw:?                    src:github
+ 135. [  MEDIUM] email:pass   user6343@comcast.com                @comcast.com          pw:#8AwpBHLcy7#         src:github
+ 136. [  MEDIUM] api_key      user2344@icloud.com                 @icloud.com           pw:?                    src:shodan
+ 137. [    HIGH] user:pass    user8877@msn.com                    @msn.com              pw:?                    src:telegram
+ 138. [     LOW] email:pass   user5659@comcast.com                @comcast.com          pw:uGwnFbS#Fc@8aN       src:pastebin
+ 139. [    HIGH] hash         user7187@comcast.com                @comcast.com          pw:?                    src:shodan
+ 140. [    INFO] hash         user8815@live.com                   @live.com             pw:?                    src:telegram
+ 141. [    HIGH] ip:port      user7471@att.net                    @att.net              pw:?                    src:public_directory
+ 142. [    HIGH] email:pass   user7191@att.net                    @att.net              pw:S!iLZILa             src:pastebin
+ 143. [    HIGH] config       user3478@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 144. [CRITICAL] email:pass   user9634@outlook.com                @outlook.com          pw:GQA25RFKgfPm8fGn#r   src:telegram
+ 145. [     LOW] hash         user7685@yahoo.com                  @yahoo.com            pw:?                    src:telegram
+ 146. [  MEDIUM] hash         user2662@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 147. [    HIGH] api_key      user3819@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 148. [    INFO] email:pass   user7934@comcast.com                @comcast.com          pw:VOpN@TzB#rgRZl3lgZHl src:github
+ 149. [    INFO] config       user2421@comcast.com                @comcast.com          pw:?                    src:telegram
+ 150. [  MEDIUM] config       user7257@comcast.com                @comcast.com          pw:?                    src:shodan
+ 151. [  MEDIUM] user:pass    user1434@sbcglobal.net              @sbcglobal.net        pw:?                    src:shodan
+ 152. [     LOW] email:pass   user4499@verizon.net                @verizon.net          pw:G3lC8O1X6F5hSBl      src:public_directory
+ 153. [    INFO] api_key      user7808@msn.com                    @msn.com              pw:?                    src:github
+ 154. [     LOW] ip:port      user2452@comcast.com                @comcast.com          pw:?                    src:telegram
+ 155. [     LOW] config       user9227@comcast.net                @comcast.net          pw:?                    src:shodan
+ 156. [    INFO] hash         user7679@yahoo.com                  @yahoo.com            pw:?                    src:public_directory
+ 157. [  MEDIUM] ip:port      user4401@gmail.com                  @gmail.com            pw:?                    src:shodan
+ 158. [    INFO] ip:port      user4860@comcast.com                @comcast.com          pw:?                    src:shodan
+ 159. [    HIGH] user:pass    user3291@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 160. [  MEDIUM] api_key      user5768@protonmail.com             @protonmail.com       pw:?                    src:shodan
+ 161. [  MEDIUM] user:pass    user3252@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 162. [    HIGH] ip:port      user1872@outlook.com                @outlook.com          pw:?                    src:github
+ 163. [     LOW] config       user3687@aol.com                    @aol.com              pw:?                    src:shodan
+ 164. [  MEDIUM] config       user4615@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 165. [  MEDIUM] api_key      user8741@comcast.com                @comcast.com          pw:?                    src:github
+ 166. [  MEDIUM] hash         user8624@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 167. [    HIGH] hash         user4919@comcast.com                @comcast.com          pw:?                    src:github
+ 168. [     LOW] user:pass    user4433@verizon.net                @verizon.net          pw:?                    src:shodan
+ 169. [  MEDIUM] ip:port      user7710@comcast.net                @comcast.net          pw:?                    src:shodan
+ 170. [    HIGH] user:pass    user8561@yahoo.com                  @yahoo.com            pw:?                    src:telegram
+ 171. [     LOW] config       user4627@comcast.com                @comcast.com          pw:?                    src:telegram
+ 172. [  MEDIUM] user:pass    user1838@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 173. [  MEDIUM] email:pass   user5207@comcast.com                @comcast.com          pw:lZA3EYv!k$xBgglM$o3  src:telegram
+ 174. [    HIGH] email:pass   user7547@comcast.com                @comcast.com          pw:ZlvXHjigX2           src:public_directory
+ 175. [    INFO] api_key      user8621@comcast.net                @comcast.net          pw:?                    src:github
+ 176. [     LOW] email:pass   user3820@hotmail.com                @hotmail.com          pw:g#7mRfGXGWhXo        src:telegram
+ 177. [  MEDIUM] user:pass    user3599@comcast.com                @comcast.com          pw:?                    src:shodan
+ 178. [     LOW] hash         user1048@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 179. [CRITICAL] ip:port      user2881@sbcglobal.net              @sbcglobal.net        pw:?                    src:shodan
+ 180. [  MEDIUM] user:pass    user5959@aol.com                    @aol.com              pw:?                    src:shodan
+ 181. [  MEDIUM] user:pass    user5853@msn.com                    @msn.com              pw:?                    src:github
+ 182. [     LOW] api_key      user3397@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 183. [     LOW] user:pass    user2436@icloud.com                 @icloud.com           pw:?                    src:public_directory
+ 184. [    HIGH] config       user9403@hotmail.com                @hotmail.com          pw:?                    src:pastebin
+ 185. [  MEDIUM] api_key      user3840@icloud.com                 @icloud.com           pw:?                    src:github
+ 186. [  MEDIUM] user:pass    user8284@att.net                    @att.net              pw:?                    src:public_directory
+ 187. [    HIGH] api_key      user2743@comcast.com                @comcast.com          pw:?                    src:github
+ 188. [    HIGH] user:pass    user5055@comcast.com                @comcast.com          pw:?                    src:shodan
+ 189. [  MEDIUM] email:pass   user4948@comcast.com                @comcast.com          pw:6bk8vavLP%Y          src:shodan
+ 190. [    HIGH] config       user9758@protonmail.com             @protonmail.com       pw:?                    src:github
+ 191. [    HIGH] email:pass   user5032@comcast.com                @comcast.com          pw:IAKHrKUdJCM          src:telegram
+ 192. [     LOW] ip:port      user4745@att.net                    @att.net              pw:?                    src:telegram
+ 193. [  MEDIUM] api_key      user9976@protonmail.com             @protonmail.com       pw:?                    src:pastebin
+ 194. [  MEDIUM] hash         user4779@icloud.com                 @icloud.com           pw:?                    src:telegram
+ 195. [    INFO] hash         user8612@comcast.com                @comcast.com          pw:?                    src:public_directory
+ 196. [     LOW] user:pass    user8300@comcast.com                @comcast.com          pw:?                    src:shodan
+ 197. [  MEDIUM] user:pass    user1748@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 198. [     LOW] api_key      user4350@sbcglobal.net              @sbcglobal.net        pw:?                    src:github
+ 199. [     LOW] ip:port      user6410@comcast.com                @comcast.com          pw:?                    src:pastebin
+ 200. [  MEDIUM] user:pass    user8062@comcast.com                @comcast.com          pw:?                    src:github

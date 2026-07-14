@@ -18,6 +18,12 @@ from flask_socketio import SocketIO, emit
 
 from oracle_engine import OracleEngine, SampleDataGenerator, EnhancedOracleEngine
 
+# Use local API keys (env var → file fallback)
+from local_keys import (
+    get_shodan_key, get_hunter_key, get_hibp_key,
+    get_vt_key, get_censys_token,
+)
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OracleAPI")
 
@@ -531,12 +537,11 @@ def api_deploy_status():
     
     # Environment variables (which API keys are configured)
     env_vars = {
-        "shodan": bool(os.environ.get("SHODAN_API_KEY")),
-        "hunter": bool(os.environ.get("HUNTER_API_KEY")),
-        "hibp": bool(os.environ.get("HIBP_API_KEY")),
-        "virustotal": bool(os.environ.get("VT_API_KEY")),
-        "censys_token": bool(os.environ.get("CENSYS_TOKEN") or 
-                            (os.environ.get("CENSYS_API_ID") and os.environ.get("CENSYS_SECRET"))),
+        "shodan": bool(get_shodan_key()),
+        "hunter": bool(get_hunter_key()),
+        "hibp": bool(get_hibp_key()),
+        "virustotal": bool(get_vt_key()),
+        "censys_token": bool(get_censys_token()),
         "es_hosts": bool(os.environ.get("ES_HOSTS")),
         "tor_proxy": os.environ.get("USE_TOR", "false"),
     }
