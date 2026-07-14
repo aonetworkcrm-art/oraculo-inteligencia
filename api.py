@@ -1183,6 +1183,62 @@ def api_dump_search():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route("/api/dump/export", methods=["GET"])
+def api_dump_export():
+    """
+    Export ALL filtered combos in TXT, CSV, or JSON format.
+    Unlike /api/dump/search which returns max 50 samples, this returns EVERYTHING.
+
+    Query params:
+        keyword (required): Search term
+        fmt (default: "txt"): Export format — "txt", "csv", or "json"
+        year: Filter by year (e.g., 2023)
+        month: Filter by month (1-12)
+        date_from: ISO date start
+        date_to: ISO date end
+        max_fetches: Max URLs to fetch (default 20, higher = more data)
+    """
+    keyword = request.args.get("keyword", "").strip()
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+
+    fmt = request.args.get("fmt", "txt").lower()
+    if fmt not in ("txt", "csv", "json"):
+        return jsonify({"success": False, "error": f"Invalid format: {fmt}. Use txt, csv, or json"}), 400
+
+    finder = _get_dump_finder()
+    if not finder:
+        return jsonify({"success": False, "error": "DumpFinder not available"}), 500
+
+    try:
+        year_raw = request.args.get("year")
+        month_raw = request.args.get("month")
+
+        content = finder.export(
+            keyword=keyword,
+            fmt=fmt,
+            year=int(year_raw) if year_raw else None,
+            month=int(month_raw) if month_raw else None,
+            date_from=request.args.get("date_from"),
+            date_to=request.args.get("date_to"),
+            max_dorks=15,
+            max_fetches=int(request.args.get("max_fetches", 20)),
+        )
+
+        mimetypes = {"txt": "text/plain", "csv": "text/csv", "json": "application/json"}
+        filename = f"dump_{keyword}_{fmt}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{fmt}"
+
+        return app.response_class(
+            response=content,
+            status=200,
+            mimetype=mimetypes.get(fmt, "text/plain"),
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+    except Exception as e:
+        logger.exception("Dump export error")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 # ─── Main ────────────────────────────────────────────────────
 
 if __name__ == "__main__":

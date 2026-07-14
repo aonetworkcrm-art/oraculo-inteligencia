@@ -1494,7 +1494,35 @@ function exportDumpResults() {
   const kw = document.getElementById('dumpKeyword').value.trim() || 'dump';
   link.download = `dump_${kw}_${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
-  showToast(`📥 Exportados ${dumpData.length} combos a CSV`, 'var(--accent2)');
+  showToast(`📥 Exportados ${dumpData.length} combos a CSV (solo muestra)`, 'var(--accent2)');
+}
+
+async function exportDumpFile(fmt) {
+  const keyword = document.getElementById('dumpKeyword').value.trim();
+  if (!keyword) { showToast('❌ Ingresa una palabra clave para exportar', 'var(--red)'); return; }
+  
+  showToast(`🔄 Exportando todos los combos a ${fmt.toUpperCase()}...`, 'var(--yellow)');
+  
+  try {
+    const year = document.getElementById('dumpYear').value;
+    const month = document.getElementById('dumpMonth').value;
+    
+    let url = `/api/dump/export?keyword=${encodeURIComponent(keyword)}&fmt=${fmt}`;
+    if (year) url += `&year=${year}`;
+    if (month) url += `&month=${month}`;
+    
+    const resp = await fetch(url, { signal: AbortSignal.timeout(120000) });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    
+    const blob = await resp.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `dump_${keyword}_${fmt}.${fmt}`;
+    link.click();
+    showToast(`📥 Dump completo exportado a ${fmt.toUpperCase()}`, 'var(--green)');
+  } catch (err) {
+    showToast('❌ Error de exportación: ' + err.message, 'var(--red)');
+  }
 }
 
 

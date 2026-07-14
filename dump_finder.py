@@ -1008,6 +1008,119 @@ class DumpFinder:
         }
 
 
+    def export(self,
+                keyword: str,
+                fmt: str = "txt",
+                year: Optional[int] = None,
+                month: Optional[int] = None,
+                date_from: Optional[str] = None,
+                date_to: Optional[str] = None,
+                max_dorks: int = 15,
+                max_fetches: int = 20) -> str:
+        """
+        Execute a search and export ALL filtered combos in the requested format.
+        Unlike search() which returns only 50 sample combos, this returns everything.
+
+        Args:
+            keyword: Search term
+            fmt: Export format — "txt", "csv", or "json"
+            year: Filter by year
+            month: Filter by month
+            date_from: ISO date start
+            date_to: ISO date end
+            max_dorks: Max dork queries
+            max_fetches: Max URLs to fetch (higher = more data)
+
+        Returns:
+            Formatted string in the requested format
+        """
+        result = self.search(
+            keyword=keyword,
+            year=year,
+            month=month,
+            date_from=date_from,
+            date_to=date_to,
+            max_dorks=max_dorks,
+            max_fetches=max_fetches,
+            save_to_disk=True,
+        )
+
+        combos = result.get("stats", {}).get("by_source", {})
+        total = result.get("filtered_combos_count", 0)
+        keyword_safe = keyword.strip().lower()
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Re-hydrate full combos from the search result's file save
+        # Try to load from the saved files first (they have ALL combos)
+        full_combos = []
+        files_saved = result.get("files_saved", {}).get("files_created", [])
+
+        if files_saved:
+            # Read full dump file
+            full_dump_files = [f for f in files_saved if "full_dump" in f]
+            if full_dump_files:
+                try:
+                    with open(full_dump_files[0], "r", encoding="utf-8") as fh:
+                        content = fh.read()
+                    for line in content.split("\n"):
+                        line = line.strip()
+                        if line and "#" not in line and ":" in line:
+                            parts = line.split(":", 1)
+                            full_combos.append({
+                                "email": parts[0].strip(),
+                                "password": parts[1].split("  #")[0].strip() if "  #" in parts[1] else parts[1].strip(),
+                            })
+                except Exception:
+                    pass
+
+        # Fallback: use the combos_sample from the search result
+        if not full_combos:
+            full_combos = result.get("combos_sample", [])
+
+        # ─── Format ───
+        if fmt == "json":
+            return json.dumps({
+                "keyword": keyword_safe,
+                "total": total,
+                "exported": len(full_combos),
+                "timestamp": timestamp,
+                "combos": full_combos,
+                "stats": result.get("stats", {}),
+                "files_saved": files_saved,
+            }, indent=2, ensure_ascii=False)
+
+        elif fmt == "csv":
+            lines = ["email,password,dominio,fuente,fecha"]
+            for c in full_combos:
+                email = c.get("email", "").replace('"', '""')
+                pw = c.get("password", "").replace('"', '""')
+                dom = c.get("domain", "").replace('"', '""')
+                src = c.get("source", c.get("source_type", "")).replace('"', '""')
+                dt = c.get("date", c.get("discovered_date", "")).replace('"', '""')
+                lines.append(f'"{email}","{pw}","{dom}","{src}","{dt}"')
+            return "\n".join(lines)
+
+        else:  # txt
+            header = (
+                f"# DumpFinder Export - {keyword_safe}\n"
+                f"# Generated: {timestamp}\n"
+                f"# Total combos: {total}\n"
+                f"# Export format: email:password\n\n"
+            )
+            body_lines = []
+            for c in full_combos:
+                identifier = c.get("email", "") or ""
+                password = c.get("password", "") or ""
+                date_str = c.get("date", c.get("discovered_date", ""))
+                source_str = c.get("source", c.get("source_type", ""))
+                domain_str = c.get("domain", "")
+                if identifier and password:
+                    comment = f"#{domain_str} | {source_str} | {date_str}"
+                    body_lines.append(f"{identifier}:{password}  {comment}")
+            return header + "\n".join(body_lines)
+
+
+
 # ═══════════════════════════════════════════════════════════════
 #  CLI TEST
 # ═══════════════════════════════════════════════════════════════
