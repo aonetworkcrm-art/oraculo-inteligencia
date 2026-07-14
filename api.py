@@ -1225,54 +1225,99 @@ def api_dump_export():
 @app.route("/api/dump/cron", methods=["POST"])
 def api_dump_cron():
     """
-    Ejecuta búsqueda en background para pre-poblar cache.
-    Máximo 3 keywords para no exceder timeout de Render (30s).
+    Ejecuta búsqueda en background ASÍNCRONO para pre-poblar cache.
+    Devuelve inmediatamente — las búsquedas corren en hilos separados.
     Diseñado para ser llamado por UptimeRobot cada 30 min.
     """
     data = request.get_json(silent=True) or {}
     keyword = data.get("keyword", "").strip()
 
+    def _run_search(kw):
+        """Ejecuta una búsqueda en background thread."""
+        try:
+            finder = _get_dump_finder()
+            if finder:
+                r = finder.search_fast(keyword=kw, save_to_disk=True)
+                combos = r.get("filtered_combos_count", 0)
+                elapsed = r.get("took_seconds", 0)
+                cached = r.get("_from_cache", False)
+                logger.info(f"⏰ [CRON] '{kw}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
+        except Exception as e:
+            logger.error(f"⏰ [CRON] Error '{kw}': {e}")
+
     if not keyword:
-        # Solo 3 keywords por request (cada cache miss ~15s × 3 ≈ 45s ≈ timeout Render)
         predefined = ["comcast", "xfinity", "verizon"]
-        results = []
         for kw in predefined:
-            try:
-                finder = _get_dump_finder()
-                if finder:
-                    r = finder.search_fast(keyword=kw, save_to_disk=True)
-                    combos = r.get("filtered_combos_count", 0)
-                    elapsed = r.get("took_seconds", 0)
-                    cached = r.get("_from_cache", False)
-                    results.append({"keyword": kw, "combos": combos, "took_seconds": elapsed, "from_cache": cached})
-                    logger.info(f"⏰ [CRON] '{kw}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
-            except Exception as e:
-                logger.error(f"⏰ [CRON] Error '{kw}': {e}")
-        return jsonify({"success": True, "data": {"results": results, "total": len(results)}})
+            t = threading.Thread(target=_run_search, args=(kw,), daemon=True)
+            t.start()
+        return jsonify({"success": True, "data": {"message": f"Started {len(predefined)} background searches", "keywords": predefined}})
 
     # Keyword específica
+    t = threading.Thread(target=_run_search, args=(keyword,), daemon=True)
+    t.start()
+    return jsonify({"success": True, "data": {"message": f"Background search started for '{keyword}'", "keyword": keyword}})
+
+
+# ─── Dump Finder: Direct Scrape Fallback ──────────────────
+# Cuando DuckDuckGo no responde (Render cloud IP), probamos scraping
+# directo de paste sites + archives como fallback sólido.
+
+@app.route("/api/dump/scrape", methods=["POST"])
+def api_dump_scrape():
+    """
+    Scrapeo DIRECTO de paste sites sin usar buscadores.
+    Ideal para Render donde DuckDuckGo está bloqueado.
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+
     finder = _get_dump_finder()
     if not finder:
         return jsonify({"success": False, "error": "DumpFinder not available"}), 500
 
     try:
-        logger.info(f"⏰ [CRON] Searching '{keyword}'...")
-        result = finder.search_fast(keyword=keyword, save_to_disk=True)
-        elapsed = result.get("took_seconds", 0)
-        combos = result.get("filtered_combos_count", 0)
-        cached = result.get("_from_cache", False)
-        logger.info(f"⏰ [CRON] '{keyword}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
+        # Usar solo PasteDirectScraper (sin dorking, sin DDG)
+        start = time.time()
+        urls = finder.paste_scraper.search_pastebin_recent(keyword, max_results=10)
+        if not urls:
+            # Fallback a scraping directo de Pastebin archive reciente
+            urls = finder.paste_scraper._scrape_pastebin_direct(keyword)
+        
+        if not urls:
+            return jsonify({"success": True, "data": {"keyword": keyword, "urls_found": 0, "combos": [], "message": "No URLs found via direct scrape"}})
+        
+        # Fetch and parse
+        combos = []
+        for u in urls[:5]:
+            content = finder.fetcher.fetch(u["url"], timeout=10)
+            if content:
+                parsed = finder.parser.parse_text(content, source_url=u["url"], source_type="direct_scrape", keyword=keyword)
+                combos.extend(parsed)
+        
+        elapsed = round(time.time() - start, 2)
+        
+        # Save combos
+        save_info = finder.local_saver.save_combos(keyword, combos)
+        
         return jsonify({
             "success": True,
             "data": {
                 "keyword": keyword,
-                "combos": combos,
+                "urls_found": len(urls),
+                "combos_found": len(combos),
                 "took_seconds": elapsed,
-                "from_cache": cached,
+                "files_saved": save_info,
+                "combos_sample": [
+                    {"email": c.email, "password": c.password[:15]+"***" if c.password and len(c.password) > 15 else c.password,
+                     "domain": c.domain, "source": c.source_type, "date": c.discovered_date}
+                    for c in combos[:50]
+                ],
             }
         })
     except Exception as e:
-        logger.exception(f"⏰ [CRON] Error for '{keyword}'")
+        logger.exception("Direct scrape error")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

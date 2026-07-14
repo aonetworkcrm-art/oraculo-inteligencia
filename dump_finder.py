@@ -296,6 +296,44 @@ class PasteDirectScraper:
 
         return results
 
+    def _scrape_pastebin_direct(self, keyword: str, max_results: int = 10) -> List[Dict[str, str]]:
+        """
+        Scrapeo DIRECTO de Pastebin sin DuckDuckGo ni ningún buscador.
+        Útil cuando DuckDuckGo está bloqueado (ej: Render cloud IP).
+        Fallback para entornos restrictivos.
+        """
+        results = []
+        seen = set()
+        # Construir URL de búsqueda de Pastebin
+        encoded = quote_plus(keyword)
+        # Intentar múltiples endpoints de Pastebin
+        paste_urls = [
+            f"https://pastebin.com/search?q={encoded}",
+            f"https://pastebin.com/archive?q={encoded}",
+            f"https://pastebin.pl/search/{encoded}",
+        ]
+        for url in paste_urls:
+            self.rate_limiter.wait(source="pastebin_direct")
+            try:
+                self.session.headers.update(_stealth_headers())
+                resp = self.session.get(url, timeout=10)
+                if resp.status_code != 200:
+                    continue
+                # Extraer raw URLs de Pastebin
+                for match in re.finditer(r'href="/(raw/|)([a-zA-Z0-9]{8})"', resp.text):
+                    paste_id = match.group(2)
+                    raw_url = f"https://pastebin.com/raw/{paste_id}"
+                    if raw_url not in seen:
+                        seen.add(raw_url)
+                        results.append({"url": raw_url, "title": f"Pastebin Direct: {keyword}", "snippet": "", "dork_name": "pastebin_direct"})
+                        if len(results) >= max_results:
+                            break
+            except Exception as e:
+                logger.debug(f"Pastebin direct scrape error: {e}")
+            if len(results) >= max_results:
+                break
+        return results
+
     def search_all(self, keyword: str, max_per_source: int = 5) -> List[Dict[str, str]]:
         """
         Search ALL direct sources for keyword.
