@@ -38,9 +38,9 @@ services:
       # Get TG_API_ID and TG_API_HASH from https://my.telegram.org/apps
       # After setting, upload oraculo_tg_session.session via Render Shell
       # - key: TG_API_ID
-      #   value: 35191536
+      #   value: your_telegram_api_id
       # - key: TG_API_HASH
-      #   value: bffeaf50312a833a1ab266a48ed67e5e
+      #   value: your_telegram_api_hash
       # - key: TG_SESSION
       #   value: oraculo_tg_session
       
