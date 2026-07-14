@@ -1,0 +1,544 @@
+{
+  "comcast.com": {
+    "keyword": "comcast.com",
+    "timestamp": "2026-07-14T14:12:15.588547",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "comcast.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 59,
+        "undetected": 32,
+        "reputation": -1,
+        "categories": [
+          "business",
+          "business",
+          "information technology",
+          "business and economy",
+          "telecommunications"
+        ],
+        "resolutions": [],
+        "registrar": "",
+        "creation_date": 809654400,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "xfinity.com": {
+    "keyword": "xfinity.com",
+    "timestamp": "2026-07-14T14:12:22.526569",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "xfinity.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 60,
+        "undetected": 31,
+        "reputation": -2,
+        "categories": [
+          "business",
+          "general business",
+          "business and economy",
+          "telecommunications"
+        ],
+        "resolutions": [],
+        "registrar": "",
+        "creation_date": 1043193600,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "verizon.com": {
+    "keyword": "verizon.com",
+    "timestamp": "2026-07-14T14:12:35.165695",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "verizon.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 57,
+        "undetected": 34,
+        "reputation": 0,
+        "categories": [
+          "business",
+          "general business",
+          "business and economy",
+          "telecommunications"
+        ],
+        "resolutions": [],
+        "registrar": "CSC Corporate Domains, Inc.",
+        "creation_date": 952356608,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "att.com": {
+    "keyword": "att.com",
+    "timestamp": "2026-07-14T14:12:50.193943",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "att.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 57,
+        "undetected": 34,
+        "reputation": -2,
+        "categories": [
+          "business",
+          "mobile communications",
+          "general business",
+          "business and economy",
+          "telecommunications"
+        ],
+        "resolutions": [],
+        "registrar": "CSC Corporate Domains, Inc.",
+        "creation_date": 514789200,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "microsoft.com": {
+    "keyword": "microsoft.com",
+    "timestamp": "2026-07-14T14:13:05.173890",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "microsoft.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 59,
+        "undetected": 32,
+        "reputation": 48,
+        "categories": [
+          "Information Technology (alphaMountain.ai)",
+          "computersandsoftware",
+          "information technology",
+          "information technology"
+        ],
+        "resolutions": [],
+        "registrar": "",
+        "creation_date": 673142400,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "google.com": {
+    "keyword": "google.com",
+    "timestamp": "2026-07-14T14:13:20.195791",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "google.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 62,
+        "undetected": 29,
+        "reputation": 711,
+        "categories": [
+          "Reference (alphaMountain.ai)",
+          "computersandsoftware",
+          "reference",
+          "reference materials"
+        ],
+        "resolutions": [],
+        "registrar": "MarkMonitor Inc.",
+        "creation_date": 874306800,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "apple.com": {
+    "keyword": "apple.com",
+    "timestamp": "2026-07-14T14:13:35.181303",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "apple.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 60,
+        "undetected": 31,
+        "reputation": 83,
+        "categories": [
+          "radiomusic",
+          "information technology",
+          "information technology"
+        ],
+        "resolutions": [],
+        "registrar": "",
+        "creation_date": 540691200,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "facebook.com": {
+    "keyword": "facebook.com",
+    "timestamp": "2026-07-14T14:13:50.275453",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "facebook.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 60,
+        "undetected": 31,
+        "reputation": 166,
+        "categories": [
+          "Business/Economy, Social Networking (alphaMountain.ai)",
+          "misc",
+          "social networks",
+          "business networking",
+          "business and economy"
+        ],
+        "resolutions": [],
+        "registrar": "",
+        "creation_date": 859593600,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "linkedin.com": {
+    "keyword": "linkedin.com",
+    "timestamp": "2026-07-14T14:14:05.440470",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "linkedin.com",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 58,
+        "undetected": 33,
+        "reputation": 6,
+        "categories": [],
+        "resolutions": [],
+        "registrar": "MarkMonitor Inc.",
+        "creation_date": 1036251491,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  },
+  "sbcglobal.net": {
+    "keyword": "sbcglobal.net",
+    "timestamp": "2026-07-14T14:14:20.203332",
+    "results": {
+      "shodan": {
+        "success": false,
+        "error": "Shodan: out of query credits",
+        "total": 0,
+        "results": []
+      },
+      "hunter": {
+        "success": false,
+        "error": "Hunter HTTP 400",
+        "emails": [],
+        "total": 0
+      },
+      "virustotal": {
+        "success": true,
+        "domain": "sbcglobal.net",
+        "malicious": 0,
+        "suspicious": 0,
+        "harmless": 56,
+        "undetected": 35,
+        "reputation": -3,
+        "categories": [],
+        "resolutions": [],
+        "registrar": "CSC Corporate Domains, Inc.",
+        "creation_date": 954195817,
+        "source": "virustotal"
+      },
+      "censys": {
+        "success": false,
+        "error": "Censys HTTP 401",
+        "total": 0,
+        "results": []
+      }
+    },
+    "summary": {
+      "total_findings": 0,
+      "critical_findings": 0,
+      "apis_queried": [
+        "shodan",
+        "hunter",
+        "virustotal",
+        "censys"
+      ],
+      "apis_configured": 4,
+      "detected_type": "domain"
+    }
+  }
+}

@@ -1,0 +1,681 @@
+{
+  "emails": [
+    {
+      "email": "jackie_broadbent@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Human Resources"
+    },
+    {
+      "email": "felix_nwokolo@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "arthy_bagavathyram@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director"
+    },
+    {
+      "email": "anna_lesovitz@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Vice President"
+    },
+    {
+      "email": "lucas_quagliata@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Partnerships"
+    },
+    {
+      "email": "james_scott@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Senior Director"
+    },
+    {
+      "email": "david_misovski@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Sales Compensation"
+    },
+    {
+      "email": "sean_smith@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Vice President, Finance"
+    },
+    {
+      "email": "michael_johnson@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director"
+    },
+    {
+      "email": "april_jones@comcast.com",
+      "domain": "comcast.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Production"
+    },
+    {
+      "email": "jhonatan@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "General Manager"
+    },
+    {
+      "email": "ismael@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "bradford@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "stefano@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "andrea@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Escalation Manager"
+    },
+    {
+      "email": "zeric@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "kaileigh@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Customer Service Manager"
+    },
+    {
+      "email": "richard@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 98,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "timothy@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 98,
+      "type": "personal",
+      "position": "Senior Quality Assurance Manager"
+    },
+    {
+      "email": "jacob@xfinity.com",
+      "domain": "xfinity.com",
+      "confidence": 98,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "ken.l@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Senior Vice President"
+    },
+    {
+      "email": "joshua.berk@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Associate Director of Quality Assurance"
+    },
+    {
+      "email": "tomas.nieves@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Product Owner"
+    },
+    {
+      "email": "samuel.cameron@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director, AI Security Operations"
+    },
+    {
+      "email": "phaniraju.komarlu@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Digital Sales"
+    },
+    {
+      "email": "ahad.moten@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Client Executive"
+    },
+    {
+      "email": "shakeel.hye@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Data Engineering"
+    },
+    {
+      "email": "erick.garcia@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director - Network Assurance"
+    },
+    {
+      "email": "tuere.watson@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Client Executive"
+    },
+    {
+      "email": "colleenc@verizon.com",
+      "domain": "verizon.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Senior Vice President"
+    },
+    {
+      "email": "shaun.hoff@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Client Solutions Executive"
+    },
+    {
+      "email": "ryan.chudy@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Fiber Sales Executive"
+    },
+    {
+      "email": "jacob.paulk@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "indu.dugan@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Director Advanced Analytics"
+    },
+    {
+      "email": "matt.quest@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Regional Director"
+    },
+    {
+      "email": "anabela.carrino@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Service Executive"
+    },
+    {
+      "email": "leatrice.sasnett@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Head Basketball Coach"
+    },
+    {
+      "email": "melisa.moreno@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Chief of Staff"
+    },
+    {
+      "email": "jordan.zilton@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Director"
+    },
+    {
+      "email": "cyndrika.brown@att.com",
+      "domain": "att.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Sales Executive"
+    },
+    {
+      "email": "florian.schuster@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Strategic Partnerships"
+    },
+    {
+      "email": "andria.warren@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Creative Operations Director"
+    },
+    {
+      "email": "jbeesley@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Business Strategy"
+    },
+    {
+      "email": "tom.jolly@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Vice President of Engineering"
+    },
+    {
+      "email": "mandela.sheaffer@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Sales"
+    },
+    {
+      "email": "orlando.escalante@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Senior Partner Development Manager"
+    },
+    {
+      "email": "jack.kelly@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of AI"
+    },
+    {
+      "email": "mariagalvez@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Chief Marketing Officer"
+    },
+    {
+      "email": "lieke.meeuwissen@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Partner Solutions Sales Manager"
+    },
+    {
+      "email": "lars.meinecke@microsoft.com",
+      "domain": "microsoft.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Chief Technology Officer"
+    },
+    {
+      "email": "kabeertandon@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Strategic Partner Manager"
+    },
+    {
+      "email": "keristenb@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Director of Business Development"
+    },
+    {
+      "email": "mbeeninga@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Head of GTM Strategy and Operations"
+    },
+    {
+      "email": "prachitaneja@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Strategic Partner Manager"
+    },
+    {
+      "email": "clevens@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Head of Education"
+    },
+    {
+      "email": "copelandi@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Head of Partnerships"
+    },
+    {
+      "email": "toshisattler@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Key Account Director"
+    },
+    {
+      "email": "erykaw@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Chief Technology Officer"
+    },
+    {
+      "email": "vidurs@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Chief of Staff"
+    },
+    {
+      "email": "flaw@google.com",
+      "domain": "google.com",
+      "confidence": 85,
+      "type": "personal",
+      "position": "Head of Partnerships"
+    },
+    {
+      "email": "bpark@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Engineering"
+    },
+    {
+      "email": "jaewoong_hwang@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Creative Director"
+    },
+    {
+      "email": "dmen@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Wearables Reliability"
+    },
+    {
+      "email": "cmarasco@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Retail Experience Design"
+    },
+    {
+      "email": "p_pelatieri@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Retail Channel Program Manager"
+    },
+    {
+      "email": "s_hertz@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "People Business Partner"
+    },
+    {
+      "email": "b_voynick@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Channel Partner Manager"
+    },
+    {
+      "email": "c_wong@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Chief Executive Officer"
+    },
+    {
+      "email": "mohit_talwar@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Engineering"
+    },
+    {
+      "email": "scotto@apple.com",
+      "domain": "apple.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Partnerships"
+    },
+    {
+      "email": "dmaurath@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of People Analytics"
+    },
+    {
+      "email": "skerwin@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Account Director"
+    },
+    {
+      "email": "dbalgrove@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Account Director, Sales Solutions"
+    },
+    {
+      "email": "nadams@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Account Director"
+    },
+    {
+      "email": "vnagaraj@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Retail"
+    },
+    {
+      "email": "mhirwani@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Global Client Executive"
+    },
+    {
+      "email": "cbrocchieri@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Account Director"
+    },
+    {
+      "email": "cbradstreet@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Client Director"
+    },
+    {
+      "email": "btejaswita@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Compensation and Benefits Partner"
+    },
+    {
+      "email": "nekbote@linkedin.com",
+      "domain": "linkedin.com",
+      "confidence": 99,
+      "type": "personal",
+      "position": "Director of Engineering"
+    }
+  ],
+  "virustotal": {
+    "comcast.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 59,
+      "reputation": -1,
+      "categories": [
+        "business",
+        "business",
+        "information technology",
+        "business and economy",
+        "telecommunications"
+      ]
+    },
+    "xfinity.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 60,
+      "reputation": -2,
+      "categories": [
+        "Business/Economy, Information Technology (alphaMountain.ai)",
+        "business",
+        "general business",
+        "business and economy",
+        "online services",
+        "telecommunications"
+      ]
+    },
+    "verizon.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 57,
+      "reputation": 0,
+      "categories": [
+        "business",
+        "general business",
+        "business and economy",
+        "telecommunications"
+      ]
+    },
+    "att.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 57,
+      "reputation": -2,
+      "categories": [
+        "business",
+        "mobile communications",
+        "general business",
+        "business and economy",
+        "telecommunications"
+      ]
+    },
+    "microsoft.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 59,
+      "reputation": 48,
+      "categories": [
+        "Information Technology (alphaMountain.ai)",
+        "computersandsoftware",
+        "information technology",
+        "information technology"
+      ]
+    },
+    "google.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 62,
+      "reputation": 711,
+      "categories": [
+        "Productivity Applications (alphaMountain.ai)",
+        "business",
+        "information technology",
+        "web collaboration",
+        "professional networking "
+      ]
+    },
+    "apple.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 60,
+      "reputation": 83,
+      "categories": [
+        "radiomusic",
+        "information technology",
+        "information technology"
+      ]
+    },
+    "facebook.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 60,
+      "reputation": 166,
+      "categories": [
+        "Business/Economy, Social Networking (alphaMountain.ai)",
+        "misc",
+        "social networks",
+        "business networking",
+        "business and economy"
+      ]
+    },
+    "linkedin.com": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 58,
+      "reputation": 6,
+      "categories": []
+    },
+    "sbcglobal.net": {
+      "malicious": 0,
+      "suspicious": 0,
+      "harmless": 56,
+      "reputation": -3,
+      "categories": []
+    }
+  }
+}

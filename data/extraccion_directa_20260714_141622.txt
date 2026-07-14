@@ -1,0 +1,166 @@
+🛸 EXTRACCIÓN DIRECTA CON APIs REALES
+Fecha: 2026-07-14T14:18:40.825534
+Hunter.io: OK
+VirusTotal: OK
+================================================================================
+
+╔════════════════════════════════════════════════════╗
+║  📧 EMAILS REALES — Hunter.io                    ║
+╚════════════════════════════════════════════════════╝
+
+  jackie_broadbent@comcast.com                  conf:99%  personal    Director of Human Resources
+  felix_nwokolo@comcast.com                     conf:99%  personal    Sales Executive
+  arthy_bagavathyram@comcast.com                conf:99%  personal    Director
+  anna_lesovitz@comcast.com                     conf:99%  personal    Vice President
+  lucas_quagliata@comcast.com                   conf:99%  personal    Director of Partnerships
+  james_scott@comcast.com                       conf:99%  personal    Senior Director
+  david_misovski@comcast.com                    conf:99%  personal    Director of Sales Compensation
+  sean_smith@comcast.com                        conf:99%  personal    Vice President, Finance
+  michael_johnson@comcast.com                   conf:99%  personal    Director
+  april_jones@comcast.com                       conf:99%  personal    Director of Production
+  jhonatan@xfinity.com                          conf:99%  personal    General Manager
+  ismael@xfinity.com                            conf:99%  personal    Sales Executive
+  bradford@xfinity.com                          conf:99%  personal    Sales Executive
+  stefano@xfinity.com                           conf:99%  personal    Sales Executive
+  andrea@xfinity.com                            conf:99%  personal    Escalation Manager
+  zeric@xfinity.com                             conf:99%  personal    Sales Executive
+  kaileigh@xfinity.com                          conf:99%  personal    Customer Service Manager
+  richard@xfinity.com                           conf:98%  personal    Sales Executive
+  timothy@xfinity.com                           conf:98%  personal    Senior Quality Assurance Manag
+  jacob@xfinity.com                             conf:98%  personal    Sales Executive
+  ken.l@verizon.com                             conf:99%  personal    Senior Vice President
+  joshua.berk@verizon.com                       conf:99%  personal    Associate Director of Quality 
+  tomas.nieves@verizon.com                      conf:99%  personal    Product Owner
+  samuel.cameron@verizon.com                    conf:99%  personal    Director, AI Security Operatio
+  phaniraju.komarlu@verizon.com                 conf:99%  personal    Director of Digital Sales
+  ahad.moten@verizon.com                        conf:99%  personal    Client Executive
+  shakeel.hye@verizon.com                       conf:99%  personal    Director of Data Engineering
+  erick.garcia@verizon.com                      conf:99%  personal    Director - Network Assurance
+  tuere.watson@verizon.com                      conf:99%  personal    Client Executive
+  colleenc@verizon.com                          conf:99%  personal    Senior Vice President
+  shaun.hoff@att.com                            conf:85%  personal    Client Solutions Executive
+  ryan.chudy@att.com                            conf:85%  personal    Fiber Sales Executive
+  jacob.paulk@att.com                           conf:85%  personal    Sales Executive
+  indu.dugan@att.com                            conf:85%  personal    Director Advanced Analytics
+  matt.quest@att.com                            conf:85%  personal    Regional Director
+  anabela.carrino@att.com                       conf:85%  personal    Service Executive
+  leatrice.sasnett@att.com                      conf:85%  personal    Head Basketball Coach
+  melisa.moreno@att.com                         conf:85%  personal    Chief of Staff
+  jordan.zilton@att.com                         conf:85%  personal    Director
+  cyndrika.brown@att.com                        conf:85%  personal    Sales Executive
+  florian.schuster@microsoft.com                conf:99%  personal    Director of Strategic Partners
+  andria.warren@microsoft.com                   conf:99%  personal    Creative Operations Director
+  jbeesley@microsoft.com                        conf:99%  personal    Director of Business Strategy
+  tom.jolly@microsoft.com                       conf:99%  personal    Vice President of Engineering
+  mandela.sheaffer@microsoft.com                conf:99%  personal    Director of Sales
+  orlando.escalante@microsoft.com               conf:99%  personal    Senior Partner Development Man
+  jack.kelly@microsoft.com                      conf:99%  personal    Director of AI
+  mariagalvez@microsoft.com                     conf:99%  personal    Chief Marketing Officer
+  lieke.meeuwissen@microsoft.com                conf:99%  personal    Partner Solutions Sales Manage
+  lars.meinecke@microsoft.com                   conf:99%  personal    Chief Technology Officer
+  kabeertandon@google.com                       conf:85%  personal    Strategic Partner Manager
+  keristenb@google.com                          conf:85%  personal    Director of Business Developme
+  mbeeninga@google.com                          conf:85%  personal    Head of GTM Strategy and Opera
+  prachitaneja@google.com                       conf:85%  personal    Strategic Partner Manager
+  clevens@google.com                            conf:85%  personal    Head of Education
+  copelandi@google.com                          conf:85%  personal    Head of Partnerships
+  toshisattler@google.com                       conf:85%  personal    Key Account Director
+  erykaw@google.com                             conf:85%  personal    Chief Technology Officer
+  vidurs@google.com                             conf:85%  personal    Chief of Staff
+  flaw@google.com                               conf:85%  personal    Head of Partnerships
+  bpark@apple.com                               conf:99%  personal    Director of Engineering
+  jaewoong_hwang@apple.com                      conf:99%  personal    Creative Director
+  dmen@apple.com                                conf:99%  personal    Director of Wearables Reliabil
+  cmarasco@apple.com                            conf:99%  personal    Director of Retail Experience 
+  p_pelatieri@apple.com                         conf:99%  personal    Retail Channel Program Manager
+  s_hertz@apple.com                             conf:99%  personal    People Business Partner
+  b_voynick@apple.com                           conf:99%  personal    Channel Partner Manager
+  c_wong@apple.com                              conf:99%  personal    Chief Executive Officer
+  mohit_talwar@apple.com                        conf:99%  personal    Director of Engineering
+  scotto@apple.com                              conf:99%  personal    Director of Partnerships
+  dmaurath@linkedin.com                         conf:99%  personal    Director of People Analytics
+  skerwin@linkedin.com                          conf:99%  personal    Account Director
+  dbalgrove@linkedin.com                        conf:99%  personal    Account Director, Sales Soluti
+  nadams@linkedin.com                           conf:99%  personal    Account Director
+  vnagaraj@linkedin.com                         conf:99%  personal    Director of Retail
+  mhirwani@linkedin.com                         conf:99%  personal    Global Client Executive
+  cbrocchieri@linkedin.com                      conf:99%  personal    Account Director
+  cbradstreet@linkedin.com                      conf:99%  personal    Client Director
+  btejaswita@linkedin.com                       conf:99%  personal    Compensation and Benefits Part
+  nekbote@linkedin.com                          conf:99%  personal    Director of Engineering
+
+╔════════════════════════════════════════════════════╗
+║  🦠 VIRUSTOTAL — ANÁLISIS DE AMENAZAS            ║
+╚════════════════════════════════════════════════════╝
+
+  comcast.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   59
+    Reputation: -1
+    Categories: business, business, information technology, business and economy, telecommunications
+
+  xfinity.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   60
+    Reputation: -2
+    Categories: Business/Economy, Information Technology (alphaMountain.ai), business, general business, business and economy, online services
+
+  verizon.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   57
+    Reputation: 0
+    Categories: business, general business, business and economy, telecommunications
+
+  att.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   57
+    Reputation: -2
+    Categories: business, mobile communications, general business, business and economy, telecommunications
+
+  microsoft.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   59
+    Reputation: 48
+    Categories: Information Technology (alphaMountain.ai), computersandsoftware, information technology, information technology
+
+  google.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   62
+    Reputation: 711
+    Categories: Productivity Applications (alphaMountain.ai), business, information technology, web collaboration, professional networking 
+
+  apple.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   60
+    Reputation: 83
+    Categories: radiomusic, information technology, information technology
+
+  facebook.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   60
+    Reputation: 166
+    Categories: Business/Economy, Social Networking (alphaMountain.ai), misc, social networks, business networking, business and economy
+
+  linkedin.com
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   58
+    Reputation: 6
+
+  sbcglobal.net
+    Malicious:  0
+    Suspicious: 0
+    Harmless:   56
+    Reputation: -3
+
+================================================================================
+📊 RESUMEN: 80 emails · 10 dominios analizados
+================================================================================

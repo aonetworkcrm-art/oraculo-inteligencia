@@ -1,0 +1,80 @@
+🛸 ORÁCULO DE INTELIGENCIA — EXTRACCIÓN MASIVA CON APIs REALES
+Fecha: 2026-07-14T14:14:35.268812
+APIs: shodan, hunter, virustotal, censys
+================================================================================
+
+
+## comcast.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=-1
+   Categorías: business, business, information technology, business and economy, telecommunications
+
+
+## xfinity.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=-2
+   Categorías: business, general business, business and economy, telecommunications
+
+
+## verizon.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=0
+   Categorías: business, general business, business and economy, telecommunications
+
+
+## att.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=-2
+   Categorías: business, mobile communications, general business, business and economy, telecommunications
+
+
+## microsoft.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=48
+   Categorías: Information Technology (alphaMountain.ai), computersandsoftware, information technology, information technology
+
+
+## google.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=711
+   Categorías: Reference (alphaMountain.ai), computersandsoftware, reference, reference materials
+
+
+## apple.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=83
+   Categorías: radiomusic, information technology, information technology
+
+
+## facebook.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=166
+   Categorías: Business/Economy, Social Networking (alphaMountain.ai), misc, social networks, business networking, business and economy
+
+
+## linkedin.com
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=6
+
+
+## sbcglobal.net
+--------------------------------------------------
+
+🦠 VirusTotal: mal=0 sus=0 rep=-3
+
+================================================================================
+📊 RESUMEN GENERAL
+  Dominios analizados: 10
+  📧 Emails descubiertos: 0
+  🦠 Detecciones maliciosas: 0
+  APIs usadas: shodan, hunter, virustotal, censys
+================================================================================
