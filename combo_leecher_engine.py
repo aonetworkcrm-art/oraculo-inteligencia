@@ -153,9 +153,82 @@ try:
 except ImportError:
     PROXY_ENGINE_AVAILABLE = False
     logger.info("proxy_engine.py not found — using legacy ProxyManager")
+# ─── Legacy ProxyManager (siempre definido para scrapers internos) ───
+class ProxyManager:
+"""
 
-    # Legacy ProxyManager (kept for backward compatibility)
-    class ProxyManager:
+# ─── Legacy ProxyManager (siempre definido para scrapers internos) ───
+class ProxyManager:
+"""
+Legacy ProxyManager (kept for backward compatibility).
+Siempre definido a nivel de módulo, porque los scrapers internos
+(PasteScraper, ForumScraper, TelegramScraper) lo usan
+independientemente de si proxy_engine.py está disponible.
+"""
+def __init__(self):
+    self.proxies = []
+    self._dead = set()
+    self._lock = threading.Lock()
+    self._load_from_env()
+
+def _load_from_env(self):
+    proxy_list = os.environ.get("COMBO_PROXIES", "")
+    if proxy_list:
+        for p in proxy_list.split(","):
+            p = p.strip()
+            if p:
+                self.proxies.append(p)
+
+def load_from_file(self, path: str):
+    try:
+        with open(path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    self.proxies.append(line)
+        logger.info(f"📥 Loaded {len(self.proxies)} proxies from {path}")
+    except Exception as e:
+        logger.warning(f"⚠️ Proxy file load failed: {e}")
+
+def get_random(self) -> Optional[dict]:
+    with self._lock:
+        alive = [p for p in self.proxies if p not in self._dead]
+        if not alive:
+            return None
+        proxy_str = random.choice(alive)
+    return {"http": proxy_str, "https": proxy_str}
+
+def mark_dead(self, proxy_str: str):
+    with self._lock:
+        self._dead.add(proxy_str)
+        logger.debug(f"💀 Marked proxy dead: {proxy_str[:30]}...")
+
+def reset_dead(self):
+    with self._lock:
+        self._dead.clear()
+
+@property
+def count(self) -> int:
+    return len(self.proxies)
+
+@property
+def alive_count(self) -> int:
+    return len(self.proxies) - len(self._dead)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  RATE LIMITER
+# ═══════════════════════════════════════════════════════════════
+
+
+# ─── Legacy ProxyManager (siempre definido para scrapers internos) ───
+class ProxyManager:
+    """
+    Legacy ProxyManager (kept for backward compatibility).
+    Siempre definido a nivel de módulo, porque los scrapers internos
+    (PasteScraper, ForumScraper, TelegramScraper) lo usan
+    independientemente de si proxy_engine.py está disponible.
+    """
         def __init__(self):
             self.proxies = []
             self._dead = set()
@@ -1364,6 +1437,9 @@ class ComboLeecherEngine:
             self.proxy_mgr = ProxyEngine()
         else:
             self.proxy_mgr = ProxyManager()
+
+        # Fallback: also instantiate a basic ProxyManager for scrapers that need it
+        self._legacy_proxy = ProxyManager()
         self.session = requests.Session()
 
         # Stats tracking

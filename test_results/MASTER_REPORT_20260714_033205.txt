@@ -1,0 +1,958 @@
+╔══════════════════════════════════════════════════╗
+║  MASTER TEST REPORT v2
+║  Generated: 2026-07-14T03:32:05.928738
+╚══════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🛸 ORÁCULO DE INTELIGENCIA — MASTER TEST REPORT                          ║
+║  Generated: 2026-07-14T03:32:05.881873
+║  Test: Full Suite v2 — Comcast + Comcast.com
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📊 GLOBAL SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+  Total records collected: 2,500
+  Email:pass combos: 404
+  Keywords: Comcast, Comcast.com
+
+📂 OUTPUT FILES:
+  • search_comcast_20260714_033205.txt                            158,648 bytes,  1,205 lines
+  • combos_comcast_20260714_033205.txt                              8,151 bytes,    208 lines
+  • json_comcast_20260714_033205.txt                              833,764 bytes, 28,801 lines
+  • search_comcast_com_20260714_033205.txt                        158,656 bytes,  1,205 lines
+  • combos_comcast_com_20260714_033205.txt                          7,948 bytes,    190 lines
+  • json_comcast_com_20260714_033205.txt                          844,983 bytes, 28,801 lines
+  • combo_leech_comcast_20260714_033205.txt                        14,527 bytes,    105 lines
+  • combos_comcast_leech_20260714_033205.txt                        1,576 bytes,     27 lines
+
+📊 STATS BY TYPE:
+────────────────────────────────────────────────────────────────────────────────
+  user:pass               450 ( 18.0%) █████████
+  config                  434 ( 17.4%) ████████
+  ip:port                 415 ( 16.6%) ████████
+  email:pass              404 ( 16.2%) ████████
+  hash                    399 ( 16.0%) ███████
+  api_key                 398 ( 15.9%) ███████
+
+📊 STATS BY SEVERITY:
+────────────────────────────────────────────────────────────────────────────────
+  critical                113 (  4.5%) ██
+  high                    489 ( 19.6%) █████████
+  medium                  889 ( 35.6%) █████████████████
+  low                     635 ( 25.4%) ████████████
+  info                    374 ( 15.0%) ███████
+
+📊 TOP 30 DOMAINS:
+────────────────────────────────────────────────────────────────────────────────
+  comcast.com                            522
+  comcast.com.com                        479
+  hotmail.com                            117
+  aol.com                                115
+  protonmail.com                         114
+  mail.com                               111
+  live.com                               108
+  yahoo.com                              108
+  icloud.com                             105
+  xfinity.com                             99
+  outlook.com                             96
+  msn.com                                 92
+  sbcglobal.net                           92
+  gmail.com                               91
+  att.net                                 86
+  verizon.net                             84
+  comcast.net                             81
+
+📊 TOP SOURCES:
+────────────────────────────────────────────────────────────────────────────────
+  public_directory             540
+  shodan                       505
+  telegram                     498
+  pastebin                     494
+  github                       463
+
+📅 DATE COVERAGE (monthly):
+────────────────────────────────────────────────────────────────────────────────
+  2025-12: 7 records
+  2026-01: 11 records
+  2026-02: 7 records
+  2026-03: 8 records
+  2026-04: 4 records
+  2026-05: 10 records
+  2026-06: 12 records
+  2026-07: 16 records
+  2026-08: 23 records
+  2026-09: 19 records
+  2026-10: 16 records
+  2026-11: 19 records
+  2026-12: 14 records
+  2027-01: 19 records
+  2027-02: 9 records
+  2027-03: 20 records
+  2027-04: 17 records
+  2027-05: 21 records
+  2027-06: 19 records
+  2027-07: 15 records
+  2027-08: 8 records
+  2027-09: 19 records
+  2027-10: 17 records
+  2027-11: 14 records
+  2027-12: 18 records
+  2028-01: 16 records
+  2028-02: 14 records
+  2028-03: 15 records
+  2028-04: 13 records
+  2028-05: 17 records
+  2028-06: 13 records
+  2028-07: 16 records
+  2028-08: 25 records
+  2028-09: 12 records
+  2028-10: 17 records
+  2028-11: 12 records
+  2028-12: 15 records
+  2029-01: 21 records
+  2029-02: 13 records
+  2029-03: 12 records
+  2029-04: 19 records
+  2029-05: 6 records
+  2029-06: 12 records
+  2029-07: 8 records
+  2029-08: 13 records
+  2029-09: 15 records
+  2029-10: 17 records
+  2029-11: 7 records
+  2029-12: 10 records
+  2030-01: 6 records
+  2030-02: 8 records
+  2030-03: 8 records
+  2030-04: 12 records
+  2030-05: 3 records
+  2030-06: 10 records
+  2030-07: 12 records
+  2030-08: 7 records
+  2030-09: 10 records
+  2030-10: 12 records
+  2030-11: 10 records
+  2030-12: 16 records
+  2031-01: 10 records
+  2031-02: 8 records
+  2031-03: 14 records
+  2031-04: 10 records
+  2031-05: 10 records
+  2031-06: 8 records
+  2031-07: 16 records
+  2031-08: 11 records
+  2031-09: 6 records
+  2031-10: 8 records
+  2031-11: 7 records
+  2031-12: 10 records
+  2032-01: 7 records
+  2032-02: 4 records
+  2032-03: 6 records
+  2032-04: 9 records
+  2032-05: 10 records
+  2032-06: 12 records
+  2032-07: 8 records
+  2032-08: 8 records
+  2032-09: 9 records
+  2032-10: 4 records
+  2032-11: 6 records
+  2032-12: 13 records
+  2033-01: 5 records
+  2033-02: 7 records
+  2033-03: 4 records
+  2033-04: 6 records
+  2033-05: 8 records
+  2033-06: 7 records
+  2033-07: 8 records
+  2033-08: 8 records
+  2033-09: 10 records
+  2033-10: 8 records
+  2033-11: 7 records
+  2033-12: 4 records
+  2034-01: 8 records
+  2034-02: 4 records
+  2034-03: 9 records
+  2034-04: 10 records
+  2034-05: 7 records
+  2034-06: 6 records
+  2034-07: 7 records
+  2034-08: 7 records
+  2034-09: 9 records
+  2034-10: 9 records
+  2034-11: 4 records
+  2034-12: 14 records
+  2035-01: 11 records
+  2035-02: 7 records
+  2035-03: 5 records
+  2035-04: 7 records
+  2035-05: 9 records
+  2035-06: 6 records
+  2035-07: 2 records
+  2035-08: 13 records
+  2035-09: 7 records
+  2035-10: 9 records
+  2035-11: 5 records
+  2035-12: 4 records
+  2036-01: 14 records
+  2036-02: 10 records
+  2036-03: 7 records
+  2036-04: 8 records
+  2036-05: 4 records
+  2036-06: 5 records
+  2036-07: 6 records
+  2036-08: 10 records
+  2036-09: 11 records
+  2036-10: 6 records
+  2036-11: 12 records
+  2036-12: 3 records
+  2037-01: 7 records
+  2037-02: 3 records
+  2037-03: 6 records
+  2037-04: 7 records
+  2037-05: 8 records
+  2037-06: 6 records
+  2037-07: 4 records
+  2037-08: 4 records
+  2037-09: 5 records
+  2037-10: 10 records
+  2037-11: 8 records
+  2037-12: 8 records
+  2038-01: 7 records
+  2038-02: 8 records
+  2038-03: 2 records
+  2038-04: 8 records
+  2038-05: 6 records
+  2038-06: 7 records
+  2038-07: 7 records
+  2038-08: 8 records
+  2038-09: 7 records
+  2038-10: 7 records
+  2038-11: 5 records
+  2038-12: 6 records
+  2039-01: 7 records
+  2039-02: 4 records
+  2039-03: 7 records
+  2039-04: 3 records
+  2039-05: 9 records
+  2039-06: 2 records
+  2039-07: 6 records
+  2039-08: 1 records
+  2039-09: 8 records
+  2039-10: 7 records
+  2039-11: 5 records
+  2039-12: 3 records
+  2040-01: 4 records
+  2040-02: 9 records
+  2040-03: 3 records
+  2040-04: 4 records
+  2040-05: 5 records
+  2040-06: 10 records
+  2040-07: 6 records
+  2040-08: 6 records
+  2040-09: 7 records
+  2040-10: 3 records
+  2040-11: 6 records
+  2040-12: 9 records
+  2041-01: 8 records
+  2041-02: 3 records
+  2041-03: 10 records
+  2041-04: 2 records
+  2041-05: 6 records
+  2041-06: 8 records
+  2041-07: 6 records
+  2041-08: 4 records
+  2041-09: 9 records
+  2041-10: 6 records
+  2041-11: 4 records
+  2041-12: 4 records
+  2042-01: 3 records
+  2042-02: 3 records
+  2042-03: 7 records
+  2042-04: 6 records
+  2042-05: 4 records
+  2042-06: 3 records
+  2042-07: 3 records
+  2042-08: 10 records
+  2042-09: 7 records
+  2042-10: 10 records
+  2042-11: 5 records
+  2042-12: 4 records
+  2043-01: 6 records
+  2043-02: 3 records
+  2043-03: 2 records
+  2043-04: 4 records
+  2043-05: 4 records
+  2043-06: 5 records
+  2043-07: 9 records
+  2043-08: 4 records
+  2043-09: 9 records
+  2043-10: 5 records
+  2043-11: 4 records
+  2043-12: 3 records
+  2044-01: 6 records
+  2044-02: 3 records
+  2044-03: 5 records
+  2044-04: 4 records
+  2044-05: 1 records
+  2044-06: 6 records
+  2044-07: 3 records
+  2044-08: 5 records
+  2044-09: 3 records
+  2044-10: 9 records
+  2044-11: 4 records
+  2044-12: 2 records
+  2045-01: 4 records
+  2045-02: 3 records
+  2045-03: 5 records
+  2045-04: 1 records
+  2045-05: 5 records
+  2045-06: 3 records
+  2045-07: 2 records
+  2045-08: 2 records
+  2045-09: 4 records
+  2045-10: 5 records
+  2045-11: 3 records
+  2045-12: 2 records
+  2046-01: 4 records
+  2046-02: 4 records
+  2046-03: 4 records
+  2046-04: 4 records
+  2046-05: 3 records
+  2046-06: 7 records
+  2046-07: 3 records
+  2046-08: 3 records
+  2046-09: 1 records
+  2046-10: 5 records
+  2046-11: 3 records
+  2046-12: 6 records
+  2047-01: 1 records
+  2047-02: 1 records
+  2047-03: 6 records
+  2047-04: 2 records
+  2047-05: 5 records
+  2047-06: 1 records
+  2047-07: 2 records
+  2047-08: 4 records
+  2047-09: 3 records
+  2047-10: 2 records
+  2047-11: 1 records
+  2047-12: 3 records
+  2048-01: 5 records
+  2048-02: 3 records
+  2048-03: 6 records
+  2048-04: 3 records
+  2048-05: 3 records
+  2048-06: 2 records
+  2048-07: 2 records
+  2048-08: 3 records
+  2048-09: 2 records
+  2048-10: 1 records
+  2048-11: 6 records
+  2049-01: 4 records
+  2049-02: 4 records
+  2049-03: 5 records
+  2049-04: 1 records
+  2049-05: 8 records
+  2049-06: 5 records
+  2049-07: 4 records
+  2049-08: 3 records
+  2049-09: 1 records
+  2049-10: 3 records
+  2049-11: 2 records
+  2049-12: 2 records
+  2050-02: 2 records
+  2050-03: 4 records
+  2050-04: 1 records
+  2050-06: 1 records
+  2050-07: 2 records
+  2050-08: 4 records
+  2050-09: 4 records
+  2050-10: 2 records
+  2050-11: 1 records
+  2050-12: 3 records
+  2051-01: 3 records
+  2051-02: 3 records
+  2051-03: 3 records
+  2051-04: 5 records
+  2051-05: 3 records
+  2051-06: 2 records
+  2051-07: 2 records
+  2051-08: 5 records
+  2051-10: 1 records
+  2051-11: 3 records
+  2051-12: 7 records
+  2052-02: 4 records
+  2052-03: 1 records
+  2052-04: 4 records
+  2052-05: 4 records
+  2052-06: 2 records
+  2052-07: 4 records
+  2052-10: 3 records
+  2052-11: 1 records
+  2052-12: 1 records
+  2053-01: 1 records
+  2053-02: 2 records
+  2053-03: 3 records
+  2053-04: 2 records
+  2053-05: 3 records
+  2053-06: 3 records
+  2053-07: 2 records
+  2053-08: 7 records
+  2053-09: 4 records
+  2053-11: 4 records
+  2053-12: 3 records
+  2054-01: 5 records
+  2054-02: 4 records
+  2054-03: 4 records
+  2054-04: 2 records
+  2054-05: 4 records
+  2054-06: 2 records
+  2054-07: 2 records
+  2054-08: 2 records
+  2054-09: 2 records
+  2054-10: 4 records
+  2054-11: 6 records
+  2054-12: 4 records
+  2055-01: 1 records
+  2055-03: 2 records
+  2055-04: 4 records
+  2055-05: 4 records
+  2055-06: 6 records
+  2055-07: 1 records
+  2055-08: 7 records
+  2055-09: 3 records
+  2055-10: 4 records
+  2055-11: 4 records
+  2055-12: 1 records
+  2056-01: 2 records
+  2056-02: 1 records
+  2056-03: 4 records
+  2056-04: 1 records
+  2056-05: 2 records
+  2056-07: 1 records
+  2056-08: 3 records
+  2056-09: 1 records
+  2056-10: 2 records
+  2056-11: 6 records
+  2056-12: 1 records
+  2057-01: 1 records
+  2057-02: 1 records
+  2057-04: 4 records
+  2057-05: 1 records
+  2057-08: 1 records
+  2057-09: 1 records
+  2057-10: 1 records
+  2057-11: 1 records
+  2057-12: 2 records
+  2058-01: 3 records
+  2058-02: 2 records
+  2058-03: 3 records
+  2058-05: 1 records
+  2058-06: 1 records
+  2058-07: 2 records
+  2058-08: 4 records
+  2058-09: 1 records
+  2058-12: 1 records
+  2059-01: 1 records
+  2059-02: 2 records
+  2059-03: 1 records
+  2059-04: 2 records
+  2059-05: 3 records
+  2059-06: 1 records
+  2059-07: 2 records
+  2059-08: 1 records
+  2059-10: 1 records
+  2059-11: 2 records
+  2059-12: 1 records
+  2060-01: 1 records
+  2060-02: 1 records
+  2060-03: 3 records
+  2060-04: 1 records
+  2060-05: 3 records
+  2060-06: 2 records
+  2060-07: 2 records
+  2060-08: 1 records
+  2060-09: 3 records
+  2060-10: 3 records
+  2060-11: 3 records
+  2060-12: 1 records
+  2061-01: 1 records
+  2061-05: 4 records
+  2061-06: 1 records
+  2061-08: 3 records
+  2061-09: 1 records
+  2061-10: 1 records
+  2061-11: 1 records
+  2061-12: 2 records
+  2062-01: 2 records
+  2062-03: 2 records
+  2062-04: 1 records
+  2062-06: 1 records
+  2062-07: 1 records
+  2062-08: 1 records
+  2062-10: 2 records
+  2062-11: 2 records
+  2062-12: 2 records
+  2063-01: 2 records
+  2063-04: 1 records
+  2063-05: 1 records
+  2063-07: 2 records
+  2063-08: 1 records
+  2063-10: 1 records
+  2063-11: 1 records
+  2063-12: 1 records
+  2064-02: 1 records
+  2064-03: 1 records
+  2064-04: 2 records
+  2064-05: 1 records
+  2064-09: 2 records
+  2064-12: 2 records
+  2065-03: 1 records
+  2065-04: 1 records
+  2065-08: 3 records
+  2065-10: 1 records
+  2066-01: 3 records
+  2066-02: 1 records
+  2066-04: 1 records
+  2066-06: 1 records
+  2066-07: 1 records
+  2066-10: 2 records
+  2066-11: 1 records
+  2066-12: 1 records
+  2067-01: 1 records
+  2067-04: 2 records
+  2067-06: 1 records
+  2067-07: 1 records
+  2067-09: 2 records
+  2067-11: 1 records
+  2067-12: 2 records
+  2068-02: 1 records
+  2068-03: 3 records
+  2068-06: 1 records
+  2068-12: 1 records
+  2069-02: 1 records
+  2069-05: 1 records
+  2069-08: 1 records
+  2069-09: 1 records
+  2069-12: 1 records
+  2070-02: 1 records
+  2070-03: 1 records
+  2070-05: 1 records
+  2070-08: 1 records
+  2070-09: 2 records
+  2070-10: 1 records
+  2071-01: 1 records
+  2071-02: 1 records
+  2072-03: 1 records
+
+════════════════════════════════════════════════════════════════════════════════
+ALL RECORDS — Complete email:pass dump
+════════════════════════════════════════════════════════════════════════════════
+
+user1031@verizon.net:8@GEHQZrc
+user7102@comcast.com:@Pe8GGLuLLuJwiJDgB
+user8057@icloud.com:15Y0AgNUk
+user2654@comcast.com:ukCCHA8AdA
+user2214@gmail.com:g#RnkurX0kuX7Cuu
+user4359@live.com:@W#5gKKmKDMnYG4w
+user2605@hotmail.com:FUqXrMbRw1pS5M0ei
+user1161@aol.com:meDe28x287
+user6971@gmail.com:mTEbn#2IktWe
+user8734@comcast.com:G2y4UYu%!dR$0$ERLGjQ
+user6121@aol.com:LVRKH%%7NAh6L!aJGXC5
+user8621@comcast.com:dpV!An0DVi2l3o9kG
+user6742@comcast.com:ZH21$3PRvsPNWfCQr6Tz
+user6445@comcast.com:RoKD6x5q
+user4441@comcast.com:wkAM%mnaqvnhyaTpBLI
+user1639@protonmail.com:3$LwjDFfzjFFGW!axbl
+user8352@verizon.net:DtgbGEGApj
+user1754@xfinity.com:WXFEfgIoj4sPJDH
+user6433@gmail.com:@bKgFFAK
+user4625@att.net:U5DX$bkQ1s9d$40$NNb
+user6535@comcast.com:jFvhv9X@
+user8620@msn.com:5NdRlqLpO
+user9151@aol.com:GScr$sJiWGgwAj8qmm
+user4734@comcast.com:@%A!%tcUk%#nq3e8gSxz
+user2946@comcast.com:5U$5NOKe4Y@#@l
+user1993@comcast.net:2hYlDRHoxNzWrLNJgC3L
+user1098@live.com:3Ubf#@xLi8xIBv$E9
+user3520@comcast.com:C$RY4P6Y@abvc
+user1424@aol.com:X#!HJhImU%S8L0G
+user6956@comcast.com:dv9Ibh8H
+user4160@yahoo.com:W44LuW$sV7I3CH88JeS
+user2360@live.com:!SIZ1#nF8h84mZ
+user4964@mail.com:GO$uPbw$r6C4xPT
+user3182@comcast.com:W1a3pi5TqE3oS0
+user1198@mail.com:58wBNRZ92eFuf
+user8087@mail.com:NJkGjo#zXrkaDVRl1vO
+user9592@xfinity.com:EFThMhiI3pyOG
+user9001@protonmail.com:SbOUyhZN
+user3848@aol.com:NV26T#vDW
+user9957@yahoo.com:tr$OB59UvF
+user2176@icloud.com:iwCI%0uz
+user3427@comcast.com:z86icmGk
+user4676@mail.com:Abzw4WclWCoKlShtt
+user3027@msn.com:DlVbtk6NF
+user7366@comcast.com:jNHK5lXrqf
+user3264@comcast.com:8rCP4#ICh4y1D1BEh@Z
+user9537@outlook.com:jQVXAPAf7bP4Rl#LZdfs
+user2141@comcast.com:V@6fbW7Ey!DKcMwN
+user8733@comcast.com:ZR!XLuIdWgOmO
+user5017@comcast.com:gV1iX8!hhfuGp
+user3015@live.com:ScD#tU$lQMVpekJD
+user1438@aol.com:mpu1FDZKvW
+user9655@comcast.com:5cM7Zo7T4I
+user2162@comcast.com:GMiMlhoU4ai370s
+user8467@hotmail.com:An1GhaqV$#cEykM5n
+user2521@att.net:#O6i7CGf2bGY
+user6035@icloud.com:#mcJQhgMQYKg9P
+user2197@sbcglobal.net:@eyGFrt1
+user8821@yahoo.com:6wjVbLkXGMgDkP%atL
+user6180@comcast.com:Ikq1P0I99
+user5166@protonmail.com:M$yajKVwG9e@S5HoKfYc
+user9506@live.com:$oXRVqPP!p
+user5869@xfinity.com:LzM7i1sRgNFn8yqnQ
+user4680@att.net:AV$mp!LX
+user2445@yahoo.com:pRJ8602co@jfDnWhy
+user8670@comcast.net:%y$AhuBd7k5Toh
+user9271@verizon.net:oOy5lqg8
+user5177@mail.com:BdyHo1DhCwRGnu
+user7883@comcast.com:8eVJ1%WCOguXml
+user4350@verizon.net:yID5ziuRo!L%bbN
+user1050@comcast.com:xnUTxuW%x78v5!
+user7867@xfinity.com:SjEDA#ErEVwt
+user9691@att.net:MI0o#mYlzpwjBHlmD87
+user8374@xfinity.com:!#OdcY#9JHo3aYu
+user2628@live.com:%!p$pAKlE9n%E9XZD%
+user4597@aol.com:v7NOLhX7%
+user3239@comcast.com:PkJ%wDxFhmT
+user1771@hotmail.com:VCnhoBdvfLTbm60@nAfU
+user3037@comcast.com:VFv$bxR6G!Qj
+user2351@comcast.com:4S3K70mh4QM9kI8ah
+user9814@live.com:zX#TPCffjtsJFquAL
+user7031@comcast.com:bceGlGSM1!Uv$EFED8
+user7724@sbcglobal.net:KlSRMhba
+user5874@verizon.net:$!iK82pgUmL@MMJ
+user8641@mail.com:nbI%Hzs7gcl6UPkJ
+user7034@msn.com:x7WljMrYva!
+user2644@comcast.com:TZKTeMkobaseJ
+user5345@comcast.com:iFI7$fdJ1Pn
+user7343@yahoo.com:kXV!c5StCc
+user5254@comcast.com:t2$avk7hWiY6Dy$I
+user4685@xfinity.com:L!Oi%zzK6f3G@!M8c
+user5758@comcast.com:zt6YBK1QcqE!ALh8dF$R
+user9677@comcast.com:#y1oh8QgLHrhglGf#
+user1457@mail.com:oJ0tGOowFQVQ
+user8382@comcast.com:5gTcuY8WZvozW
+user2154@comcast.com:yoowxnG@b3xIDlpNA4
+user5808@icloud.com:kumZbVk@7Hg
+user8710@comcast.com:B#SA!##Ub%JXk$SIBD%
+user4407@mail.com:i3@6Qsi%1g
+user3208@msn.com:up0P298FdnV%#R
+user4440@comcast.com:F$eQF4eVX!8J6JI
+user1302@protonmail.com:xXzd!#7JtNhiu4
+user9447@live.com:9GWcrnIkGB3r5Ed@
+user7116@comcast.com:8Xz1EfsJKQGic
+user8064@aol.com:glPY4mlbKw
+user9250@hotmail.com:$a6GosPdp
+user9775@sbcglobal.net:l@UcCe!wI$B3Cftq@3
+user1195@comcast.com:9qtWBdnRwruv
+user7873@att.net:AkzMTuZBFMxJGOQq
+user7657@comcast.com:ewd7p6vt3PTqR
+user6106@comcast.com:ThmHZC0Ugr7@wuzFA
+user3105@att.net:Wwd1c@VQk%#vMkV
+user4995@icloud.com:J#f1%yQvPUGdE5j17pRR
+user8494@aol.com:OjA7PPa%DQp8
+user1971@comcast.com:A1lYYITb03
+user2666@comcast.com:AOdbUBi$Dxs
+user7762@comcast.com:CgMHaj1zi%B#6!rudJ
+user3947@comcast.com:oYB2UQa4t
+user4916@comcast.com:R!lWh5W03
+user1594@icloud.com:GXUEiNGGgEfhUuV
+user2928@xfinity.com:LXraDC4CFGX
+user6665@comcast.net:l9v!tXSEQJ#yi
+user4881@outlook.com:vtU48N%@yq
+user4500@aol.com:GfdR4tw#lr!gy4XkM
+user9329@live.com:dhfyDhWIKt@uRWwQ6n2j
+user1765@live.com:4wIOU@gt
+user8581@gmail.com:jWWal3l8OowCWRR
+user8966@xfinity.com:OXj%63NQJyYBG$y!@
+user2449@comcast.com:uwTNBLraWnZHuLWDI
+user3373@comcast.com:k#kjEX9kwP
+user5667@mail.com:Zndw$i2Bgi9f43gMF9
+user8958@msn.com:N89XuR8bBCcVv$uwq8Ol
+user3388@comcast.net:FW8CrRqZBYx7P9h5h3qy
+user1517@live.com:enBtcJI9UEo4tTq1Ck
+user4602@comcast.com:6J1E6iywt3S
+user4536@comcast.com:WYyg6vCi7Ewmisj
+user3951@outlook.com:hOcy0sLGTgz
+user2197@protonmail.com:L!01h@T!S$lAo
+user3471@comcast.com:@UywtFVD35gzvhb5n
+user7157@comcast.com:y$LaauylgW
+user8255@comcast.com:8KZxk1BoIFey
+user6962@comcast.com:QJuJWrEJPN6ou7DZ9J0E
+user3281@comcast.net:S5uzUxeDp3UPuTnl54
+user5200@live.com:qNuPugA#jrOGTA6
+user2777@protonmail.com:Maol17hB2je%qtTpS
+user8368@comcast.com:LCGryso41AHxk2VMCVf
+user1299@comcast.com:NF@zc#!AN2B
+user6176@comcast.com:6C#uHyNtlvMtJP3eHe
+user5222@hotmail.com:eFnmYn8OzhWTbSWJ6
+user8495@comcast.com:HDHGIIz#D@Kwa0%
+user2298@mail.com:ns3Yh#Ge52$J9$RxT33#
+user5793@comcast.com:MnPHeTEo
+user3104@comcast.com:ydbjB8wO5XjEnpZmBP3
+user8668@comcast.com:5yyp8i5D
+user2406@verizon.net:VkmyrD4RLGe!P
+user3777@comcast.com:fVA@SKEUv9GUjeLdj5w
+user9668@comcast.com:7kfc%w0%
+user2642@comcast.com:fNEBCO!2@6
+user8740@msn.com:XNSlvj$kKu3buB1z2m
+user4310@hotmail.com:f$c#y2M7@4R6ATyp
+user3809@att.net:rcPlq4UC9aAtegWm7
+user4750@msn.com:odHy%Zp2PpLR$rYOv5n
+user3165@outlook.com:g0%PRr4f7n$XViJZgKzm
+user5394@comcast.com:QGoorZdxodoksgEl03
+user6277@comcast.com:1wBiA7wx5dx%h2m
+user4414@comcast.com:AGGy$Gs#IS1P8
+user6711@comcast.com:qloux3IZBT64AsTu@kIp
+user7345@gmail.com:4Lpt$c8Bv$7ePXe
+user1317@comcast.com:d0voVx4RLr
+user8585@outlook.com:iHNF$yK%$
+user7662@comcast.com:!kn3GwWAesm7rwGPS5
+user6609@comcast.com:!4VpjRZxDoO
+user3710@icloud.com:QtwVlyU3@2SFRt!lJs!U
+user4985@mail.com:1uns2PSbrUi
+user2987@comcast.com:474E9QOi$X5QmjPA
+user9785@aol.com:DXDXcgZ!
+user2531@outlook.com:XlNjm@umeENMwKasc
+user4690@msn.com:#wyCMo0i!A7ocEFXl
+user4494@comcast.com:U5iyBJFyjcVXBtDk
+user9708@comcast.com:3jNFmua%I
+user7259@live.com:tSuq$spyhc$g
+user8960@sbcglobal.net:Xyh@v$ws
+user2295@comcast.net:mlAYKdMmcH!iNy#@GRl
+user2993@comcast.com:9dFYndxPMd099pNoxN
+user4660@aol.com:ow4jyuN3VNF0h3
+user2600@comcast.com:9YlUjJ2K
+user9651@comcast.com:ST57%3aTuwB5v#0Ed#$
+user5364@comcast.com:ET3g69sIY7qhXi5saf8
+user7741@comcast.com:Y@L0DPMPUho!!g
+user2241@protonmail.com:%#WHgWSsoAt
+user1657@yahoo.com:9efcCLSH6XP
+user9250@hotmail.com:FvMy1iGjga
+user8220@hotmail.com:qIIcHUV12$CvbCF%NKh
+user9902@live.com:jksUUxzMq$UdXaC1Y5
+user3489@comcast.com:kyoGP6B93Zixx
+user4006@yahoo.com:IAESdkI4LOZ
+user2935@protonmail.com:b!TBzmNml59zubZ
+user4985@comcast.com:VB!UWHQ!7s!dO2vKTUOR
+user7710@comcast.com:MLv9ykwG
+user4463@comcast.com:iddesvDyrC0OG
+user3428@msn.com:Hj1YIdqBJvf%UvaH
+user7681@comcast.com.com:JiJhhk#3neDY
+user2470@comcast.com.com:Wz@iOGhPbeC2$tp@D
+user2302@yahoo.com:g6pknI25fCw2v
+user4634@hotmail.com:o8JjhkUQM5b
+user3452@sbcglobal.net:LyZNPq2S!axnd!vXxG
+user5854@comcast.com.com:CkqFPvxa2b5p
+user5776@xfinity.com:SzhHHN67!%47
+user3897@att.net:%T0k0sodE5HXNNWZ1v!6
+user2929@msn.com:pfSJBUwdakElaqHyMdz
+user4187@msn.com:aP0tipM#
+user8947@aol.com:OUxprEK@
+user7924@comcast.com.com:gx#z#Ljmnduf
+user4286@gmail.com:D8f6CfRm$NZfbKCwv
+user2083@hotmail.com:90JM2UcKsXA
+user2446@verizon.net:dMhlxFSW8TBIc4p8tDp
+user3908@yahoo.com:pJtbgORdkgLQO3eU
+user7527@att.net:UoNfJPln#%
+user2486@mail.com:f1FVDg9Kzkr1JhaHe
+user9075@xfinity.com:u7Be7RT9245
+user5485@comcast.com.com:7xI!CnZZz%j
+user6001@outlook.com:$vzlzylk!zhLrVR
+user8429@comcast.com.com:gG1cr2h#MKvCgYmmAA
+user8578@icloud.com:D9oEQKAG
+user8607@protonmail.com:vSamGb#o60H5$aZvj4W
+user9731@sbcglobal.net:BvC@AdvOY5sgdFfsCn#P
+user9041@comcast.com.com:WhpjtpMHYR$%
+user8711@icloud.com:J6phSO7aHK4jYKeXbCxm
+user3127@att.net:@10R4oabuUpJC
+user5770@yahoo.com:ZTJ@zCI6CKT
+user1426@comcast.com.com:!vejFh!5oGr%tHSX
+user1353@msn.com:dMuJyP%ykBAMZTCpgoIn
+user6872@comcast.com.com:vV7EBhnCKCoed3y
+user9876@hotmail.com:heuP90wwi!8U4l
+user1261@comcast.com.com:932wxoDlbouTUW!vW$
+user9883@msn.com:iwMKC6@Rs3CaDVnl#9#d
+user3867@comcast.com.com:v5Ii1NzIfISS
+user3918@comcast.com.com:3K0hU@lcBADuc6ccL
+user5534@comcast.com.com:0uHt#PJp!3CkKBq
+user5265@comcast.com.com:k3V#SjDxgkxm
+user8447@comcast.com.com:GxQ1X32fVw!YZQKM
+user5196@comcast.com.com:ooLxmaB7fyh1
+user7906@hotmail.com:KI4zue8ah@
+user6960@comcast.net:wcgCTs@rNIGCz61xYGa
+user8037@comcast.com.com:WAFdemGE
+user3322@comcast.com.com:J8Wbd1diT
+user6795@comcast.net:Vxuu7gxxv
+user6699@msn.com:KKPrWJEIfL72aDKauW
+user5521@xfinity.com:15aqnljjnJEGgqIR5xt
+user6624@comcast.com.com:vgZlUqWGX18bBQ9Hvt
+user7143@icloud.com:DMGKhGkE#f%m1Qf#H
+user2901@comcast.com.com:4IXSd3oQ1rdYiVIa@
+user7536@comcast.com.com:kXrFeO%CysA
+user3411@comcast.com.com:3@09B#136Vd3l
+user6893@comcast.com.com:0nPGKODL4nyyvj
+user2684@sbcglobal.net:5ajxH3luMamXrb
+user6396@comcast.com.com:KWSK4tasgm$DwxZpr45
+user5537@comcast.com.com:E$jx!XejNvEDx
+user8681@comcast.com.com:s%KYF8pH5k%W#L
+user4337@comcast.com.com:o6N7Q3X3eF9SE
+user1038@sbcglobal.net:0Z9%GiOV8apLQ@Ap
+user3279@att.net:zWsEDiVpJDiwNmk
+user9467@comcast.com.com:fULN%fOeOdTB1!9o
+user6331@comcast.com.com:v4G#KTvIuC4slUr
+user9257@comcast.com.com:VHBFKVAmbN39
+user5184@comcast.com.com:QFtK0UszQD0bedLB#L
+user1791@comcast.com.com:bc2ahI2k2
+user2037@protonmail.com:6UQMxb9%
+user5059@comcast.com.com:HSzlJ8UKKYrRDMa
+user6159@xfinity.com:k#mOCkTUPH7#nKCY!S8u
+user3160@msn.com:5IPggGP1XN@moAc4IqV
+user9737@comcast.com.com:#nXUDNOA80MM5lt
+user6848@comcast.com.com:ZZwAN956s8JaXt!O@Ru
+user2968@xfinity.com:2q23D01hqRx8Zsiynp
+user4102@comcast.com.com:tO7qewWqU@BeZIR#3
+user8029@comcast.com.com:28ulmMr!EhNOxyP
+user3116@gmail.com:$T!v%jLEj
+user6239@outlook.com:FcmjKiwsOxPWFbWTzL%2
+user2572@gmail.com:t4dTq2zxH
+user2455@protonmail.com:Mqt$%neSKGgAH
+user2434@comcast.net:90c5nFm$E6
+user8742@comcast.com.com:hfiB7XNu1!#2
+user6998@outlook.com:#ZDqLGr0wJP12oiCcstD
+user7763@yahoo.com:X8HQMSs%z!PkQiv#rHS
+user3635@aol.com:sCkeOt0#Vi43!9CqC
+user8403@mail.com:43XeFr@AvQX@n!
+user1547@sbcglobal.net:9J6scdgz!mzSj25i%
+user2844@verizon.net:UwJVQ6G5sxC2KXT
+user6324@xfinity.com:tDhny@5ankxngm%pB
+user5214@aol.com:yf!orT!idk
+user9082@gmail.com:DdsB9eWPobfUcadS
+user7295@msn.com:Y7R0ER1tXi0VFPv
+user1940@protonmail.com:bjlC7@%R6xPDDYX
+user9231@comcast.com.com:7$z7vqAUR!U8keEQl
+user2456@hotmail.com:BdJwSdBM8vDeW
+user9092@comcast.com.com:V#ViAz0g$#qZ
+user2554@icloud.com:JVc3vdQst
+user4078@comcast.com.com:si#tkFnW1TdXhH
+user9863@comcast.com.com:#JYvIB7R72A%s1EQ
+user1654@msn.com:SgY7y9tGl!uzB8%h
+user1471@att.net:tqoyMDCZCsmZY
+user4655@comcast.com.com:cXz1rDsCoCSgqPHiv
+user8059@comcast.com.com:tV@PF@rKT6x#0Ic7j
+user3996@xfinity.com:9t#IzSObLgoFTn1OA
+user2021@verizon.net:SX9%c7vtT%uOX@
+user8328@icloud.com:Gpxe9MeEeW7cU0Ht6Jq
+user3058@sbcglobal.net:ogDg#ml1h9sdGLG
+user4584@mail.com:08bK@M%%vD#ESrmU
+user1398@mail.com:WogtSs7o3Gz0Ax2c5
+user7312@comcast.com.com:%ybU!UKMg5C%RcN%0
+user6138@verizon.net:DBFJ95ld@x4CqG8$Sy
+user5863@sbcglobal.net:h8a!5vwSpesziN$t09Fz
+user1531@comcast.com.com:V2uK5iruvP
+user5829@att.net:Z2%mBXZE@D
+user5327@outlook.com:hs!cJpsai
+user3108@comcast.com.com:cIYoJEGr
+user9767@sbcglobal.net:rBwcN%VGk2u3lD5x7K#v
+user1703@att.net:NU135vJknDAMnIotxxSz
+user7382@sbcglobal.net:vTgFLCSq%LYqX9RUZb4E
+user7715@sbcglobal.net:be%RNzdJMb8gTMZWWR#
+user2144@comcast.net:1$n$!9pLacfsw3ImPo7r
+user5101@comcast.com.com:72tvXC1y4yZ7@eBZ3w
+user1223@yahoo.com:uXS2vOu29$cux
+user2306@comcast.com.com:kovt4cm7wMFZm
+user4363@comcast.com.com:BnUmliwxG
+user2937@protonmail.com:KhThFp0O49iZ
+user7791@comcast.com.com:jdTyFOa6Et1udJUA
+user8542@comcast.com.com:%fxgbfjNrVPcLbgd
+user7299@live.com:gD@walYD!N5
+user5438@comcast.com.com:D5mvMIyr
+user8268@comcast.com.com:cXGQ4!#WSYTyUn
+user8677@hotmail.com:x2Sc#BEguXn9q9e
+user6767@comcast.net:RgzzizJS#m
+user3853@comcast.com.com:zZUII%M$9Uq3LfMZ@PY
+user7693@att.net:J8zbsPsXr9gOb#ymEoDv
+user7589@verizon.net:%prb7A#GT!DV4
+user2819@comcast.com.com:KFK1MBI9@Ao
+user3143@xfinity.com:V3o$WYLNCJDQdGb1FUDp
+user5242@comcast.com.com:HZzNNjJgWT7KI4KT
+user9449@live.com:xqRZnlyN9UTQIQ
+user1744@yahoo.com:aUIH87uOkaFnn$L3iXi
+user2552@comcast.com.com:KTxSvxbc!h87R!7DqZ
+user1230@comcast.com.com:KtOhEnqcCb39
+user2586@hotmail.com:TZYvX2aX
+user6118@verizon.net:gLb1PBr3l$
+user3445@icloud.com:i65JC2l2Cq
+user1592@comcast.com.com:DZ!nozYa5#Bf4z!5
+user3725@comcast.com.com:hlihru$Ts#OPjQ
+user3976@verizon.net:!%wGGR7i%upvJJ1
+user6199@comcast.com.com:JfGbtnO%08KTK
+user2255@comcast.com.com:2jexl1IVnwW3xSsG8
+user6604@comcast.com.com:EivlCEUs5%uGgDHsk6M
+user3465@yahoo.com:S!95HLSQCi2
+user1819@live.com:D@DUVc6!%kv
+user1869@comcast.com.com:M4dtUnqi
+user8701@outlook.com:J##MxXc@vWjuIZfXut
+user4848@outlook.com:0mZzRuJGMDkhkIDJI
+user8354@mail.com:QpWF%V!eVrWL0zrZRo
+user8361@comcast.com.com:UGhY1SCJBelpTtSF
+user6090@live.com:!oqzRb0oKPZbs
+user7835@comcast.net:oAObcY27ARjT1ajKrC
+user8983@comcast.com.com:7nw@r5zf
+user6602@comcast.com.com:03@zWxME
+user3665@comcast.com.com:NC6IF32n2$@f!
+user6057@verizon.net:yL@tmMOQ!F%Wq8dC2sj
+user7290@comcast.com.com:07DCELp2k1HGi
+user9200@aol.com:SHgEt@21psK5bAJnVLw
+user3395@comcast.com.com:rEZk0xXf6fnY
+user8010@mail.com:7VLXH1lqT#I
+user8117@aol.com:fxfIm3dnm!Zg
+user4368@yahoo.com:aUrfCjD4v841XYDP
+user4106@comcast.com.com:4J71rzqlb1Z
+user9330@att.net:2m39CVUe8EiJBDFEz
+user1947@xfinity.com:23EEmNdM9d%jk4yPg0
+user3575@comcast.com.com:afiggxNnhFF2wmyy
+user5195@comcast.com.com:JJfqlt72GZKlms6azB@
+user5624@msn.com:gEq8OHGIEQ9Y!
+user8830@comcast.com.com:$UbQUtPeef7r1zpnU
+user6626@comcast.com.com:TvqRbs5dq
+user9616@comcast.com.com:qz3ouJ5#xiQwUm#
+user4075@gmail.com:RzWz8R5vOkHq
+user2020@comcast.com.com:Sbplr9Rg1uFYmJhwaE!R
+user4251@comcast.com.com:UfTSSoX4!d#
+user6573@comcast.com.com:9bz!G%jeDXZTqya%J
+user1031@verizon.net:8@GEHQZrc
+user7102@comcast.com:@Pe8GGLuLLuJwiJDgB
+user8057@icloud.com:15Y0AgNUk
+user2654@comcast.com:ukCCHA8AdA
+user2214@gmail.com:g#RnkurX0kuX7Cuu
+user4359@live.com:@W#5gKKmKDMnYG4w
+user2605@hotmail.com:FUqXrMbRw1pS5M0ei
+user1161@aol.com:meDe28x287
+user6971@gmail.com:mTEbn#2IktWe
+user8734@comcast.com:G2y4UYu%!dR$0$ERLGjQ
+user6121@aol.com:LVRKH%%7NAh6L!aJGXC5
+user8621@comcast.com:dpV!An0DVi2l3o9kG
+user6742@comcast.com:ZH21$3PRvsPNWfCQr6Tz
+user6445@comcast.com:RoKD6x5q
+user4441@comcast.com:wkAM%mnaqvnhyaTpBLI
+user1639@protonmail.com:3$LwjDFfzjFFGW!axbl
+user8352@verizon.net:DtgbGEGApj
+user1754@xfinity.com:WXFEfgIoj4sPJDH
+user6433@gmail.com:@bKgFFAK
+user4625@att.net:U5DX$bkQ1s9d$40$NNb
+
+════════════════════════════════════════════════════════════════════════════════
+END OF MASTER REPORT — 2,500 total records, 404 email:pass combos

@@ -1,0 +1,91 @@
+╔══════════════════════════════════════════════════╗
+║  SEARCH: Comcast
+║  Generated: 2026-07-14T03:30:38.061889
+╚══════════════════════════════════════════════════╝
+
+🔍 SEARCH RESULTS FOR: 'Comcast'
+⏱️  Time: 0.01s
+📊 Total records: 40
+🔴 Critical: 2
+📡 Sources: sample_data
+
+────────────────────────────────────────────────────────────
+📊 STATS BY TYPE:
+  hash: 11
+  config: 10
+  api_key: 7
+  ip:port: 7
+  user:pass: 3
+  email:pass: 2
+
+📊 STATS BY SEVERITY:
+  medium: 13
+  low: 10
+  high: 9
+  info: 6
+  critical: 2
+
+📊 TOP DOMAINS:
+  comcast.com: 15
+  sbcglobal.net: 3
+  xfinity.com: 3
+  icloud.com: 3
+  protonmail.com: 2
+  outlook.com: 2
+  gmail.com: 2
+  live.com: 2
+  att.net: 2
+  mail.com: 2
+  hotmail.com: 1
+  msn.com: 1
+  verizon.net: 1
+  comcast.net: 1
+
+════════════════════════════════════════════════════════════
+📝 ALL RECORDS:
+════════════════════════════════════════════════════════════
+SEV      TYPE           EMAIL/USER                          DOMAIN                 PASSWORD             SOURCE         DATE
+──────── ────────────── ─────────────────────────────────── ────────────────────── ──────────────────── ────────────── ──────────
+HIGH     config         user3182@comcast.com                comcast.com                                 shodan         2026-01-11
+LOW      hash           user8784@hotmail.com                hotmail.com                                 pastebin       2026-01-14
+INFO     email:pass     user3774@protonmail.com             protonmail.com         #L3usZUPq9G8         telegram       2026-02-02
+MEDIUM   api_key        user3249@comcast.com                comcast.com                                 shodan         2026-02-13
+MEDIUM   hash           user8131@sbcglobal.net              sbcglobal.net                               telegram       2026-03-08
+LOW      config         user7409@outlook.com                outlook.com                                 public_direc   2026-02-15
+MEDIUM   user:pass      user1022@xfinity.com                xfinity.com                                 pastebin       2026-03-06
+INFO     config         user8982@gmail.com                  gmail.com                                   pastebin       2026-02-22
+MEDIUM   hash           user9264@comcast.com                comcast.com                                 shodan         2026-02-28
+HIGH     config         user6934@icloud.com                 icloud.com                                  public_direc   2026-04-02
+MEDIUM   hash           user6346@msn.com                    msn.com                                     github         2026-05-31
+HIGH     ip:port        user2216@comcast.com                comcast.com                                 shodan         2026-03-29
+INFO     ip:port        user3434@comcast.com                comcast.com                                 public_direc   2026-04-17
+HIGH     config         user1739@comcast.com                comcast.com                                 shodan         2026-02-19
+MEDIUM   ip:port        user9501@live.com                   live.com                                    public_direc   2026-05-31
+MEDIUM   ip:port        user2701@xfinity.com                xfinity.com                                 pastebin       2026-06-10
+MEDIUM   api_key        user7437@comcast.com                comcast.com                                 pastebin       2026-02-28
+INFO     hash           user3576@comcast.com                comcast.com                                 pastebin       2026-09-06
+LOW      config         user6983@comcast.com                comcast.com                                 github         2026-01-29
+HIGH     hash           user1531@att.net                    att.net                                     telegram       2026-03-28
+HIGH     hash           user4706@protonmail.com             protonmail.com                              pastebin       2026-05-11
+MEDIUM   api_key        user4627@att.net                    att.net                                     public_direc   2026-09-20
+HIGH     ip:port        user6412@mail.com                   mail.com                                    pastebin       2026-05-01
+HIGH     ip:port        user7547@xfinity.com                xfinity.com                                 github         2026-05-29
+LOW      api_key        user2137@comcast.com                comcast.com                                 shodan         2026-09-08
+LOW      user:pass      user2008@outlook.com                outlook.com                                 pastebin       2026-08-24
+LOW      api_key        user3527@comcast.com                comcast.com                                 telegram       2026-08-07
+MEDIUM   hash           user7707@verizon.net                verizon.net                                 telegram       2026-10-08
+CRITIC   config         user9103@comcast.com                comcast.com                                 github         2026-12-13
+CRITIC   ip:port        user5809@live.com                   live.com                                    public_direc   2026-04-08
+LOW      config         user5218@comcast.net                comcast.net                                 github         2026-03-12
+INFO     hash           user6154@mail.com                   mail.com                                    public_direc   2026-09-16
+LOW      api_key        user6293@gmail.com                  gmail.com                                   github         2026-11-27
+MEDIUM   hash           user7832@sbcglobal.net              sbcglobal.net                               github         2026-04-20
+MEDIUM   config         user1403@comcast.com                comcast.com                                 shodan         2026-08-03
+LOW      hash           user6444@sbcglobal.net              sbcglobal.net                               pastebin       2026-04-26
+INFO     user:pass      user3309@comcast.com                comcast.com                                 shodan         2026-08-15
+MEDIUM   config         user2937@icloud.com                 icloud.com                                  telegram       2027-02-22
+HIGH     email:pass     user1041@comcast.com                comcast.com            15m44A5SdYGe         pastebin       2026-07-20
+LOW      api_key        user8276@icloud.com                 icloud.com                                  github         2026-10-11
+
+════════════════════════════════════════════════════════════
+END OF RECORDS — Total: 40

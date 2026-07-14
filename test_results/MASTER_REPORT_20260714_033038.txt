@@ -1,0 +1,79 @@
+╔══════════════════════════════════════════════════╗
+║  MASTER TEST REPORT
+║  Generated: 2026-07-14T03:30:38.282912
+╚══════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════╗
+║  🛸 ORÁCULO DE INTELIGENCIA — MASTER TEST REPORT             ║
+║  Generated: 2026-07-14T03:30:38.281638
+║  Keywords: Comcast, Comcast.com
+╚══════════════════════════════════════════════════════════════╝
+
+📊 TOTAL RECORDS: 80
+📂 Output files generated:
+  • test_results\search_comcast_20260714_033038.txt
+  • test_results\combos_comcast_search_20260714_033038.txt
+  • test_results\search_comcast_com_20260714_033038.txt
+  • test_results\combos_comcast_com_search_20260714_033038.txt
+  • test_results\combined_export_json_20260714_033038.txt
+
+────────────────────────────────────────────────────────────
+📊 GLOBAL STATS:
+
+BY TYPE:
+  hash: 19
+  config: 18
+  api_key: 15
+  ip:port: 13
+  email:pass: 9
+  user:pass: 6
+
+BY SEVERITY:
+  medium: 31
+  low: 20
+  high: 16
+  info: 10
+  critical: 3
+
+BY SOURCE:
+  public_directory: 19
+  telegram: 17
+  shodan: 16
+  github: 15
+  pastebin: 13
+
+TOP 30 DOMAINS:
+  comcast.com.com: 17
+  comcast.com: 15
+  xfinity.com: 7
+  hotmail.com: 5
+  live.com: 4
+  att.net: 4
+  mail.com: 4
+  protonmail.com: 3
+  sbcglobal.net: 3
+  outlook.com: 3
+  gmail.com: 3
+  icloud.com: 3
+  aol.com: 3
+  msn.com: 2
+  comcast.net: 2
+  verizon.net: 1
+  yahoo.com: 1
+
+════════════════════════════════════════════════════════════
+ALL RECORDS — email:pass format:
+════════════════════════════════════════════════════════════
+
+user3774@protonmail.com:#L3usZUPq9G8
+user1041@comcast.com:15m44A5SdYGe
+user3189@comcast.com.com:QuMEC6tm2ln@
+user3360@comcast.com.com:BDA2DP387bTEunq
+user6357@xfinity.com:CLLwJdVodtN2R91SvQS
+user7168@comcast.com.com:29@Snw3zaS2FQ
+user8585@comcast.com.com:FYuPpGI4HKFzpl%Jw#I
+user6543@comcast.com.com:mVczRqXr3Ik2P!FIy
+user4876@comcast.com.com:yJbi$$E3iyQ
+
+════════════════════════════════════════════════════════════
+END OF MASTER REPORT — 80 total records

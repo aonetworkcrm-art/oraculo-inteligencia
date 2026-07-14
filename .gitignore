@@ -28,3 +28,6 @@ oracle_index.json
 
 # Deployed artifacts
 *.egg
+test_results/
+_fix_*.py
+oracle_js_extracted.js
