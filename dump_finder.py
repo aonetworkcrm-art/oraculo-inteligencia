@@ -470,7 +470,7 @@ class DumpFinder:
         self.local_saver = LocalSaver()
         self.hunter_connector = None
         try:
-            from intel_connectors import HunterConnector
+            # HunterConnector imported lazily inside DumpFinder.__init__
             self.hunter_connector = HunterConnector()
         except Exception:
             self.hunter_connector = None
