@@ -1068,6 +1068,30 @@ def _generate_chat_response(message: str, context: dict) -> str:
     )
 
 
+# ─── Ping/Uptime Endpoint (ultraligero para monitoreo) ─────
+
+@app.route("/api/ping", methods=["GET"])
+def api_ping():
+    """
+    Endpoint ultraligero para UptimeRobot/monitoring.
+    Responde en <5ms — sin psutil, sin DB, sin Engine.
+    """
+    uptime_seconds = round(time.time() - SERVER_START_TIME, 1)
+    return jsonify({
+        "success": True,
+        "data": {
+            "status": "ok",
+            "service": "oraculo-inteligencia",
+            "version": "2.0",
+            "uptime_seconds": uptime_seconds,
+            "uptime_str": _format_uptime(uptime_seconds),
+            "server_time": datetime.now().isoformat(),
+            "platform": "render" if os.environ.get("RENDER") else "local",
+            "ping_interval": "5-10 minutes recommended for UptimeRobot",
+        }
+    })
+
+
 # ─── Main ────────────────────────────────────────────────────
 
 if __name__ == "__main__":
