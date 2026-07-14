@@ -129,69 +129,122 @@ class DorkEngine:
         return results
 
     def _search_google(self, encoded_dork: str, max_results: int) -> List[Dict[str, str]]:
-        """Search Google and extract result URLs."""
+        """Search Google and extract result URLs. Falls back to regex if blocked."""
         self.rate_limiter.wait(source="google")
-        results = []
         url = f"https://www.google.com/search?q={encoded_dork}&num={min(max_results, 20)}"
 
         self.session.headers.update({"User-Agent": random_ua()})
         proxy = self.proxy_mgr.get_random()
-        resp = self.session.get(url, timeout=15, proxies=proxy)
 
-        if resp.status_code != 200:
-            return results
+        try:
+            resp = self.session.get(url, timeout=15, proxies=proxy)
+            if resp.status_code != 200:
+                return self._extract_urls_regex(resp.text, max_results) if resp.text else []
 
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(resp.text, "html.parser")
+            # Detect CAPTCHA/block page
+            text_lower = resp.text.lower()
+            if "unusual traffic" in text_lower or "captcha" in text_lower or "please verify" in text_lower:
+                logger.debug(f"Google blocked (CAPTCHA) for dork: {encoded_dork[:50]}...")
+                return []
 
-        for g in soup.select("div.g")[:max_results]:
-            link_el = g.select_one("a")
-            if not link_el:
-                continue
-            href = link_el.get("href", "")
-            if href.startswith("/url?q="):
-                href = href.split("/url?q=")[1].split("&")[0]
-            if not href or "http" not in href:
-                continue
+            # Try BeautifulSoup first
+            results = self._parse_google_bs4(resp.text, max_results)
+            if results:
+                return results
 
-            title_el = g.select_one("h3")
-            title = title_el.get_text(strip=True) if title_el else ""
-            snippet_el = g.select_one("div.VwiC3b")
-            snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+            # Fallback: regex extraction
+            return self._extract_urls_regex(resp.text, max_results)
+        except Exception:
+            return []
 
-            results.append({"url": href, "title": title, "snippet": snippet})
-
+    def _parse_google_bs4(self, html: str, max_results: int) -> List[Dict[str, str]]:
+        """Parse Google results using BeautifulSoup."""
+        results = []
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, "html.parser")
+            for g in soup.select("div.g")[:max_results]:
+                link_el = g.select_one("a")
+                if not link_el:
+                    continue
+                href = link_el.get("href", "")
+                if href.startswith("/url?q="):
+                    href = href.split("/url?q=")[1].split("&")[0]
+                if not href or "http" not in href:
+                    continue
+                title_el = g.select_one("h3")
+                title = title_el.get_text(strip=True) if title_el else ""
+                snippet_el = g.select_one("div.VwiC3b")
+                snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+                results.append({"url": href, "title": title, "snippet": snippet})
+        except Exception:
+            pass
         return results
 
     def _search_bing(self, encoded_dork: str, max_results: int) -> List[Dict[str, str]]:
-        """Search Bing and extract result URLs."""
+        """Search Bing and extract result URLs. Falls back to regex if blocked."""
         self.rate_limiter.wait(source="bing")
-        results = []
         url = f"https://www.bing.com/search?q={encoded_dork}&count={min(max_results, 20)}"
 
         self.session.headers.update({"User-Agent": random_ua()})
         proxy = self.proxy_mgr.get_random()
-        resp = self.session.get(url, timeout=15, proxies=proxy)
 
-        if resp.status_code != 200:
-            return results
+        try:
+            resp = self.session.get(url, timeout=15, proxies=proxy)
+            if resp.status_code != 200:
+                return self._extract_urls_regex(resp.text, max_results) if resp.text else []
 
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(resp.text, "html.parser")
+            # Try BeautifulSoup first
+            results = self._parse_bing_bs4(resp.text, max_results)
+            if results:
+                return results
 
-        for li in soup.select("li.b_algo")[:max_results]:
-            link_el = li.select_one("a")
-            if not link_el:
+            # Fallback: regex extraction
+            return self._extract_urls_regex(resp.text, max_results)
+        except Exception:
+            return []
+
+    def _parse_bing_bs4(self, html: str, max_results: int) -> List[Dict[str, str]]:
+        """Parse Bing results using BeautifulSoup."""
+        results = []
+        try:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, "html.parser")
+            for li in soup.select("li.b_algo")[:max_results]:
+                link_el = li.select_one("a")
+                if not link_el:
+                    continue
+                href = link_el.get("href", "")
+                if not href or "http" not in href:
+                    continue
+                title_el = li.select_one("h2")
+                title = title_el.get_text(strip=True) if title_el else ""
+                snippet_el = li.select_one(".b_caption p")
+                snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+                results.append({"url": href, "title": title, "snippet": snippet})
+        except Exception:
+            pass
+        return results
+
+    @staticmethod
+    def _extract_urls_regex(html: str, max_results: int) -> List[Dict[str, str]]:
+        """Extract URLs from HTML using regex fallback."""
+        results = []
+        seen = set()
+        # Pattern: <a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>
+        pattern = r'<a[^>]*href="(https?://[^"\s]+)"[^>]*>(.*?)</a>'
+        for match in re.finditer(pattern, html, re.IGNORECASE | re.DOTALL):
+            url = match.group(1)
+            if url in seen:
                 continue
-            href = link_el.get("href", "")
-            if not href or "http" not in href:
+            seen.add(url)
+            # Skip google-specific URLs
+            if any(x in url for x in ["google.com/search", "accounts.google", "policies.google", "support.google"]):
                 continue
-            title_el = li.select_one("h2")
-            title = title_el.get_text(strip=True) if title_el else ""
-            snippet_el = li.select_one(".b_caption p")
-            snippet = snippet_el.get_text(strip=True) if snippet_el else ""
-            results.append({"url": href, "title": title, "snippet": snippet})
-
+            title = re.sub(r'<[^>]+>', '', match.group(2)).strip()[:100]
+            results.append({"url": url, "title": title, "snippet": ""})
+            if len(results) >= max_results:
+                break
         return results
 
 
@@ -415,6 +468,12 @@ class DumpFinder:
         self.parser = ComboParser()
         self.date_filter = DateFilter()
         self.local_saver = LocalSaver()
+        self.hunter_connector = None
+        try:
+            from intel_connectors import HunterConnector
+            self.hunter_connector = HunterConnector()
+        except Exception:
+            self.hunter_connector = None
 
     def search(self,
                keyword: str,
@@ -481,6 +540,26 @@ class DumpFinder:
         all_urls = unique_urls
 
         logger.info(f"📡 Total unique URLs found: {len(all_urls)}")
+
+        # ─── Step 1b: Fallback — use Hunter.io if dorking found nothing ───
+        if not all_urls and self.hunter_connector and self.hunter_connector.enabled:
+            logger.info(f"📧 Dorking returned no results — trying Hunter.io for real emails...")
+            try:
+                hs = self.hunter_connector.domain_search(keyword, limit=10)
+                if hs.get("success") and hs.get("data", {}).get("emails"):
+                    for email_info in hs["data"]["emails"]:
+                        email = email_info.get("value", "")
+                        if email and "@" in email:
+                            domain = email.split("@")[1]
+                            all_urls.append({
+                                "url": f"https://{domain}",
+                                "title": f"{email_info.get('position', 'Employee')} at {domain}",
+                                "snippet": f"Email: {email} | {email_info.get('confidence', 0)}% confidence",
+                                "dork_name": "hunter_io",
+                            })
+                    logger.info(f"📧 Hunter.io: {len(all_urls)} emails found for {keyword}")
+            except Exception as e:
+                logger.debug(f"Hunter.io fallback error: {e}")
 
         # ─── Step 2: Fetch content from found URLs ───
         raw_combos = []
