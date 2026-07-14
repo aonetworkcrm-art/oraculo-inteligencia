@@ -320,8 +320,12 @@ class PasteDirectScraper:
                 if resp.status_code != 200:
                     continue
                 # Extraer raw URLs de Pastebin
+                # Filter out common English words that are 8 chars (settings, messages, etc.)
+                _SKIP_IDS = {"settings", "messages", "privacy", "contact", "accounts", "password", "download", "register", "loginpro"}
                 for match in re.finditer(r'href="/(raw/|)([a-zA-Z0-9]{8})"', resp.text):
                     paste_id = match.group(2)
+                    if paste_id.lower() in _SKIP_IDS:
+                        continue
                     raw_url = f"https://pastebin.com/raw/{paste_id}"
                     if raw_url not in seen:
                         seen.add(raw_url)
