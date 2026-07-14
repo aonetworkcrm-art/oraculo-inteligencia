@@ -34,7 +34,18 @@ services:
         value: 3.12.0
       - key: SAMPLE_DATA
         value: "true"
+      # ── Telegram (Telethon) ─────────────────────────────
+      # Get TG_API_ID and TG_API_HASH from https://my.telegram.org/apps
+      # After setting, upload oraculo_tg_session.session via Render Shell
+      # - key: TG_API_ID
+      #   value: 35191536
+      # - key: TG_API_HASH
+      #   value: bffeaf50312a833a1ab266a48ed67e5e
+      # - key: TG_SESSION
+      #   value: oraculo_tg_session
+      
       # ── External APIs (optional — system works without them) ──
+      # Get your API keys from each service's website
       # - key: SHODAN_API_KEY
       #   value: your_key_here
       # - key: HUNTER_API_KEY
@@ -44,4 +55,4 @@ services:
       # - key: VT_API_KEY
       #   value: your_key_here
       # - key: CENSYS_TOKEN
-      #   value: your_key_here
+      #   value: your_token_here
