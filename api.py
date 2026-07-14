@@ -348,6 +348,23 @@ SERVER_START_TIME = time.time()
 enhanced_engine = EnhancedOracleEngine()
 base_engine = enhanced_engine.base_engine
 
+
+def _auto_generate_sample_data(engine):
+    """Auto-generate sample data for demo/development when SAMPLE_DATA=true."""
+    keywords = ["comcast", "xfinity", "verizon", "att", "netflix", "spotify"]
+    for kw in keywords:
+        records = SampleDataGenerator.generate_records(kw, 20)
+        engine._index_records(kw, records)
+
+
+# ─── Auto-populate sample data if SAMPLE_DATA env var is set ───
+if os.environ.get("SAMPLE_DATA", "").lower() in ("true", "1", "yes"):
+    stats = base_engine.get_index_stats()
+    if stats.get("total_records", 0) == 0:
+        logger.info("📊 SAMPLE_DATA=true — auto-generating sample intelligence data...")
+        _auto_generate_sample_data(base_engine)
+        logger.info("✅ Sample data generated")
+
 # ─── Serve Static Files ──────────────────────────────────────
 
 @app.route("/")
