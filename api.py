@@ -24,6 +24,9 @@ from local_keys import (
     get_vt_key, get_censys_token,
 )
 
+# Dump Finder
+from dump_finder import DumpFinder
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OracleAPI")
 
@@ -1095,6 +1098,67 @@ def api_ping():
             "ping_interval": "5-10 minutes recommended for UptimeRobot",
         }
     })
+
+
+# ─── Dump Finder Endpoint ────────────────────────────
+
+DUMP_FINDER_INSTANCE = None
+
+def _get_dump_finder():
+    """Lazy-load the DumpFinder singleton."""
+    global DUMP_FINDER_INSTANCE
+    if DUMP_FINDER_INSTANCE is None:
+        try:
+            DUMP_FINDER_INSTANCE = DumpFinder()
+            logger.info("🛡️ DumpFinder initialized")
+        except Exception as e:
+            logger.error(f"DumpFinder init error: {e}")
+            return None
+    return DUMP_FINDER_INSTANCE
+
+
+@app.route("/api/dump/search", methods=["POST"])
+def api_dump_search():
+    """
+    Execute a Dump Finder search — busca URLs con dumps de credenciales,
+    extrae email:pass, filtra por fecha, guarda en disco.
+
+    Body: {
+        "keyword": "comcast",
+        "year": 2023,
+        "month": null,
+        "date_from": null,
+        "date_to": null,
+        "max_dorks": 15,
+        "max_fetches": 10,
+        "save_to_disk": true
+    }
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+
+    finder = _get_dump_finder()
+    if not finder:
+        return jsonify({"success": False, "error": "DumpFinder not available"}), 500
+
+    try:
+        result = finder.search(
+            keyword=keyword,
+            year=data.get("year"),
+            month=data.get("month"),
+            date_from=data.get("date_from"),
+            date_to=data.get("date_to"),
+            max_dorks=data.get("max_dorks", 15),
+            max_fetches=data.get("max_fetches", 10),
+            save_to_disk=data.get("save_to_disk", True),
+        )
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        logger.exception("Dump search error")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # ─── Main ────────────────────────────────────────────────────

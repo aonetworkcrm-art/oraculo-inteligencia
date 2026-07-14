@@ -316,6 +316,7 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
       <a class="sidebar-item" data-section="history"><span class="icon">🕐</span><span>Historial</span></a>
       
       <div class="sidebar-section">Operaciones</div>
+      <a class="sidebar-item" data-section="dump"><span class="icon">🗄️</span><span>Dump Finder</span><span class="badge" id="sidebarDumpCount">0</span></a>
       <a class="sidebar-item" data-section="deploy"><span class="icon">🚀</span><span>Despliegue</span><span class="badge badge-green" id="sidebarDeployStatus">En vivo</span></a>
       
       <div class="sidebar-section">Sistema</div>
@@ -605,6 +606,107 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
             <div id="historyStats">
               <div class="empty-state" style="padding:10px"><p>Datos disponibles después de varias búsquedas</p></div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: DUMP FINDER ═══ -->
+      <section class="sec" id="sec-dump">
+        <div class="sec-title">🗄️ Dump Finder — Buscador de Bases de Datos Filtradas</div>
+        
+        <div class="search-panel">
+          <div class="search-bar">
+            <input type="text" id="dumpKeyword" placeholder='Ej: comcast, verizon, at&t, netflix, spotify...' onkeydown="if(event.key==='Enter')executeDumpSearch()">
+            <select id="dumpYear" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:11px;border-radius:var(--radius-sm);outline:none;cursor:pointer">
+              <option value="">📅 Todos los años</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+            <select id="dumpMonth" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:11px;border-radius:var(--radius-sm);outline:none;cursor:pointer">
+              <option value="">🌙 Todos los meses</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+            <button id="dumpBtn" onclick="executeDumpSearch()" style="background:linear-gradient(135deg,var(--red),var(--orange));color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;display:flex;align-items:center;gap:6px">
+              <span class="spinner" id="dumpSpinner" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:radarSpin 0.8s linear infinite"></span>
+              <span>🗄️ Buscar Dumps</span>
+            </button>
+          </div>
+          <div class="search-options" style="margin-top:10px">
+            <label><input type="checkbox" id="dumpSaveDisk" checked> 💾 Guardar en disco</label>
+            <span style="color:var(--text3);font-size:8px">data/{keyword}/{año}/{mes}/</span>
+            <span style="color:var(--text3);font-size:8px;margin-left:12px">🔍 Busca URLs con email:pass · Google + Bing · 30+ dorks</span>
+          </div>
+          <div class="scanning-bar" id="dumpScanBar"><div class="fill" id="dumpScanFill"></div></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-panel" id="dumpResults">
+          <div class="results-header">
+            <div class="left">
+              <span id="dumpResultsKeyword"></span>
+              <span id="dumpResultsCount" style="background:var(--bg3);padding:2px 10px;border-radius:10px"></span>
+              <span id="dumpResultsTime" style="color:var(--text3);font-size:9px"></span>
+            </div>
+            <div class="right">
+              <button class="filter-btn" onclick="exportDumpResults()">📥 Exportar Dump</button>
+            </div>
+          </div>
+
+          <div class="kpi-row" style="margin-bottom:12px">
+            <div class="kpi-card err" style="padding:10px 14px"><div class="kpi-label">Dorks Ejecutados</div><div class="kpi-value" id="dumpDorksCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card warn" style="padding:10px 14px"><div class="kpi-label">URLs Encontradas</div><div class="kpi-value" id="dumpUrlsCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card info" style="padding:10px 14px"><div class="kpi-label">URLs Fetchadas</div><div class="kpi-value" id="dumpFetchedCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card accent" style="padding:10px 14px"><div class="kpi-label">Combos Encontrados</div><div class="kpi-value" id="dumpCombosCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card cyber" style="padding:10px 14px"><div class="kpi-label">Tiempo</div><div class="kpi-value" id="dumpTookCount" style="font-size:18px">—</div></div>
+          </div>
+
+          <!-- Top URLs Found -->
+          <div class="stat-card" style="margin-bottom:14px">
+            <h4>🔗 Top URLs Encontradas</h4>
+            <div id="dumpUrlsList"><div class="empty-state" style="padding:5px"><p>Ejecuta una búsqueda para ver URLs</p></div></div>
+          </div>
+
+          <!-- Sample Combos Table -->
+          <div class="table-wrap">
+            <table class="records" id="dumpTable">
+              <thead>
+                <tr>
+                  <th>Email / Usuario</th><th>Contraseña</th><th>Dominio</th><th>Fuente</th><th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="dumpBody">
+                <tr><td colspan="5" class="empty">🗄️ Ejecuta una búsqueda de dumps para ver resultados</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid" style="margin-top:16px">
+          <div class="stat-card">
+            <h4>📊 Por Fuente</h4>
+            <div id="dumpBySource"><div class="empty-state" style="padding:5px"><p>Ejecuta búsqueda</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>🌐 Top Dominios</h4>
+            <div id="dumpByDomain"><div class="empty-state" style="padding:5px"><p>Ejecuta búsqueda</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>📁 Archivos Guardados</h4>
+            <div id="dumpSavedFiles"><div class="empty-state" style="padding:5px"><p>Ejecuta búsqueda con guardado activado</p></div></div>
           </div>
         </div>
       </section>

@@ -1341,6 +1341,163 @@ async function executeAutoPopulate() {
   }
 }
 
+// ─── Dump Finder ───
+let dumpData = [];
+
+async function executeDumpSearch() {
+  const keyword = document.getElementById('dumpKeyword').value.trim();
+  if (!keyword) { showToast('❌ Ingresa una palabra clave', 'var(--red)'); return; }
+  
+  const year = document.getElementById('dumpYear').value;
+  const month = document.getElementById('dumpMonth').value;
+  const saveToDisk = document.getElementById('dumpSaveDisk').checked;
+  
+  const btn = document.getElementById('dumpBtn');
+  const spinner = document.getElementById('dumpSpinner');
+  const scanBar = document.getElementById('dumpScanBar');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  scanBar.classList.add('active');
+  document.getElementById('dumpResults').classList.remove('active');
+  
+  try {
+    const body = {
+      keyword,
+      year: year ? parseInt(year) : null,
+      month: month ? parseInt(month) : null,
+      max_dorks: 15,
+      max_fetches: 10,
+      save_to_disk: saveToDisk,
+    };
+    
+    const resp = await fetch('/api/dump/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120000),
+    });
+    
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+    if (!json.success) throw new Error(json.error || 'API error');
+    
+    renderDumpResults(json.data, keyword);
+    const total = json.data.filtered_combos_count || 0;
+    showToast(`✅ ${total} combos encontrados para "${keyword}"`, 'var(--green)');
+  } catch (err) {
+    console.error('Dump search error:', err);
+    showToast('❌ Error: ' + err.message, 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    scanBar.classList.remove('active');
+  }
+}
+
+function renderDumpResults(data, keyword) {
+  dumpData = data.combos_sample || [];
+  
+  // Header
+  document.getElementById('dumpResultsKeyword').innerHTML = `🗄️ <strong>"${escapeHtml(keyword)}"</strong>`;
+  document.getElementById('dumpResultsCount').textContent = `${data.filtered_combos_count || 0} combos filtrados`;
+  document.getElementById('dumpResultsTime').textContent = `· ${data.took_seconds || '—'}s`;
+  
+  // KPIs
+  animateValue('dumpDorksCount', data.dorks_executed || 0);
+  animateValue('dumpUrlsCount', data.urls_found || 0);
+  animateValue('dumpFetchedCount', data.urls_fetched || 0);
+  animateValue('dumpCombosCount', data.filtered_combos_count || 0);
+  document.getElementById('dumpTookCount').textContent = (data.took_seconds || '—') + 's';
+  
+  // Sidebar badge
+  document.getElementById('sidebarDumpCount').textContent = data.filtered_combos_count || 0;
+  
+  // Top URLs
+  const urls = data.top_urls || [];
+  const urlsContainer = document.getElementById('dumpUrlsList');
+  if (urls.length === 0) {
+    urlsContainer.innerHTML = '<div class="empty-state" style="padding:5px"><p>No se encontraron URLs</p></div>';
+  } else {
+    urlsContainer.innerHTML = urls.map((u, i) => {
+      const maxUrl = 80;
+      const displayUrl = u.url.length > maxUrl ? u.url.substring(0, maxUrl) + '...' : u.url;
+      return `<div class="stat-row" style="font-size:9px">
+        <span style="color:var(--text3);width:20px">${i+1}.</span>
+        <span class="lb" style="max-width:100%;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);font-size:8px;color:var(--accent2)" title="${escapeHtml(u.url)}">${escapeHtml(displayUrl)}</span>
+        <span class="vl" style="font-size:7px;color:var(--text3)">${escapeHtml(u.source || '')}</span>
+      </div>`;
+    }).join('');
+  }
+  
+  // Combos table
+  const tbody = document.getElementById('dumpBody');
+  if (dumpData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">🔍 No se encontraron combos con los filtros actuales</td></tr>';
+  } else {
+    tbody.innerHTML = dumpData.map(c => {
+      const pwHidden = c.password ? (c.password.length > 15 ? c.password.substring(0, 12) + '***' : c.password) : '—';
+      return `<tr>
+        <td class="email-cell">${escapeHtml(c.email || '—')}</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--text2)">${escapeHtml(pwHidden)}</td>
+        <td class="domain">${escapeHtml(c.domain || '—')}</td>
+        <td class="source-cell">${escapeHtml(c.source || c.source_type || '—')}</td>
+        <td class="date-cell">${escapeHtml(c.date || c.discovered_date || '—')}</td>
+      </tr>`;
+    }).join('');
+  }
+  
+  document.getElementById('dumpResults').classList.add('active');
+  
+  // By source
+  const bySource = data.stats?.by_source || {};
+  document.getElementById('dumpBySource').innerHTML = Object.entries(bySource)
+    .sort((a,b) => b[1] - a[1])
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:5px"><p>Sin datos</p></div>';
+  
+  // By domain
+  const byDomain = data.stats?.by_domain || {};
+  document.getElementById('dumpByDomain').innerHTML = Object.entries(byDomain)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:5px"><p>Sin datos</p></div>';
+  
+  // Saved files
+  const files = data.files_saved?.files_created || [];
+  const savedContainer = document.getElementById('dumpSavedFiles');
+  if (files.length > 0) {
+    savedContainer.innerHTML = files.map(f => {
+      const relativePath = f.replace(/.*\\data\\/, 'data/').replace(/\\/g, '/');
+      return `<div class="stat-row" style="font-size:8px">
+        <span class="lb" style="font-family:var(--mono);color:var(--green)">📄</span>
+        <span class="vl" style="font-size:8px;font-family:var(--mono);color:var(--text2)">${escapeHtml(relativePath)}</span>
+      </div>`;
+    }).join('');
+    savedContainer.innerHTML += `<div class="stat-row"><span class="lb">Total guardados</span><span class="vl accent">${data.files_saved?.total_saved || 0}</span></div>`;
+  } else {
+    savedContainer.innerHTML = '<div class="empty-state" style="padding:5px"><p>No se guardaron archivos (desactivado o sin resultados)</p></div>';
+  }
+}
+
+function exportDumpResults() {
+  if (dumpData.length === 0) { showToast('❌ No hay datos para exportar', 'var(--red)'); return; }
+  
+  const csv = ['email,password,dominio,fuente,fecha'];
+  dumpData.forEach(c => {
+    csv.push(`"${c.email || ''}","${c.password || ''}","${c.domain || ''}","${c.source || c.source_type || ''}","${c.date || c.discovered_date || ''}"`);
+  });
+  
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  const kw = document.getElementById('dumpKeyword').value.trim() || 'dump';
+  link.download = `dump_${kw}_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  showToast(`📥 Exportados ${dumpData.length} combos a CSV`, 'var(--accent2)');
+}
+
+
 // ─── Init ───
 document.addEventListener('DOMContentLoaded', () => {
   updateDashboardKPIs();

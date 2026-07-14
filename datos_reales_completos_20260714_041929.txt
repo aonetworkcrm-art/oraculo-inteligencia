@@ -1,0 +1,344 @@
+================================================================================
+  🛸  ORÁCULO DE INTELIGENCIA — EXTRACCIÓN DE DATOS REALES
+  Fecha: 2026-07-14 04:19:29
+  API: https://oraculo-inteligencia.onrender.com
+================================================================================
+
+╔══════════════════════════════════════════════════════════════╗
+║  📧 HUNTER.IO — EMAILS REALES POR DOMINIO                  ║
+╚══════════════════════════════════════════════════════════════╝
+
+  comcast.com — 10 emails
+    📧 jackie_broadbent@comcast.com                  conf:99%  tipo:personal  cargo:Director of Human Resources
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jackie%20broadbent%20comcast
+    📧 felix_nwokolo@comcast.com                     conf:99%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20felix%20nwokolo%20comcast
+    📧 arthy_bagavathyram@comcast.com                conf:99%  tipo:personal  cargo:Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20arthy%20bagavathyram%20comcast
+    📧 anna_lesovitz@comcast.com                     conf:99%  tipo:personal  cargo:Vice President
+       fuente: https://www.google.com/search?q=site:linkedin.com%20anna%20lesovitz%20comcast
+    📧 lucas_quagliata@comcast.com                   conf:99%  tipo:personal  cargo:Director of Partnerships
+       fuente: https://www.google.com/search?q=site:linkedin.com%20lucas%20quagliata%20comcast
+    📧 james_scott@comcast.com                       conf:99%  tipo:personal  cargo:Senior Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20james%20scott%20comcast
+    📧 david_misovski@comcast.com                    conf:99%  tipo:personal  cargo:Director of Sales Compensation
+       fuente: https://www.google.com/search?q=site:linkedin.com%20david%20misovski%20comcast
+    📧 sean_smith@comcast.com                        conf:99%  tipo:personal  cargo:Vice President, Finance
+       fuente: https://www.google.com/search?q=site:linkedin.com%20sean%20smith%20comcast
+    📧 michael_johnson@comcast.com                   conf:99%  tipo:personal  cargo:Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20michael%20johnson%20comcast
+    📧 april_jones@comcast.com                       conf:99%  tipo:personal  cargo:Director of Production
+       fuente: https://www.google.com/search?q=site:linkedin.com%20april%20jones%20comcast
+
+  xfinity.com — 10 emails
+    📧 jhonatan@xfinity.com                          conf:99%  tipo:personal  cargo:General Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jhonatan%20arroyo%20xfinity
+    📧 ismael@xfinity.com                            conf:99%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20ismael%20torres%20xfinity
+    📧 bradford@xfinity.com                          conf:99%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20troy%20bradford%20xfinity
+    📧 stefano@xfinity.com                           conf:99%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20stefano%20trejo%20xfinity
+    📧 andrea@xfinity.com                            conf:99%  tipo:personal  cargo:Escalation Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20andrea%20coptis%20xfinity
+    📧 zeric@xfinity.com                             conf:99%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20zeric%20hiyas%20xfinity
+    📧 kaileigh@xfinity.com                          conf:99%  tipo:personal  cargo:Customer Service Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20kaileigh%20o%20xfinity
+    📧 richard@xfinity.com                           conf:98%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20richard%20barela%20xfinity
+    📧 timothy@xfinity.com                           conf:98%  tipo:personal  cargo:Senior Quality Assurance Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20nida%20azk%20xfinity
+    📧 jacob@xfinity.com                             conf:98%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jacob%20williams%20xfinity
+
+  verizon.com — 10 emails
+    📧 ken.l@verizon.com                             conf:99%  tipo:personal  cargo:Senior Vice President
+       fuente: https://www.google.com/search?q=site:linkedin.com%20ken%20lain%20verizon
+    📧 joshua.berk@verizon.com                       conf:99%  tipo:personal  cargo:Associate Director of Quality Assurance
+       fuente: https://www.google.com/search?q=site:linkedin.com%20josh%20berk%20verizon
+    📧 tomas.nieves@verizon.com                      conf:99%  tipo:personal  cargo:Product Owner
+       fuente: https://www.google.com/search?q=site:linkedin.com%20tomas%20nieves%20verizon
+    📧 samuel.cameron@verizon.com                    conf:99%  tipo:personal  cargo:Director, AI Security Operations
+       fuente: https://www.google.com/search?q=site:linkedin.com%20samuel%20cameron%20verizon
+    📧 phaniraju.komarlu@verizon.com                 conf:99%  tipo:personal  cargo:Director of Digital Sales
+       fuente: https://www.google.com/search?q=site:linkedin.com%20phaniraju%20komarlu%20verizon
+    📧 ahad.moten@verizon.com                        conf:99%  tipo:personal  cargo:Client Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20ahad%20moten%20verizon
+    📧 shakeel.hye@verizon.com                       conf:99%  tipo:personal  cargo:Director of Data Engineering
+       fuente: https://www.google.com/search?q=site:linkedin.com%20shakeel%20hye%20verizon
+    📧 erick.garcia@verizon.com                      conf:99%  tipo:personal  cargo:Director - Network Assurance
+       fuente: https://www.google.com/search?q=site:linkedin.com%20erick%20garcia%20verizon
+    📧 tuere.watson@verizon.com                      conf:99%  tipo:personal  cargo:Client Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20tuere%20watson%20verizon
+    📧 colleenc@verizon.com                          conf:99%  tipo:personal  cargo:Senior Vice President
+       fuente: https://www.google.com/search?q=site:linkedin.com%20colleen%20cunniffe%20verizon
+
+  att.com — 10 emails
+    📧 shaun.hoff@att.com                            conf:85%  tipo:personal  cargo:Client Solutions Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20shaun%20hoff%20att
+    📧 ryan.chudy@att.com                            conf:85%  tipo:personal  cargo:Fiber Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20ryan%20chudy%20att
+    📧 jacob.paulk@att.com                           conf:85%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jacob%20paulk%20att
+    📧 indu.dugan@att.com                            conf:85%  tipo:personal  cargo:Director Advanced Analytics
+       fuente: https://www.google.com/search?q=site:linkedin.com%20indu%20dugan%20att
+    📧 matt.quest@att.com                            conf:85%  tipo:personal  cargo:Regional Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20matt%20quest%20att
+    📧 anabela.carrino@att.com                       conf:85%  tipo:personal  cargo:Service Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20anabela%20carrino%20att
+    📧 leatrice.sasnett@att.com                      conf:85%  tipo:personal  cargo:Head Basketball Coach
+       fuente: https://www.google.com/search?q=site:linkedin.com%20leatrice%20sasnett%20att
+    📧 melisa.moreno@att.com                         conf:85%  tipo:personal  cargo:Chief of Staff
+       fuente: https://www.google.com/search?q=site:linkedin.com%20melisa%20moreno%20att
+    📧 jordan.zilton@att.com                         conf:85%  tipo:personal  cargo:Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jordan%20zilton%20att
+    📧 cyndrika.brown@att.com                        conf:85%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20cyndrika%20brown%20att
+
+  sbcglobal.net — 0 emails
+
+  centurylink.com — 10 emails
+    📧 dean.ehler@centurylink.com                    conf:99%  tipo:personal  cargo:Director of Solutions Architecture
+       fuente: https://www.google.com/search?q=site:linkedin.com%20dean%20ehler%20centurylink
+    📧 gerri.mccormick@centurylink.com               conf:99%  tipo:personal  cargo:Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20gerri%20mccormick%20centurylink
+    📧 bhickey@centurylink.com                       conf:99%  tipo:personal  cargo:Sales Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20bud%20hickey%20centurylink
+    📧 andy.profita@centurylink.com                  conf:99%  tipo:personal  cargo:Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20andy%20profita%20centurylink
+    📧 robert.bell@centurylink.com                   conf:99%  tipo:personal  cargo:Sales Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20robert%20bell%20centurylink
+    📧 amol.moghe@centurylink.com                    conf:99%  tipo:personal  cargo:Senior Director of Data Analytics
+       fuente: https://www.google.com/search?q=site:linkedin.com%20amol%20moghe%20centurylink
+    📧 aaron.turner@centurylink.com                  conf:99%  tipo:personal  cargo:Office Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20aaron%20turner%20centurylink
+    📧 larae.dodson@centurylink.com                  conf:99%  tipo:personal  cargo:Vice President of Real Estate
+       fuente: https://www.google.com/search?q=site:linkedin.com%20larae%20dodson%20centurylink
+    📧 richard.fernandez@centurylink.com             conf:99%  tipo:personal  cargo:Director of Product Management
+       fuente: https://www.google.com/search?q=site:linkedin.com%20richard%20fernandez%20centurylink
+    📧 rob.hicks@centurylink.com                     conf:99%  tipo:personal  cargo:Director of Engineering
+       fuente: https://www.google.com/search?q=site:linkedin.com%20rob%20hicks%20centurylink
+
+  spectrum.com — 10 emails
+    📧 stephen.lance@spectrum.com                    conf:99%  tipo:personal  cargo:VP of Inside Plant
+       fuente: https://www.google.com/search?q=site:linkedin.com%20stephen%20lance%20spectrum
+    📧 melanie.davis@spectrum.com                    conf:99%  tipo:personal  cargo:Director of Operations
+       fuente: https://www.google.com/search?q=site:linkedin.com%20melanie%20davis%20spectrum
+    📧 gabriel.rodas@spectrum.com                    conf:99%  tipo:personal  cargo:Area Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20gabriel%20rodas%20spectrum
+    📧 saikiran.bomidika@spectrum.com                conf:98%  tipo:personal  cargo:Director of Information Technology
+       fuente: https://www.google.com/search?q=site:linkedin.com%20saikiran%20bomidika%20spectrum
+    📧 erik.solorio@spectrum.com                     conf:98%  tipo:personal  cargo:Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20erik%20solorio%20spectrum
+    📧 karen.philipson@spectrum.com                  conf:98%  tipo:personal  cargo:Director of Program Management
+       fuente: https://www.google.com/search?q=site:linkedin.com%20karen%20philipson%20spectrum
+    📧 ashley.griser@spectrum.com                    conf:98%  tipo:personal  cargo:Area Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20ashley%20griser%20spectrum
+    📧 tank.johnson@spectrum.com                     conf:98%  tipo:personal  cargo:Director of Field Services
+       fuente: https://www.google.com/search?q=site:linkedin.com%20tank%20johnson%20spectrum
+    📧 brian.russell@spectrum.com                    conf:98%  tipo:personal  cargo:None
+       fuente: https://www.google.com/search?q=site:linkedin.com%20brian%20russell%20spectrum
+    📧 brandon.hodge@spectrum.com                    conf:97%  tipo:personal  cargo:Sales Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20brandon%20hodge%20spectrum
+
+  microsoft.com — 10 emails
+    📧 florian.schuster@microsoft.com                conf:99%  tipo:personal  cargo:Director of Strategic Partnerships
+       fuente: https://www.google.com/search?q=site:linkedin.com%20florian%20schuster%20microsoft
+    📧 andria.warren@microsoft.com                   conf:99%  tipo:personal  cargo:Creative Operations Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20andria%20warren%20microsoft
+    📧 jbeesley@microsoft.com                        conf:99%  tipo:personal  cargo:Director of Business Strategy
+       fuente: https://wwps.microsoft.com/wp-content/uploads/2023/12/transforming-sub-surface-operations.pdf
+    📧 tom.jolly@microsoft.com                       conf:99%  tipo:personal  cargo:Vice President of Engineering
+       fuente: https://usenix.org/conference/nsdi23/fall-accepted-papers
+       fuente: https://usenix.org/conference/nsdi23/technical-sessions
+    📧 mandela.sheaffer@microsoft.com                conf:99%  tipo:personal  cargo:Director of Sales
+       fuente: https://blogs.microsoft.com/chicago/tag/mandela-sheaffer/
+    📧 orlando.escalante@microsoft.com               conf:99%  tipo:personal  cargo:Senior Partner Development Manager
+       fuente: https://ansys.com/ja-jp/partner-ecosystem/high-performance-computing-partners/microsoft-azure
+       fuente: https://ansys.com/ko-kr/partner-ecosystem/high-performance-computing-partners/microsoft-azure
+    📧 jack.kelly@microsoft.com                      conf:99%  tipo:personal  cargo:Director of AI
+       fuente: https://lakecountypurchasingportal.com/procurement-opportunities/purchasing/contracting-opportunities/lake-county-enterprise-resource-planning-erp-modernization-initiative
+    📧 mariagalvez@microsoft.com                     conf:99%  tipo:personal  cargo:Chief Marketing Officer
+       fuente: https://pulse.microsoft.com/da-dk/work-productivity-da-dk/na/fa1-hybrid-work-en-arbejdsplads-med-det-bedste-fra-begge-verdener
+    📧 lieke.meeuwissen@microsoft.com                conf:99%  tipo:personal  cargo:Partner Solutions Sales Manager
+       fuente: https://pulse.microsoft.com/en/author/lieke-meeuwissen
+       fuente: https://pastebin.pl/view/a84df80a
+    📧 lars.meinecke@microsoft.com                   conf:99%  tipo:personal  cargo:Chief Technology Officer
+       fuente: https://bdl.leasingverband.de/fileadmin/downloads/bdl-forum-digitalisierung-cloud-computing-im-leasing.pdf
+
+  google.com — 10 emails
+    📧 kabeertandon@google.com                       conf:85%  tipo:personal  cargo:Strategic Partner Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20kabeer%20tandon%20google
+    📧 keristenb@google.com                          conf:85%  tipo:personal  cargo:Director of Business Development
+       fuente: https://www.google.com/search?q=site:linkedin.com%20keristen%20barbosa%20google
+    📧 mbeeninga@google.com                          conf:85%  tipo:personal  cargo:Head of GTM Strategy and Operations
+       fuente: https://www.google.com/search?q=site:linkedin.com%20matt%20beeninga%20google
+    📧 prachitaneja@google.com                       conf:85%  tipo:personal  cargo:Strategic Partner Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20prachi%20taneja%20google
+    📧 clevens@google.com                            conf:85%  tipo:personal  cargo:Head of Education
+       fuente: https://www.google.com/search?q=site:linkedin.com%20caroline%20levens%20google
+    📧 copelandi@google.com                          conf:85%  tipo:personal  cargo:Head of Partnerships
+       fuente: https://www.google.com/search?q=site:linkedin.com%20copeland%20isaacson%20google
+    📧 toshisattler@google.com                       conf:85%  tipo:personal  cargo:Key Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20toshi%20sattler%20google
+    📧 erykaw@google.com                             conf:85%  tipo:personal  cargo:Chief Technology Officer
+       fuente: https://www.google.com/search?q=site:linkedin.com%20eryka%20wetherall%20google
+    📧 vidurs@google.com                             conf:85%  tipo:personal  cargo:Chief of Staff
+       fuente: https://www.google.com/search?q=site:linkedin.com%20vidur%20sehgal%20google
+    📧 flaw@google.com                               conf:85%  tipo:personal  cargo:Head of Partnerships
+       fuente: https://www.google.com/search?q=site:linkedin.com%20fiona%20law%20google
+
+  apple.com — 10 emails
+    📧 bpark@apple.com                               conf:99%  tipo:personal  cargo:Director of Engineering
+       fuente: https://www.google.com/search?q=site:linkedin.com%20brian%20park%20apple
+    📧 jaewoong_hwang@apple.com                      conf:99%  tipo:personal  cargo:Creative Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20jaewoong%20hwang%20apple
+    📧 dmen@apple.com                                conf:99%  tipo:personal  cargo:Director of Wearables Reliability
+       fuente: https://www.google.com/search?q=site:linkedin.com%20danju%20men%20apple
+    📧 cmarasco@apple.com                            conf:99%  tipo:personal  cargo:Director of Retail Experience Design
+       fuente: https://www.google.com/search?q=site:linkedin.com%20carly%20marasco%20apple
+    📧 p_pelatieri@apple.com                         conf:99%  tipo:personal  cargo:Retail Channel Program Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20pedro%20pelatieri%20apple
+    📧 s_hertz@apple.com                             conf:99%  tipo:personal  cargo:People Business Partner
+       fuente: https://www.google.com/search?q=site:linkedin.com%20stephanie%20hertz%20apple
+    📧 b_voynick@apple.com                           conf:99%  tipo:personal  cargo:Channel Partner Manager
+       fuente: https://www.google.com/search?q=site:linkedin.com%20brian%20voynick%20apple
+    📧 c_wong@apple.com                              conf:99%  tipo:personal  cargo:Chief Executive Officer
+       fuente: https://www.google.com/search?q=site:linkedin.com%20colton%20wong%20apple
+    📧 mohit_talwar@apple.com                        conf:99%  tipo:personal  cargo:Director of Engineering
+       fuente: https://www.google.com/search?q=site:linkedin.com%20mohit%20talwar%20apple
+    📧 scotto@apple.com                              conf:99%  tipo:personal  cargo:Director of Partnerships
+       fuente: https://www.google.com/search?q=site:linkedin.com%20scott%20ogrodnik%20apple
+
+  facebook.com — 0 emails
+
+  linkedin.com — 10 emails
+    📧 dmaurath@linkedin.com                         conf:99%  tipo:personal  cargo:Director of People Analytics
+       fuente: https://www.google.com/search?q=site:linkedin.com%20daniel%20maurath%20linkedin
+    📧 skerwin@linkedin.com                          conf:99%  tipo:personal  cargo:Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20seamus%20kerwin%20linkedin
+    📧 dbalgrove@linkedin.com                        conf:99%  tipo:personal  cargo:Account Director, Sales Solutions
+       fuente: https://www.google.com/search?q=site:linkedin.com%20desean%20balgrove%20linkedin
+    📧 nadams@linkedin.com                           conf:99%  tipo:personal  cargo:Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20nicole%20adams%20linkedin
+    📧 vnagaraj@linkedin.com                         conf:99%  tipo:personal  cargo:Director of Retail
+       fuente: https://www.google.com/search?q=site:linkedin.com%20vimal%20nagaraj%20linkedin
+    📧 mhirwani@linkedin.com                         conf:99%  tipo:personal  cargo:Global Client Executive
+       fuente: https://www.google.com/search?q=site:linkedin.com%20mallika%20hirwani%20linkedin
+    📧 cbrocchieri@linkedin.com                      conf:99%  tipo:personal  cargo:Account Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20clarissa%20brocchieri%20linkedin
+    📧 cbradstreet@linkedin.com                      conf:99%  tipo:personal  cargo:Client Director
+       fuente: https://www.google.com/search?q=site:linkedin.com%20chris%20bradstreet%20linkedin
+    📧 btejaswita@linkedin.com                       conf:99%  tipo:personal  cargo:Compensation and Benefits Partner
+       fuente: https://www.google.com/search?q=site:linkedin.com%20bagmi%20tejaswita%20linkedin
+    📧 nekbote@linkedin.com                          conf:99%  tipo:personal  cargo:Director of Engineering
+       fuente: https://www.google.com/search?q=site:linkedin.com%20niranjan%20ekbote%20linkedin
+
+╔══════════════════════════════════════════════════════════════╗
+║  🦠 VIRUSTOTAL — ANÁLISIS DE AMENAZAS                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+  comcast.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     59
+    Reputación:  -1
+
+  xfinity.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     59
+    Reputación:  -2
+    Categorías:  Business/Economy, Information Technology (alphaMountain.ai), business, general business, business and economy, telecommunications
+
+  verizon.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     56
+    Reputación:  0
+    Categorías:  business, general business, business and economy, telecommunications
+
+  att.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     57
+    Reputación:  -2
+    Categorías:  business, general business, business and economy, telecommunications
+
+  sbcglobal.net
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     56
+    Reputación:  -3
+
+  centurylink.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     57
+    Reputación:  -1
+    Categorías:  business, information technology, business and economy
+
+  spectrum.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     58
+    Reputación:  -1
+
+  microsoft.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     58
+    Reputación:  48
+    Categorías:  Business/Economy, Information Technology (alphaMountain.ai), computersandsoftware, information technology, information technology
+
+  google.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     62
+    Reputación:  711
+    Categorías:  Information Technology (alphaMountain.ai), business, information technology, search engines and portals
+
+  apple.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     58
+    Reputación:  83
+    Categorías:  Business/Economy, Information Technology (alphaMountain.ai), computersandsoftware, information technology, application and software download, computing & technology
+
+  facebook.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     60
+    Reputación:  166
+
+  linkedin.com
+    Maliciosos:  0
+    Sospechosos: 0
+    Limpios:     58
+    Reputación:  6
+    Categorías:  Business/Economy, Social Networking (alphaMountain.ai), business, business networking, social web - linkedin
+
+╔══════════════════════════════════════════════════════════════╗
+║  🌐 CENSYS — DISPOSITIVOS EXPUESTOS                        ║
+╚══════════════════════════════════════════════════════════════╝
+
+  comcast.com — 0 hosts
+
+  xfinity.com — 0 hosts
+
+  verizon.com — 0 hosts
+
+  att.com — 0 hosts
+
+  sbcglobal.net — 0 hosts
+
+================================================================================
+  📊 RESUMEN GENERAL
+================================================================================
+
+  📧 Emails descubiertos:  100 en 10 dominios
+  🦠 Dominios maliciosos:  0 detecciones
+  🌐 Hosts en Censys:     0
+
+  🕐 Extracción completada: 2026-07-14 04:19:29

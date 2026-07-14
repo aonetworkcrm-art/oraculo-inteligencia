@@ -1,0 +1,127 @@
+{
+  "comcast.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 59,
+    "reputation": -1,
+    "categories": []
+  },
+  "xfinity.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 59,
+    "reputation": -2,
+    "categories": [
+      "Business/Economy, Information Technology (alphaMountain.ai)",
+      "business",
+      "general business",
+      "business and economy",
+      "telecommunications"
+    ]
+  },
+  "verizon.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 56,
+    "reputation": 0,
+    "categories": [
+      "business",
+      "general business",
+      "business and economy",
+      "telecommunications"
+    ]
+  },
+  "att.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 57,
+    "reputation": -2,
+    "categories": [
+      "business",
+      "general business",
+      "business and economy",
+      "telecommunications"
+    ]
+  },
+  "sbcglobal.net": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 56,
+    "reputation": -3,
+    "categories": []
+  },
+  "centurylink.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 57,
+    "reputation": -1,
+    "categories": [
+      "business",
+      "information technology",
+      "business and economy"
+    ]
+  },
+  "spectrum.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 58,
+    "reputation": -1,
+    "categories": []
+  },
+  "microsoft.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 58,
+    "reputation": 48,
+    "categories": [
+      "Business/Economy, Information Technology (alphaMountain.ai)",
+      "computersandsoftware",
+      "information technology",
+      "information technology"
+    ]
+  },
+  "google.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 62,
+    "reputation": 711,
+    "categories": [
+      "Information Technology (alphaMountain.ai)",
+      "business",
+      "information technology",
+      "search engines and portals"
+    ]
+  },
+  "apple.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 58,
+    "reputation": 83,
+    "categories": [
+      "Business/Economy, Information Technology (alphaMountain.ai)",
+      "computersandsoftware",
+      "information technology",
+      "application and software download",
+      "computing & technology"
+    ]
+  },
+  "facebook.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 60,
+    "reputation": 166,
+    "categories": []
+  },
+  "linkedin.com": {
+    "malicious": 0,
+    "suspicious": 0,
+    "harmless": 58,
+    "reputation": 6,
+    "categories": [
+      "Business/Economy, Social Networking (alphaMountain.ai)",
+      "business",
+      "business networking",
+      "social web - linkedin"
+    ]
+  }
+}
