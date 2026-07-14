@@ -7,7 +7,7 @@
     "step_3_configure": {
       "monitor_type": "HTTP(s)",
       "friendly_name": "Oráculo de Inteligencia",
-      "url": "https://TU-APP.onrender.com/api/stats",
+      "url": "https://oraculo-inteligencia.onrender.com/api/ping",
       "interval_minutes": 5,
       "timeout_seconds": 30,
       "alert_contacts": "(opcional) tu email o Telegram para notificaciones si la app cae"
