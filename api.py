@@ -1247,42 +1247,23 @@ DUMP_FINDER_FAILED = False
 DUMP_FINDER_LOCK = threading.Lock()
 
 def _get_dump_finder():
-    """Lazy-load the DumpFinder singleton with timeout + sentinel + lock."""
+    """Lazy-load the DumpFinder singleton with safe try/except (no threads)."""
     global DUMP_FINDER_INSTANCE, DUMP_FINDER_FAILED
     if DUMP_FINDER_FAILED:
         return None
     if DUMP_FINDER_INSTANCE is None:
         with DUMP_FINDER_LOCK:
-            # Double-check after acquiring lock
             if DUMP_FINDER_INSTANCE is not None:
                 return DUMP_FINDER_INSTANCE
             if DUMP_FINDER_FAILED:
                 return None
-            import threading
-            result = [None]
-            error = [None]
-            done = threading.Event()
-            
-            def _init():
-                try:
-                    result[0] = DumpFinder()
-                except Exception as e:
-                    error[0] = e
-                finally:
-                    done.set()
-            
-            t = threading.Thread(target=_init, daemon=True)
-            t.start()
-            if not done.wait(timeout=12):  # 12s timeout para init
-                logger.error("🛡️ DumpFinder init timed out (>12s)")
+            try:
+                DUMP_FINDER_INSTANCE = DumpFinder()
+                logger.info("🛡️ DumpFinder initialized")
+            except Exception as e:
+                logger.error(f"🛡️ DumpFinder init error: {e}")
                 DUMP_FINDER_FAILED = True
                 return None
-            if error[0]:
-                logger.error(f"🛡️ DumpFinder init error: {error[0]}")
-                DUMP_FINDER_FAILED = True
-                return None
-            DUMP_FINDER_INSTANCE = result[0]
-            logger.info("🛡️ DumpFinder initialized")
     return DUMP_FINDER_INSTANCE
 
 
