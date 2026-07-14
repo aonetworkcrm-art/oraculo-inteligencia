@@ -1126,8 +1126,8 @@ def _get_dump_finder():
         
         t = threading.Thread(target=_init, daemon=True)
         t.start()
-        if not done.wait(timeout=8):
-            logger.error("🛡️ DumpFinder init timed out (>8s)")
+        if not done.wait(timeout=12):  # 12s timeout para init
+            logger.error("🛡️ DumpFinder init timed out (>12s)")
             DUMP_FINDER_FAILED = True
             return None
         if error[0]:
@@ -1142,19 +1142,8 @@ def _get_dump_finder():
 @app.route("/api/dump/search", methods=["POST"])
 def api_dump_search():
     """
-    Execute a Dump Finder search — busca URLs con dumps de credenciales,
-    extrae email:pass, filtra por fecha, guarda en disco.
-
-    Body: {
-        "keyword": "comcast",
-        "year": 2023,
-        "month": null,
-        "date_from": null,
-        "date_to": null,
-        "max_dorks": 15,
-        "max_fetches": 10,
-        "save_to_disk": true
-    }
+    Execute a Dump Finder search.
+    Uses search_fast() = cache hit → instant, cache miss → DuckDuckGo only.
     """
     data = request.get_json(silent=True) or {}
     keyword = data.get("keyword", "").strip()
@@ -1167,14 +1156,13 @@ def api_dump_search():
         return jsonify({"success": False, "error": "DumpFinder not available"}), 500
 
     try:
-        result = finder.search(
+        # Usar search_fast siempre (cache + DuckDuckGo)
+        result = finder.search_fast(
             keyword=keyword,
             year=data.get("year"),
             month=data.get("month"),
             date_from=data.get("date_from"),
             date_to=data.get("date_to"),
-            max_dorks=data.get("max_dorks", 15),
-            max_fetches=data.get("max_fetches", 10),
             save_to_disk=data.get("save_to_disk", True),
         )
         return jsonify({"success": True, "data": result})
@@ -1186,17 +1174,8 @@ def api_dump_search():
 @app.route("/api/dump/export", methods=["GET"])
 def api_dump_export():
     """
-    Export ALL filtered combos in TXT, CSV, or JSON format.
-    Unlike /api/dump/search which returns max 50 samples, this returns EVERYTHING.
-
-    Query params:
-        keyword (required): Search term
-        fmt (default: "txt"): Export format — "txt", "csv", or "json"
-        year: Filter by year (e.g., 2023)
-        month: Filter by month (1-12)
-        date_from: ISO date start
-        date_to: ISO date end
-        max_fetches: Max URLs to fetch (default 20, higher = more data)
+    Export ALL filtered combos in TXT, CSV, or JSON.
+    Uses search_fast() — cache hit = instant, cache miss = ~15s.
     """
     keyword = request.args.get("keyword", "").strip()
     if not keyword:
@@ -1221,12 +1200,13 @@ def api_dump_export():
             month=int(month_raw) if month_raw else None,
             date_from=request.args.get("date_from"),
             date_to=request.args.get("date_to"),
-            max_dorks=15,
-            max_fetches=int(request.args.get("max_fetches", 20)),
+            max_dorks=5,
+            max_fetches=int(request.args.get("max_fetches", 10)),
         )
 
         mimetypes = {"txt": "text/plain", "csv": "text/csv", "json": "application/json"}
-        filename = f"dump_{keyword}_{fmt}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{fmt}"
+        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"dump_{keyword}_{fmt}_{ts}.{fmt}"
 
         return app.response_class(
             response=content,
@@ -1237,6 +1217,85 @@ def api_dump_export():
     except Exception as e:
         logger.exception("Dump export error")
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/dump/cron", methods=["POST"])
+def api_dump_cron():
+    """
+    Ejecuta búsqueda en background para pre-poblar cache.
+    Diseñado para ser llamado por UptimeRobot o cron job cada 30 min.
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+
+    if not keyword:
+        # Si no hay keyword, ejecutar búsquedas predefinidas
+        predefined = ["comcast", "xfinity", "verizon", "att", "netflix", "spotify", "facebook", "instagram", "tiktok", "paypal"]
+        for kw in predefined:
+            try:
+                finder = _get_dump_finder()
+                if finder:
+                    # Forzar cache miss con parámetros diferentes
+                    logger.info(f"⏰ [CRON] Pre-caching '{kw}'...")
+                    finder.search_fast(keyword=kw, save_to_disk=True)
+            except Exception as e:
+                logger.error(f"⏰ [CRON] Error pre-caching '{kw}': {e}")
+        return jsonify({"success": True, "data": {"message": f"Cron completed for {len(predefined)} keywords"}})
+
+    # Keyword específica
+    finder = _get_dump_finder()
+    if not finder:
+        return jsonify({"success": False, "error": "DumpFinder not available"}), 500
+
+    try:
+        logger.info(f"⏰ [CRON] Searching '{keyword}'...")
+        result = finder.search_fast(keyword=keyword, save_to_disk=True)
+        elapsed = result.get("took_seconds", 0)
+        combos = result.get("filtered_combos_count", 0)
+        if result.get("_from_cache"):
+            logger.info(f"⏰ [CRON] '{keyword}' — CACHE HIT ({combos} combos)")
+        else:
+            logger.info(f"⏰ [CRON] '{keyword}' — {combos} combos en {elapsed}s")
+        return jsonify({
+            "success": True,
+            "data": {
+                "keyword": keyword,
+                "combos": combos,
+                "took_seconds": elapsed,
+                "from_cache": result.get("_from_cache", False),
+                "message": f"Cron completed for '{keyword}' — {combos} combos in {elapsed}s",
+            }
+        })
+    except Exception as e:
+        logger.exception(f"⏰ [CRON] Error for '{keyword}'")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/dump/cache", methods=["GET"])
+def api_dump_cache():
+    """
+    List all cached keywords and their status.
+    """
+    from dump_finder import DiskCache
+    keys = DiskCache.list_keys()
+    return jsonify({
+        "success": True,
+        "data": {
+            "cached_keywords": keys,
+            "total_cached": len(keys),
+        }
+    })
+
+
+@app.route("/api/dump/cache/clear", methods=["POST"])
+def api_dump_cache_clear():
+    """Clear all cached results."""
+    from dump_finder import DiskCache
+    import shutil
+    cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", ".dump_cache")
+    if os.path.exists(cache_dir):
+        shutil.rmtree(cache_dir)
+    return jsonify({"success": True, "data": {"message": "Cache cleared"}})
 
 
 # ─── Main ────────────────────────────────────────────────────

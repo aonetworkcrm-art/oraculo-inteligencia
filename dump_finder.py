@@ -16,6 +16,7 @@ import os
 import re
 import json
 import time
+import hashlib
 import random
 import logging
 from datetime import datetime, timedelta
@@ -334,20 +335,23 @@ class DorkEngine:
         self.rate_limiter = _RateLimiter(requests_per_minute=8)
         self.proxy_mgr = ProxyManager()
 
-    def search(self, dork: str, max_results: int = 10) -> List[Dict[str, str]]:
+    def search(self, dork: str, max_results: int = 10, fast_mode: bool = False) -> List[Dict[str, str]]:
         """
-        Execute a dork query against multiple search engines.
-        Order: DuckDuckGo (no CAPTCHA) → Google → Bing
+        Execute a dork query against search engines.
+        - fast_mode=True: only DuckDuckGo (no CAPTCHA, 2-3s)
+        - fast_mode=False: DuckDuckGo → Google → Bing (15-24s total)
         """
         encoded = quote_plus(dork)
 
         # ── 1. DuckDuckGo (no CAPTCHA, no blocking) ──
         try:
             results = self._search_duckduckgo(encoded, max_results)
-            if results:
+            if results or fast_mode:
                 return results
         except Exception as e:
             logger.debug(f"DuckDuckGo failed: {e}")
+            if fast_mode:
+                return []
 
         _random_delay(0.5, 2.0)
 
@@ -744,6 +748,88 @@ class LocalSaver:
 
 
 # ═══════════════════════════════════════════════════════════════
+#  DISK CACHE — cachea resultados de búsqueda por keyword
+# ═══════════════════════════════════════════════════════════════
+
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", ".dump_cache")
+CACHE_TTL_SECONDS = 3600  # 1 hora
+
+class DiskCache:
+    """Cache de búsquedas en disco. Cache hit = instantáneo."""
+
+    @staticmethod
+    def _cache_key(keyword: str, year=None, month=None) -> str:
+        raw = f"{keyword}_{year}_{month}"
+        return hashlib.md5(raw.encode()).hexdigest()
+
+    @staticmethod
+    def _cache_path(cache_key: str) -> str:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        return os.path.join(CACHE_DIR, f"{cache_key}.json")
+
+    @staticmethod
+    def get(keyword: str, year=None, month=None) -> Optional[Dict[str, Any]]:
+        """Return cached result if exists and fresh."""
+        ck = DiskCache._cache_key(keyword, year, month)
+        path = DiskCache._cache_path(ck)
+        if not os.path.exists(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                cached = json.load(f)
+            cached_at = cached.get("_cached_at", 0)
+            if time.time() - cached_at > CACHE_TTL_SECONDS:
+                logger.info(f"📦 Cache expired for '{keyword}' (>{CACHE_TTL_SECONDS}s)")
+                os.remove(path)
+                return None
+            logger.info(f"📦 Cache HIT for '{keyword}' — {len(cached.get('combos_sample',[]))} combos")
+            return cached
+        except Exception:
+            return None
+
+    @staticmethod
+    def set(keyword: str, result: Dict[str, Any], year=None, month=None):
+        """Store result in cache."""
+        try:
+            ck = DiskCache._cache_key(keyword, year, month)
+            path = DiskCache._cache_path(ck)
+            result["_cached_at"] = time.time()
+            result["_from_cache"] = True
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False, default=str)
+            logger.info(f"📦 Cached result for '{keyword}'")
+        except Exception as e:
+            logger.debug(f"Cache write error: {e}")
+
+    @staticmethod
+    def invalidate(keyword: str, year=None, month=None):
+        """Remove cached result."""
+        ck = DiskCache._cache_key(keyword, year, month)
+        path = DiskCache._cache_path(ck)
+        if os.path.exists(path):
+            os.remove(path)
+
+    @staticmethod
+    def list_keys() -> List[str]:
+        """List all cached keywords."""
+        if not os.path.exists(CACHE_DIR):
+            return []
+        keys = []
+        for fname in os.listdir(CACHE_DIR):
+            if fname.endswith(".json"):
+                try:
+                    with open(os.path.join(CACHE_DIR, fname), "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    kw = data.get("keyword", fname)
+                    age = int(time.time() - data.get("_cached_at", 0))
+                    combos = data.get("filtered_combos_count", 0)
+                    keys.append(f"{kw} ({combos} combos, {age}s ago)")
+                except:
+                    keys.append(fname)
+        return keys
+
+
+# ═══════════════════════════════════════════════════════════════
 #  MAIN DUMP FINDER ENGINE
 # ═══════════════════════════════════════════════════════════════
 
@@ -757,7 +843,8 @@ class DumpFinder:
       3. Parse email:pass combos using ComboParser
       4. Filter by date (year, month, range)
       5. Save to local folders
-      6. Return results
+      6. Cache results on disk
+      7. Return results
     """
 
     def __init__(self):
@@ -774,6 +861,44 @@ class DumpFinder:
         except Exception:
             self.hunter_connector = None
 
+    def search_fast(self,
+                     keyword: str,
+                     year: Optional[int] = None,
+                     month: Optional[int] = None,
+                     date_from: Optional[str] = None,
+                     date_to: Optional[str] = None,
+                     save_to_disk: bool = True) -> Dict[str, Any]:
+        """
+        Búsqueda RÁPIDA — usa cache si existe, si no, ejecuta búsqueda ligera.
+        - Cache hit → instantáneo
+        - Cache miss → solo DuckDuckGo + paste scraping (5 dorks, ~15s)
+        """
+        # 1. Try cache first
+        cached = DiskCache.get(keyword, year, month)
+        if cached:
+            cached["_from_cache"] = True
+            cached["took_seconds"] = 0.01
+            return cached
+
+        # 2. Cache miss — execute fast search
+        result = self.search(
+            keyword=keyword,
+            year=year,
+            month=month,
+            date_from=date_from,
+            date_to=date_to,
+            max_dorks=5,
+            max_fetches=5,
+            save_to_disk=save_to_disk,
+            _fast_mode=True,  # Solo DuckDuckGo sin Google/Bing
+        )
+
+        # 3. Cache the result
+        if result.get("filtered_combos_count", 0) > 0:
+            DiskCache.set(keyword, result, year, month)
+
+        return result
+
     def search(self,
                keyword: str,
                year: Optional[int] = None,
@@ -782,7 +907,8 @@ class DumpFinder:
                date_to: Optional[str] = None,
                max_dorks: int = 15,
                max_fetches: int = 10,
-               save_to_disk: bool = True) -> Dict[str, Any]:
+               save_to_disk: bool = True,
+               _fast_mode: bool = False) -> Dict[str, Any]:
         """
         Execute a complete dump search pipeline.
 
@@ -795,6 +921,7 @@ class DumpFinder:
             max_dorks: Max dork queries to execute
             max_fetches: Max URLs to fetch per dork
             save_to_disk: Save results to local folders
+            _fast_mode: If True, only use DuckDuckGo (skip Google/Bing) for speed
 
         Returns:
             Dict with: keyword, dorks_executed, urls_found, urls_fetched,
@@ -814,7 +941,7 @@ class DumpFinder:
             dork_name = dork_spec["name"]
 
             try:
-                urls = self.dork_engine.search(dork_template, max_results=5)
+                urls = self.dork_engine.search(dork_template, max_results=5, fast_mode=_fast_mode)
                 for u in urls:
                     u["dork_name"] = dork_name
                 all_urls.extend(urls)
@@ -1015,10 +1142,11 @@ class DumpFinder:
                 month: Optional[int] = None,
                 date_from: Optional[str] = None,
                 date_to: Optional[str] = None,
-                max_dorks: int = 15,
-                max_fetches: int = 20) -> str:
+                max_dorks: int = 5,
+                max_fetches: int = 10) -> str:
         """
         Execute a search and export ALL filtered combos in the requested format.
+        Uses search_fast() — cache hit = instant, cache miss = ~15s (DDG only).
         Unlike search() which returns only 50 sample combos, this returns everything.
 
         Args:
@@ -1034,7 +1162,7 @@ class DumpFinder:
         Returns:
             Formatted string in the requested format
         """
-        result = self.search(
+        result = self.search_fast(
             keyword=keyword,
             year=year,
             month=month,
