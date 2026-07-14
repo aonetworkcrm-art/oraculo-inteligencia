@@ -229,6 +229,14 @@ class PasteDirectScraper:
         self.session = requests.Session()
         self.rate_limiter = _RateLimiter(requests_per_minute=20)
         self.proxy_mgr = ProxyManager()
+        # Use Tor proxy when available (global override for all requests)
+        self._tor_proxy = os.environ.get("TOR_PROXY", "")
+
+    def _get_proxies(self):
+        """Get proxy dict — Tor if available, else random from pool."""
+        if self._tor_proxy and TOR_AVAILABLE:
+            return {"http": self._tor_proxy, "https": self._tor_proxy}
+        return self.proxy_mgr.get_random()
 
     def search_pastebin_recent(self, keyword: str, max_results: int = 20) -> List[Dict[str, str]]:
         """
@@ -241,8 +249,8 @@ class PasteDirectScraper:
 
         try:
             self.session.headers.update(_stealth_headers())
-            proxy = self.proxy_mgr.get_random()
-            resp = self.session.get(url, timeout=8, proxies=proxy)
+            proxies = self._get_proxies()
+            resp = self.session.get(url, timeout=8, proxies=proxies)
             if resp.status_code != 200:
                 return []
 
@@ -280,8 +288,8 @@ class PasteDirectScraper:
             url = arch_url.replace("{keyword}", encoded)
             try:
                 self.session.headers.update(_stealth_headers())
-                proxy = self.proxy_mgr.get_random()
-                resp = self.session.get(url, timeout=8, proxies=proxy)
+                proxies = self._get_proxies()
+                resp = self.session.get(url, timeout=8, proxies=proxies)
                 if resp.status_code != 200:
                     continue
                 for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
@@ -316,7 +324,8 @@ class PasteDirectScraper:
             self.rate_limiter.wait(source="pastebin_direct")
             try:
                 self.session.headers.update(_stealth_headers())
-                resp = self.session.get(url, timeout=10)
+                proxies = self._get_proxies()
+                resp = self.session.get(url, timeout=10, proxies=proxies)
                 if resp.status_code != 200:
                     continue
                 # Extraer raw URLs de Pastebin
@@ -416,11 +425,19 @@ class DorkEngine:
         return results
 
     def _stealth_get(self, url: str, timeout: int = 8) -> Optional[requests.Response]:
-        """HTTP GET with full stealth headers + proxy rotation."""
+        """HTTP GET with full stealth headers + proxy rotation.
+        Uses Tor proxy when TOR_PROXY env var is set (global override).
+        Falls back to ProxyManager rotation when Tor is not available."""
         self.session.headers.update(_stealth_headers())
-        proxy = self.proxy_mgr.get_random()
+        # Use Tor as global proxy when available
+        tor = os.environ.get("TOR_PROXY", "")
+        if tor and TOR_AVAILABLE:
+            proxies = {"http": tor, "https": tor}
+        else:
+            proxy = self.proxy_mgr.get_random()
+            proxies = proxy
         try:
-            return self.session.get(url, timeout=timeout, proxies=proxy)
+            return self.session.get(url, timeout=timeout, proxies=proxies)
         except Exception:
             return None
 
@@ -601,13 +618,15 @@ class URLFetcher:
         self.proxy_mgr = ProxyManager()
 
     def fetch(self, url: str, timeout: int = 10, retries: int = 2) -> Optional[str]:
-        """Fetch URL content with retry. Routes .onion/.i2p URLs through Tor."""
+        """Fetch URL content with retry. Routes ALL traffic through Tor when TOR_PROXY is set."""
         is_onion = ".onion" in url.lower() or ".i2p" in url.lower()
+        tor = os.environ.get("TOR_PROXY", "")
+        using_tor = bool(tor and (is_onion or True))  # Use Tor for ALL requests if available
         
         for attempt in range(retries + 1):
             self.rate_limiter.wait(source=f"fetch_{hash(url) % 100}")
             try:
-                if is_onion:
+                if using_tor:
                     # Check Tor availability lazily
                     if not TOR_AVAILABLE:
                         _check_tor()
@@ -616,8 +635,10 @@ class URLFetcher:
                         tor_sess.headers.update(_stealth_headers())
                         resp = tor_sess.get(url, timeout=timeout + 10, verify=False)
                     else:
-                        logger.debug(f"Tor not available, skipping onion URL: {url[:50]}")
-                        return None
+                        logger.debug(f"Tor not available, falling back to direct fetch: {url[:50]}")
+                        self.session.headers.update(_stealth_headers())
+                        proxy = self.proxy_mgr.get_random()
+                        resp = self.session.get(url, timeout=timeout, proxies=proxy)
                 else:
                     self.session.headers.update(_stealth_headers())
                     proxy = self.proxy_mgr.get_random()
@@ -999,6 +1020,15 @@ class DumpFinder:
         """
         start_time = time.time()
         keyword = keyword.strip().lower()
+
+        # ─── Step 0: Check Tor availability (lazy init) ───
+        tor = os.environ.get("TOR_PROXY", "")
+        if tor and not TOR_AVAILABLE:
+            _check_tor()
+            if TOR_AVAILABLE:
+                logger.info(f"🌍 Tor detected — routing ALL traffic through {tor}")
+            else:
+                logger.info("⚠️ TOR_PROXY set but Tor not reachable")
 
         # ─── Step 1a: Execute dorks (Google + Bing + DuckDuckGo) ───
         all_urls = []
