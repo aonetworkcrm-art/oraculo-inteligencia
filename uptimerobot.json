@@ -1,0 +1,39 @@
+{
+  "description": "🚀 UptimeRobot Monitor Config — Mantén el Oráculo despierto 24/7 en Render free",
+  "why": "Render free tier duerme la app tras 15 min sin tráfico. UptimeRobot hace ping cada 5 min y la mantiene activa.",
+  "how_to_setup": {
+    "step_1": "Ve a https://uptimerobot.com y crea una cuenta gratis",
+    "step_2": "Haz clic en 'Add New Monitor'",
+    "step_3_configure": {
+      "monitor_type": "HTTP(s)",
+      "friendly_name": "Oráculo de Inteligencia",
+      "url": "https://TU-APP.onrender.com/api/stats",
+      "interval_minutes": 5,
+      "timeout_seconds": 30,
+      "alert_contacts": "(opcional) tu email o Telegram para notificaciones si la app cae"
+    },
+    "step_4": "Haz clic en 'Create Monitor' — ¡listo!"
+  },
+  "notes": [
+    "UptimeRobot tiene hasta 50 monitores en el plan gratis — más que suficiente.",
+    "También puedes usar BetterUptime (mejor interfaz) o cron-job.org (sin registro) como alternativa.",
+    "Sin esto, la app se dormirá a los 15 min de inactividad y tardará ~10s en despertar."
+  ],
+  "alternative_free_uptime_monitors": [
+    {
+      "name": "BetterUptime",
+      "url": "https://betteruptime.com",
+      "free_tier": "10 monitores, 3 min interval"
+    },
+    {
+      "name": "cron-job.org",
+      "url": "https://cron-job.org",
+      "free_tier": "Ilimitado, 5 min interval, sin registro"
+    },
+    {
+      "name": "Pingdom",
+      "url": "https://www.pingdom.com",
+      "free_tier": "1 monitor, 15 min interval"
+    }
+  ]
+}

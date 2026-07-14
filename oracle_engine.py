@@ -749,10 +749,244 @@ class EnhancedOracleEngine:
         self.base_engine = OracleEngine()
         self.intel = get_intel_orchestrator()
     
+    def _api_records_to_index(self, api_intel: dict, keyword: str) -> list:
+        """
+        Convert external API intelligence findings into IntelligenceRecord objects
+        so they get persisted in the index (ES or in-memory).
+        
+        Handles: Shodan, Hunter.io, HaveIBeenPwned, VirusTotal, Censys
+        """
+        records = []
+        now_iso = datetime.now().isoformat()
+        now_date = datetime.now().strftime("%Y-%m-%d")
+        
+        if not api_intel or "results" not in api_intel:
+            return records
+        
+        results = api_intel.get("results", {})
+        
+        # ─── Shodan: exposed services → ip:port records ───
+        shodan_data = results.get("shodan", {})
+        if shodan_data.get("success") and shodan_data.get("results"):
+            for srv in shodan_data["results"]:
+                ip = srv.get("ip", "")
+                port = str(srv.get("port", ""))
+                org = srv.get("org", "")
+                hostnames = srv.get("hostnames", [])
+                preview_parts = [f"IP: {ip}:{port}"]
+                if org:
+                    preview_parts.append(f"Org: {org}")
+                if hostnames:
+                    preview_parts.append(f"Host: {', '.join(hostnames[:3])}")
+                
+                rec = IntelligenceRecord(
+                    id=self.base_engine._generate_id(),
+                    keyword=keyword,
+                    source_url=f"https://www.shodan.io/host/{ip}",
+                    source_type="shodan",
+                    record_type="ip:port",
+                    content_preview=" | ".join(preview_parts)[:300],
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    severity="medium",
+                    domain="",
+                    ip_address=ip,
+                    port=port,
+                    extra_data={
+                        "org": org,
+                        "hostnames": hostnames[:3],
+                        "country": srv.get("country", ""),
+                        "city": srv.get("city", ""),
+                        "api_source": "shodan",
+                        "services": srv.get("services", []),
+                    }
+                )
+                records.append(rec)
+        
+        # ─── Hunter.io: email discovery → email records ───
+        hunter_data = results.get("hunter", {})
+        if hunter_data.get("success") and hunter_data.get("emails"):
+            for email_entry in hunter_data["emails"]:
+                email_val = email_entry.get("value", "")
+                if not email_val:
+                    continue
+                domain = email_val.split("@")[-1] if "@" in email_val else ""
+                confidence = email_entry.get("confidence", 0)
+                full_name = f"{email_entry.get('first_name', '')} {email_entry.get('last_name', '')}".strip()
+                position = email_entry.get("position", "")
+                
+                preview = f"Email: {email_val}"
+                if full_name:
+                    preview += f" | {full_name}"
+                if position:
+                    preview += f" | {position}"
+                
+                rec = IntelligenceRecord(
+                    id=self.base_engine._generate_id(),
+                    keyword=keyword,
+                    source_url="",
+                    source_type="hunter",
+                    record_type="email",
+                    content_preview=preview[:300],
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    severity="low",
+                    domain=domain,
+                    email=email_val,
+                    username=email_val.split("@")[0] if "@" in email_val else email_val,
+                    extra_data={
+                        "confidence": confidence,
+                        "full_name": full_name,
+                        "position": position,
+                        "api_source": "hunter",
+                        "email_type": email_entry.get("type", ""),
+                        "phone_number": email_entry.get("phone_number", ""),
+                    }
+                )
+                records.append(rec)
+        
+        # ─── HaveIBeenPwned: breach data → breach records ───
+        hibp_data = results.get("hibp", {})
+        if hibp_data.get("success"):
+            hibp_breaches = hibp_data.get("breaches", []) or []
+            for breach in hibp_breaches:
+                breach_name = breach.get("name", "Unknown Breach")
+                breach_domain = breach.get("domain", "")
+                breach_date = breach.get("date", "")
+                data_classes = breach.get("data_classes", [])
+                pwn_count = breach.get("pwn_count", 0)
+                
+                preview = f"Breach: {breach_name}"
+                if breach_domain:
+                    preview += f" | Domain: {breach_domain}"
+                if data_classes:
+                    preview += f" | Data: {', '.join(data_classes[:5])}"
+                preview += f" | Accounts: {pwn_count:,}" if pwn_count else ""
+                
+                rec = IntelligenceRecord(
+                    id=self.base_engine._generate_id(),
+                    keyword=keyword,
+                    source_url=f"https://haveibeenpwned.com/breach/{breach_name.lower()}",
+                    source_type="hibp",
+                    record_type="breach",
+                    content_preview=preview[:300],
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    severity="critical",
+                    domain=breach_domain,
+                    extra_data={
+                        "breach_name": breach_name,
+                        "breach_date": breach_date,
+                        "pwn_count": pwn_count,
+                        "data_classes": data_classes,
+                        "is_verified": breach.get("is_verified", False),
+                        "is_fabricated": breach.get("is_fabricated", False),
+                        "description": breach.get("description", "")[:300],
+                        "api_source": "hibp",
+                    }
+                )
+                records.append(rec)
+        
+        # ─── VirusTotal: threat analysis → threat records ───
+        vt_data = results.get("virustotal", {})
+        vt_data_ip = results.get("virustotal_ip", {})
+        
+        for vt_results, is_ip in [(vt_data, False), (vt_data_ip, True)]:
+            if not vt_results.get("success"):
+                continue
+            malicious = vt_results.get("malicious", 0)
+            suspicious = vt_results.get("suspicious", 0)
+            harmless = vt_results.get("harmless", 0)
+            target = vt_results.get("domain", vt_results.get("ip", ""))
+            
+            severity = "critical" if malicious > 0 else ("high" if suspicious > 0 else "low")
+            record_type = "vt_domain_threat" if not is_ip else "vt_ip_threat"
+            
+            preview_parts = []
+            if malicious:
+                preview_parts.append(f"🚨 {malicious} malicious")
+            if suspicious:
+                preview_parts.append(f"⚠️ {suspicious} suspicious")
+            preview_parts.append(f"{harmless} harmless")
+            preview_str = f"VT [{target}] " + " | ".join(preview_parts)
+            
+            categories = vt_results.get("categories", [])
+            resolutions = vt_results.get("resolutions", [])
+            
+            rec = IntelligenceRecord(
+                id=self.base_engine._generate_id(),
+                keyword=keyword,
+                source_url=f"https://www.virustotal.com/gui/domain/{target}" if not is_ip 
+                           else f"https://www.virustotal.com/gui/ip-address/{target}",
+                source_type="virustotal",
+                record_type=record_type,
+                content_preview=preview_str[:300],
+                discovered_at=now_iso,
+                discovered_date=now_date,
+                severity=severity,
+                domain=target if not is_ip else "",
+                ip_address=target if is_ip else "",
+                extra_data={
+                    "malicious": malicious,
+                    "suspicious": suspicious,
+                    "harmless": harmless,
+                    "reputation": vt_results.get("reputation", 0),
+                    "categories": categories,
+                    "resolutions": resolutions[:10],
+                    "country": vt_results.get("country", ""),
+                    "as_owner": vt_results.get("as_owner", ""),
+                    "registrar": vt_results.get("registrar", ""),
+                    "api_source": "virustotal",
+                }
+            )
+            records.append(rec)
+        
+        # ─── Censys: exposed hosts → ip:port records ───
+        censys_data = results.get("censys", {})
+        if censys_data.get("success") and censys_data.get("results"):
+            for host in censys_data["results"]:
+                ip = host.get("ip", "")
+                services = host.get("services", [])
+                location = host.get("location", {})
+                
+                service_names = [s.get("service_name", "") for s in services[:5] if s.get("service_name")]
+                if not service_names:
+                    service_ports = [str(s.get("port", "")) for s in services[:5] if s.get("port")]
+                    preview = f"IP: {ip} | Ports: {', '.join(service_ports)}"
+                else:
+                    preview = f"IP: {ip} | Services: {', '.join(service_names)}"
+                
+                country = location.get("country", "") if location else ""
+                if country:
+                    preview += f" | {country}"
+                
+                rec = IntelligenceRecord(
+                    id=self.base_engine._generate_id(),
+                    keyword=keyword,
+                    source_url=f"https://search.censys.io/hosts/{ip}",
+                    source_type="censys",
+                    record_type="ip:port",
+                    content_preview=preview[:300],
+                    discovered_at=now_iso,
+                    discovered_date=now_date,
+                    severity="medium",
+                    ip_address=ip,
+                    port=str(services[0].get("port", "")) if services else "",
+                    extra_data={
+                        "services": services[:5],
+                        "country": country,
+                        "api_source": "censys",
+                    }
+                )
+                records.append(rec)
+        
+        return records
+
     def search(self, keyword: str, use_apis: bool = True, 
                categories: list = None, sample: bool = False) -> dict:
         """
         Unified search — combines OSINT dorking with external API intelligence.
+        API findings are persisted into the index (ES or in-memory) alongside dorking results.
         
         Returns: {
             "keyword", "timestamp",
@@ -763,7 +997,7 @@ class EnhancedOracleEngine:
         """
         keyword = keyword.strip()
         
-        # 1. Run base OSINT dorking
+        # 1. Run base OSINT dorking (records are indexed inside search_keyword)
         if sample:
             sample_records = SampleDataGenerator.generate_records(keyword, 40)
             dorking = {
@@ -773,6 +1007,8 @@ class EnhancedOracleEngine:
                 "sources": ["sample_data"],
                 "stats": self.base_engine._generate_stats(sample_records),
             }
+            # Index sample records too
+            self.base_engine._index_records(keyword, sample_records)
         else:
             report = self.base_engine.search_keyword(keyword, categories=categories)
             dorking = {
@@ -785,32 +1021,54 @@ class EnhancedOracleEngine:
         
         # 2. Run external API intelligence (if available and requested)
         api_intel = None
+        api_records = []
         if use_apis and self.intel:
             try:
                 api_intel = self.intel.investigate_keyword(keyword)
+                # Convert API findings to IntelligenceRecord objects and index them
+                api_records = self._api_records_to_index(api_intel, keyword)
+                if api_records:
+                    self.base_engine._index_records(keyword, api_records)
+                    logger.info(f"📦 Indexed {len(api_records)} API intelligence records for '{keyword}'")
             except Exception as e:
                 logger.error(f"API intel error: {e}")
         
-        # 3. Combine summary
-        total = dorking.get("total_records", 0)
-        sources = dorking.get("sources", [])
-        critical_count = dorking.get("stats", {}).get("by_severity", {}).get("critical", 0)
+        # 3. Combine records: dorking + api_intel
+        all_records_dicts = list(dorking.get("records", []))
+        all_records_dicts.extend(r.to_dict() for r in api_records)
         
+        # 4. Compute combined stats
+        all_records_combined = []
+        if sample:
+            all_records_combined = list(sample_records)
+        else:
+            all_records_combined = list(getattr(report, "records", [])) if not sample else []
+        all_records_combined.extend(api_records)
+        
+        combined_stats = self.base_engine._generate_stats(all_records_combined)
+        
+        # 5. Build sources list
+        all_sources = list(dorking.get("sources", []))
         if api_intel:
-            total += api_intel["summary"].get("total_findings", 0)
-            critical_count += api_intel["summary"].get("critical_findings", 0)
+            all_sources.extend(api_intel["summary"].get("apis_queried", []))
+        
+        # 6. Summary with total counts
+        total = len(all_records_combined)
+        critical_count = combined_stats.get("by_severity", {}).get("critical", 0)
         
         return {
             "keyword": keyword,
             "timestamp": datetime.now().isoformat(),
             "dorking": dorking,
             "api_intel": api_intel,
+            "all_records": all_records_dicts[:200],  # merged record list
             "summary": {
                 "total_records": total,
                 "critical_count": critical_count,
-                "sources": sources + (api_intel["summary"]["apis_queried"] if api_intel else []),
+                "sources": all_sources,
                 "apis_available": self.intel.available_apis if self.intel else [],
-            }
+            },
+            "stats": combined_stats,
         }
 
 

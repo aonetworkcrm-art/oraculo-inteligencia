@@ -313,6 +313,9 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
       <a class="sidebar-item" data-section="stats"><span class="icon">📈</span><span>Estadísticas</span></a>
       <a class="sidebar-item" data-section="history"><span class="icon">🕐</span><span>Historial</span></a>
       
+      <div class="sidebar-section">Operaciones</div>
+      <a class="sidebar-item" data-section="deploy"><span class="icon">🚀</span><span>Despliegue</span><span class="badge badge-green" id="sidebarDeployStatus">En vivo</span></a>
+      
       <div class="sidebar-section">Sistema</div>
       <a class="sidebar-item" data-section="about"><span class="icon">ℹ️</span><span>Acerca de</span></a>
     </nav>
@@ -526,6 +529,69 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
         </div>
       </section>
 
+      <!-- ═══ SECTION: DEPLOY STATUS ═══ -->
+      <section class="sec" id="sec-deploy">
+        <div class="sec-title">🚀 Estado del Despliegue</div>
+        
+        <!-- KPI Row -->
+        <div class="kpi-row">
+          <div class="kpi-card accent"><div class="kpi-label">Tiempo Activo</div><div class="kpi-value" id="deployUptime">—</div><div class="kpi-sub">Desde último deploy</div></div>
+          <div class="kpi-card ok"><div class="kpi-label">Workers</div><div class="kpi-value" id="deployWorkers">—</div><div class="kpi-sub">Activos procesando</div></div>
+          <div class="kpi-card info"><div class="kpi-label">APIs Configuradas</div><div class="kpi-value" id="deployApisConfigured">—</div><div class="kpi-sub">De 5 externas disponibles</div></div>
+          <div class="kpi-card cyber"><div class="kpi-label">CPU</div><div class="kpi-value" id="deployCpu">—</div><div class="kpi-sub">Uso actual del procesador</div></div>
+          <div class="kpi-card warn"><div class="kpi-label">Memoria RAM</div><div class="kpi-value" id="deployMemory">—</div><div class="kpi-sub">Consumo del proceso</div></div>
+        </div>
+
+        <div class="stats-grid">
+          <!-- Railway Connection Card -->
+          <div class="stat-card" style="grid-column:1/-1">
+            <h4>🔗 Conexión Railway</h4>
+            <div id="deployRailwayInfo">
+              <div class="empty-state" style="padding:5px"><p>Cargando información del despliegue...</p></div>
+            </div>
+          </div>
+
+          <!-- Healthcheck Card -->
+          <div class="stat-card">
+            <h4>💚 Healthchecks</h4>
+            <div id="deployHealthcheck">
+              <div class="empty-state" style="padding:5px"><p>Verificando...</p></div>
+            </div>
+          </div>
+
+          <!-- Environment Variables Card -->
+          <div class="stat-card">
+            <h4>🔐 Variables de Entorno</h4>
+            <div id="deployEnvVars">
+              <div class="empty-state" style="padding:5px"><p>Cargando...</p></div>
+            </div>
+          </div>
+
+          <!-- Workers / Performance Card -->
+          <div class="stat-card">
+            <h4>⚙️ Workers & Rendimiento</h4>
+            <div id="deployWorkersInfo">
+              <div class="empty-state" style="padding:5px"><p>Cargando...</p></div>
+            </div>
+          </div>
+
+          <!-- System Info Card -->
+          <div class="stat-card">
+            <h4>💻 Plataforma</h4>
+            <div id="deployPlatform">
+              <div class="empty-state" style="padding:5px"><p>Cargando...</p></div>
+            </div>
+          </div>
+
+          <!-- Logs & Quick Actions Card -->
+          <div class="stat-card" style="grid-column:1/-1">
+            <h4>📋 Acciones Rápidas</h4>
+            <div id="deployActions" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0">
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══ SECTION: ABOUT ═══ -->
       <section class="sec" id="sec-about">
         <div class="sec-title">ℹ️ Acerca del Oráculo de Inteligencia</div>
@@ -629,6 +695,29 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
 });
 
 function navigateTo(section) {
+  document.querySelectorAll('.sidebar-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`.sidebar-item[data-section="${section}"]`).classList.add('active');
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  const secEl = document.getElementById(`sec-${section}`);
+  if (secEl) secEl.classList.add('active');
+  state.currentSection = section;
+  
+  if (section === 'records') renderRecords();
+  if (section === 'stats') renderStats();
+  if (section === 'history') renderHistory();
+  if (section === 'deploy') {
+    fetchDeployStatus();
+    // Auto-refresh every 30 seconds
+    if (deployRefreshInterval) clearInterval(deployRefreshInterval);
+    deployRefreshInterval = setInterval(fetchDeployStatus, 30000);
+  } else {
+    // Clear refresh when leaving deploy section
+    if (deployRefreshInterval) {
+      clearInterval(deployRefreshInterval);
+      deployRefreshInterval = null;
+    }
+  }
+}
   document.querySelectorAll('.sidebar-item').forEach(n => n.classList.remove('active'));
   document.querySelector(`.sidebar-item[data-section="${section}"]`).classList.add('active');
   document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
@@ -1268,6 +1357,285 @@ function chatGenerateResponse(msg) {
   // Default
   return '🤔 No entendí tu mensaje. Prueba con:\n\n• `buscar comcast` — Buscar inteligencia\n• `¿Cuántos registros?` — Estadísticas\n• `resumen` — Panorama general\n• `ayuda` — Comandos disponibles';
 }
+
+// ─── Deploy Status ───
+let deployRefreshInterval = null;
+
+async function fetchDeployStatus() {
+  try {
+    const resp = await fetch('/api/deploy/status', {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+    if (!json.success) throw new Error(json.error || 'API error');
+    renderDeployStatus(json.data);
+    return json.data;
+  } catch (err) {
+    console.error('Deploy status error:', err);
+    document.getElementById('deployRailwayInfo').innerHTML = 
+      `<div class="empty-state" style="padding:5px"><p>⚠️ No se puede conectar con el servidor: ${escapeHtml(err.message)}</p></div>`;
+    document.getElementById('sidebarDeployStatus').textContent = 'Offline';
+    document.getElementById('sidebarDeployStatus').className = 'badge badge-red';
+    return null;
+  }
+}
+
+function renderDeployStatus(d) {
+  if (!d) return;
+  
+  // ── KPI Cards ──
+  const health = d.health || {};
+  document.getElementById('deployUptime').textContent = health.uptime_str || '—';
+  
+  const workers = health.workers || {};
+  const workerCount = workers.worker_count || '—';
+  document.getElementById('deployWorkers').textContent = workerCount;
+  
+  const env = d.env_vars || {};
+  const configuredCount = Object.values(env).filter(v => v === true).length;
+  animateValue('deployApisConfigured', configuredCount);
+  
+  document.getElementById('deployCpu').textContent = health.cpu_percent != null ? `${health.cpu_percent}%` : '—';
+  
+  const mem = health.memory || {};
+  document.getElementById('deployMemory').textContent = mem.rss_mb != null && mem.rss_mb !== 'N/A' ? `${mem.rss_mb} MB` : '—';
+
+  // ── Sidebar badge ──
+  const badge = document.getElementById('sidebarDeployStatus');
+  const deploy = d.deploy || {};
+  const platform = deploy.detected_platform || 'local';
+  
+  if (platform === 'render') {
+    badge.textContent = 'Render';
+    badge.className = 'badge badge-green';
+  } else if (platform === 'railway') {
+    badge.textContent = 'Railway';
+    badge.className = 'badge badge-green';
+  } else if (platform === 'fly') {
+    badge.textContent = 'Fly.io';
+    badge.className = 'badge badge-green';
+  } else {
+    badge.textContent = 'Local';
+    badge.className = 'badge';
+  }
+  
+  // ── Connection Info (Render / Railway / Local) ──
+  const deployInfo = d.deploy || {};
+  const platform = deployInfo.detected_platform || 'local';
+  
+  let connHtml = '';
+  
+  if (platform === 'render') {
+    const r = deployInfo.render || {};
+    connHtml = `
+      <div class="stat-row"><span class="lb">🌐 URL Pública</span><span class="vl green">${escapeHtml(r.public_url)}</span></div>
+      <div class="stat-row"><span class="lb">🏷️ Servicio</span><span class="vl">${escapeHtml(r.service_name)}</span></div>
+      <div class="stat-row"><span class="lb">🌍 Región</span><span class="vl">${escapeHtml(r.region)}</span></div>
+      <div class="stat-row"><span class="lb">🌿 Rama</span><span class="vl">${escapeHtml(r.git_branch)}</span></div>
+      <div class="stat-row"><span class="lb">📦 Commit</span><span class="vl" style="font-size:8px;font-family:var(--mono)">${escapeHtml(r.git_commit_sha?.substring(0, 12) || '—')}</span></div>
+      <div class="stat-row"><span class="lb">🆔 Deploy ID</span><span class="vl" style="font-size:8px;font-family:var(--mono)">${escapeHtml(r.deploy_id?.substring(0, 20) || '—')}</span></div>
+      <div class="stat-row"><span class="lb">⏱️ Iniciado</span><span class="vl">${escapeHtml(formatISODate(d.started_at))}</span></div>
+      <div class="stat-row"><span class="lb">🔌 Servidor</span><span class="vl green">✅ Render — siempre activo (con pings)</span></div>
+    `;
+  } else if (platform === 'railway') {
+    const rw = deployInfo.railway || {};
+    connHtml = `
+      <div class="stat-row"><span class="lb">🌐 URL Pública</span><span class="vl green">${escapeHtml(rw.public_url)}</span></div>
+      <div class="stat-row"><span class="lb">🏷️ Servicio</span><span class="vl">${escapeHtml(rw.service_name)}</span></div>
+      <div class="stat-row"><span class="lb">🌍 Región</span><span class="vl">${escapeHtml(rw.region)}</span></div>
+      <div class="stat-row"><span class="lb">🌿 Rama</span><span class="vl">${escapeHtml(rw.git_branch)}</span></div>
+      <div class="stat-row"><span class="lb">📦 Commit</span><span class="vl" style="font-size:8px;font-family:var(--mono)">${escapeHtml(rw.git_commit_sha?.substring(0, 12) || '—')}</span></div>
+      <div class="stat-row"><span class="lb">⏱️ Iniciado</span><span class="vl">${escapeHtml(formatISODate(d.started_at))}</span></div>
+      <div class="stat-row"><span class="lb">🔌 Servidor</span><span class="vl green">✅ Conectado y respondiendo</span></div>
+    `;
+  } else if (platform === 'fly') {
+    const f = deployInfo.fly || {};
+    connHtml = `
+      <div class="stat-row"><span class="lb">🌐 App</span><span class="vl green">${escapeHtml(f.app_name)}</span></div>
+      <div class="stat-row"><span class="lb">🌍 Región</span><span class="vl">${escapeHtml(f.region)}</span></div>
+      <div class="stat-row"><span class="lb">🔌 Servidor</span><span class="vl green">✅ Fly.io — siempre activo</span></div>
+    `;
+  } else {
+    connHtml = `
+      <div class="stat-row"><span class="lb">🌐 Entorno</span><span class="vl warn" style="color:var(--yellow)">Desarrollo Local</span></div>
+      <div class="stat-row"><span class="lb">💻 Host</span><span class="vl">${escapeHtml(d.platform?.hostname || '—')}</span></div>
+      <div class="stat-row"><span class="lb">🔌 Servidor</span><span class="vl green">✅ Funcionando correctamente</span></div>
+      <div class="stat-row"><span class="lb">💡 Sugerencia</span><span class="vl" style="color:var(--text3);font-size:9px">Despliega en Render.app para acceso 24/7</span></div>
+    `;
+  }
+  // Add server time and started at
+  document.getElementById('deployRailwayInfo').innerHTML = connHtml;
+  
+  // ── Healthcheck ──
+  let hcHtml = '';
+  const latency = d.healthcheck_latency_ms || {};
+  const overallOk = health.api_server?.status === 'passing' && health.engine_initialized;
+  
+  hcHtml = `
+    <div class="stat-row">
+      <span class="lb">🩺 Healthcheck</span>
+      <span class="vl ${overallOk ? 'green' : 'red'}">${overallOk ? '✅ Pasando' : '❌ Fallando'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">⏱️ Stats endpoint</span>
+      <span class="vl accent">${latency.stats_endpoint_ms || '—'} ms</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🔍 Query index</span>
+      <span class="vl accent">${latency.query_index_ms || '—'} ms</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🧠 Motor Inicializado</span>
+      <span class="vl ${health.engine_initialized ? 'green' : 'red'}">${health.engine_initialized ? '✅ Sí' : '❌ No'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🗄️ Modo Índice</span>
+      <span class="vl accent">${health.index_mode === 'elasticsearch' ? '🔍 Elasticsearch' : '💾 En Memoria'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🕐 Uptime</span>
+      <span class="vl">${health.uptime_str || '—'}</span>
+    </div>
+  `;
+  document.getElementById('deployHealthcheck').innerHTML = hcHtml;
+  
+  // ── Environment Variables ──
+  let envHtml = '';
+  const envConfig = {
+    shodan: { label: 'Shodan', icon: '🔍' },
+    hunter: { label: 'Hunter.io', icon: '📧' },
+    hibp: { label: 'HaveIBeenPwned', icon: '🔒' },
+    virustotal: { label: 'VirusTotal', icon: '🦠' },
+    censys_token: { label: 'Censys', icon: '🌐' },
+    es_hosts: { label: 'Elasticsearch', icon: '🗄️' },
+    tor_proxy: { label: 'Proxy Tor', icon: '🧅' },
+  };
+  
+  Object.entries(envConfig).forEach(([key, cfg]) => {
+    const val = env[key];
+    const configured = val === true || (key === 'tor_proxy' && val === 'true');
+    envHtml += `
+      <div class="stat-row">
+        <span class="lb">${cfg.icon} ${cfg.label}</span>
+        <span class="vl ${configured ? 'green' : 'red'}">${configured ? '✅ Configurada' : '❌ No configurada'}</span>
+      </div>
+    `;
+  });
+  document.getElementById('deployEnvVars').innerHTML = envHtml;
+  
+  // ── Workers & Performance ──
+  const perf = health.memory || {};
+  let perfHtml = `
+    <div class="stat-row">
+      <span class="lb">⚙️ Gunicorn Workers</span>
+      <span class="vl accent">${workers.worker_count}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🧵 Worker Class</span>
+      <span class="vl">${workers.worker_class}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🖥️ CPUs Disponibles</span>
+      <span class="vl">${d.platform?.cpus || '—'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">💾 RSS Memory</span>
+      <span class="vl">${perf.rss_mb != null && perf.rss_mb !== 'N/A' ? perf.rss_mb + ' MB' : '—'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">🧠 VMS Memory</span>
+      <span class="vl">${perf.vms_mb != null && perf.vms_mb !== 'N/A' ? perf.vms_mb + ' MB' : '—'}</span>
+    </div>
+    <div class="stat-row">
+      <span class="lb">📊 CPU Usage</span>
+      <span class="vl">${health.cpu_percent != null ? health.cpu_percent + '%' : '—'}</span>
+    </div>
+  `;
+  if (perf.system_total_mb) {
+    const sysPct = perf.system_percent || 0;
+    perfHtml += `
+      <div class="stat-row">
+        <span class="lb">🖥️ RAM Sistema</span>
+        <span class="vl">${perf.system_used_mb || perf.system_total_mb - (perf.system_available_mb || 0)} / ${perf.system_total_mb} MB (${sysPct}%)</span>
+      </div>
+    `;
+  }
+  document.getElementById('deployWorkersInfo').innerHTML = perfHtml;
+  
+  // ── Platform ──
+  const plat = d.platform || {};
+  document.getElementById('deployPlatform').innerHTML = `
+    <div class="stat-row"><span class="lb">🐍 Python</span><span class="vl accent">${escapeHtml(plat.python_version)}</span></div>
+    <div class="stat-row"><span class="lb">💻 Sistema</span><span class="vl">${escapeHtml(plat.system)} ${escapeHtml(plat.release)}</span></div>
+    <div class="stat-row"><span class="lb">🏗️ Arquitectura</span><span class="vl">${escapeHtml(plat.machine)}</span></div>
+    <div class="stat-row"><span class="lb">🆔 Hostname</span><span class="vl" style="font-size:8px;font-family:var(--mono)">${escapeHtml(plat.hostname)}</span></div>
+    <div class="stat-row"><span class="lb">🕒 Servidor</span><span class="vl">${escapeHtml(formatISODate(d.server_time))}</span></div>
+  `;
+  
+  // ── Quick Actions ──
+  const actionsContainer = document.getElementById('deployActions');
+  const serviceId = rw.service_id || rw.service_name || '';
+  const railUrl = isRailway ? `https://railway.app/project/${rw.project_id}/service/${serviceId}` : 'https://railway.app/dashboard';
+  actionsContainer.innerHTML = `
+    <a href="${dashboardUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" 
+       onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg4)'" 
+       onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      ${dashboardLabel}
+    </a>
+    <a href="${logsUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"
+       onmouseover="this.style.borderColor='var(--accent2)';this.style.background='var(--bg4)'" 
+       onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      ${logsLabel}
+    </a>
+    <button onclick="refreshDeployStatus()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;"
+            onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg4)'" 
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      🔄 Refrescar Estado
+    </button>
+    <button onclick="testHealthcheck()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;"
+            onmouseover="this.style.borderColor='var(--green)';this.style.background='var(--bg4)'" 
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
+      🩺 Probar Healthcheck
+    </button>
+  `;
+}
+
+async function refreshDeployStatus() {
+  showToast('🔄 Refrescando estado del despliegue...', 'var(--accent2)');
+  await fetchDeployStatus();
+  showToast('✅ Estado actualizado', 'var(--green)');
+}
+
+async function testHealthcheck() {
+  try {
+    const start = performance.now();
+    const resp = await fetch('/api/stats', { signal: AbortSignal.timeout(5000) });
+    const latency = Math.round(performance.now() - start);
+    
+    if (resp.ok) {
+      showToast(`🩺 Healthcheck OK · ${latency}ms respuesta`, 'var(--green)');
+    } else {
+      showToast(`⚠️ Healthcheck respondió HTTP ${resp.status}`, 'var(--yellow)');
+    }
+  } catch (err) {
+    showToast(`❌ Healthcheck falló: ${escapeHtml(err.message)}`, 'var(--red)');
+  }
+}
+
+function formatISODate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('es-ES', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  } catch (e) {
+    return iso;
+  }
+}
+
 
 // ─── Init ───
 document.addEventListener('DOMContentLoaded', () => {

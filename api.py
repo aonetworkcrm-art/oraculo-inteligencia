@@ -7,6 +7,9 @@
 import os
 import json
 import logging
+import time
+import platform
+import multiprocessing
 from datetime import datetime
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -19,6 +22,9 @@ logger = logging.getLogger("OracleAPI")
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
+
+# Track server start time for uptime reporting
+SERVER_START_TIME = time.time()
 
 # Initialize the enhanced oracle engine
 enhanced_engine = EnhancedOracleEngine()
@@ -227,6 +233,196 @@ def api_categories():
             for c in categories
         ]
     })
+
+
+# ─── Deploy Status Endpoint ──────────────────────────────────
+
+@app.route("/api/deploy/status", methods=["GET"])
+def api_deploy_status():
+    """
+    Get full deployment health and status information.
+    Used by the dashboard Deploy Status section.
+    """
+    uptime_seconds = time.time() - SERVER_START_TIME
+    uptime_str = _format_uptime(uptime_seconds)
+    
+    # Platform detection (Render, Railway, Fly.io, etc.)
+    is_railway = bool(os.environ.get("RAILWAY_SERVICE_ID"))
+    is_render = bool(os.environ.get("RENDER"))
+    is_fly = bool(os.environ.get("FLY_APP_NAME"))
+    
+    platform_info_detected = "render" if is_render else ("railway" if is_railway else ("fly" if is_fly else "local"))
+    
+    deploy_info = {
+        "detected_platform": platform_info_detected,
+        "railway": {
+            "detected": is_railway,
+            "service_name": os.environ.get("RAILWAY_SERVICE_NAME", "N/A"),
+            "deployment_id": os.environ.get("RAILWAY_DEPLOYMENT_ID", "N/A"),
+            "project_id": os.environ.get("RAILWAY_PROJECT_ID", "N/A"),
+            "environment": os.environ.get("RAILWAY_ENVIRONMENT", "N/A"),
+            "region": os.environ.get("RAILWAY_REGION", "N/A"),
+            "public_url": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "N/A"),
+            "git_branch": os.environ.get("RAILWAY_GIT_BRANCH", "N/A"),
+            "git_commit_sha": os.environ.get("RAILWAY_GIT_COMMIT_SHA", "N/A"),
+            "service_id": os.environ.get("RAILWAY_SERVICE_ID", "N/A"),
+        },
+        "render": {
+            "detected": is_render,
+            "service_id": os.environ.get("RENDER_SERVICE_ID", "N/A"),
+            "deploy_id": os.environ.get("RENDER_DEPLOY_ID", "N/A"),
+            "service_name": os.environ.get("RENDER_SERVICE_NAME", "oraculo-inteligencia"),
+            "region": os.environ.get("RENDER_REGION", "ohio"),
+            "public_url": os.environ.get("RENDER_EXTERNAL_URL", "N/A"),
+            "git_branch": os.environ.get("RENDER_GIT_BRANCH", os.environ.get("RAILWAY_GIT_BRANCH", "N/A")),
+            "git_commit_sha": os.environ.get("RENDER_GIT_COMMIT", os.environ.get("RAILWAY_GIT_COMMIT_SHA", "N/A")),
+        },
+        "fly": {
+            "detected": is_fly,
+            "app_name": os.environ.get("FLY_APP_NAME", "N/A"),
+            "region": os.environ.get("FLY_REGION", "N/A"),
+            "public_url": os.environ.get("FLY_APP_HOSTNAME", "N/A"),
+        },
+        "generic": {
+            "hostname": platform.node(),
+            "port": os.environ.get("PORT", "8080"),
+            "start_command": os.environ.get("RENDER_START_COMMAND", 
+                          os.environ.get("RAILWAY_START_COMMAND", "gunicorn api:app")),
+        },
+    }
+    
+    # Memory info
+    try:
+        import psutil
+        mem = psutil.Process().memory_info()
+        mem_info = {
+            "rss_mb": round(mem.rss / 1024 / 1024, 1),
+            "vms_mb": round(mem.vms / 1024 / 1024, 1),
+            "percent": psutil.Process().memory_percent(),
+            "system_total_mb": round(psutil.virtual_memory().total / 1024 / 1024, 1),
+            "system_available_mb": round(psutil.virtual_memory().available / 1024 / 1024, 1),
+            "system_percent": psutil.virtual_memory().percent,
+        }
+    except ImportError:
+        mem_info = {"rss_mb": "N/A", "vms_mb": "N/A", "note": "install psutil for details"}
+    except Exception:
+        mem_info = {"rss_mb": "N/A", "vms_mb": "N/A", "error": "permission denied"}
+    
+    # CPU / workers
+    cpu_count = multiprocessing.cpu_count()
+    try:
+        import psutil
+        cpu_percent = psutil.cpu_percent(interval=None)  # non-blocking, uses cached values
+        load_avg = psutil.getloadavg() if hasattr(psutil, "getloadavg") else None
+    except Exception:
+        cpu_percent = 0
+        load_avg = None
+    
+    # Gunicorn workers detection
+    workers_count = _detect_workers_gunicorn()
+    
+    # Environment variables (which API keys are configured)
+    env_vars = {
+        "shodan": bool(os.environ.get("SHODAN_API_KEY")),
+        "hunter": bool(os.environ.get("HUNTER_API_KEY")),
+        "hibp": bool(os.environ.get("HIBP_API_KEY")),
+        "virustotal": bool(os.environ.get("VT_API_KEY")),
+        "censys_token": bool(os.environ.get("CENSYS_TOKEN") or 
+                            (os.environ.get("CENSYS_API_ID") and os.environ.get("CENSYS_SECRET"))),
+        "es_hosts": bool(os.environ.get("ES_HOSTS")),
+        "tor_proxy": os.environ.get("USE_TOR", "false"),
+    }
+    
+    # Platform info
+    platform_info = {
+        "python_version": platform.python_version(),
+        "system": platform.system(),
+        "release": platform.release(),
+        "machine": platform.machine(),
+        "hostname": platform.node(),
+        "cpus": cpu_count,
+    }
+    
+    # Health check results
+    health = {
+        "api_server": {"status": "passing", "uptime_seconds": round(uptime_seconds, 1), "uptime_str": uptime_str},
+        "engine_initialized": bool(enhanced_engine is not None),
+        "index_mode": "elasticsearch" if env_vars["es_hosts"] else "in_memory",
+        "workers": workers_count,
+        "memory": mem_info,
+        "cpu_percent": cpu_percent,
+    }
+    
+    # Test healthcheck latency
+    healthcheck_latency = _measure_healthcheck_latency()
+    
+    return jsonify({
+        "success": True,
+        "data": {
+            "platform": platform_info,
+            "deploy": deploy_info,
+            "health": health,
+            "healthcheck_latency_ms": healthcheck_latency,
+            "env_vars": env_vars,
+            "server_time": datetime.now().isoformat(),
+            "started_at": datetime.fromtimestamp(SERVER_START_TIME).isoformat(),
+            "active_requests": 0,  # gunicorn manages this externally
+        }
+    })
+
+
+def _format_uptime(seconds: float) -> str:
+    """Format uptime seconds into human-readable string."""
+    days, rem = divmod(int(seconds), 86400)
+    hours, rem = divmod(rem, 3600)
+    minutes, secs = divmod(rem, 60)
+    if days > 0:
+        return f"{days}d {hours}h {minutes}m {secs}s"
+    elif hours > 0:
+        return f"{hours}h {minutes}m {secs}s"
+    elif minutes > 0:
+        return f"{minutes}m {secs}s"
+    else:
+        return f"{secs}s"
+
+
+def _detect_workers_gunicorn() -> dict:
+    """Detect gunicorn workers using environment variables (portable, no subprocess)."""
+    worker_class = os.environ.get("GUNICORN_WORKER_CLASS", "sync")
+    is_gunicorn = "gunicorn" in os.environ.get("SERVER_SOFTWARE", "").lower()
+    max_config = int(os.environ.get("GUNICORN_WORKERS", "2"))
+    
+    # In gunicorn, each worker process has a distinct PID.
+    # We can detect the current role from env vars gunicorn sets.
+    # For a reliable count, gunicorn's --workers flag is our best bet.
+    if is_gunicorn:
+        worker_count = max_config  # best estimate from config
+    else:
+        worker_count = "N/A (dev mode)"
+    
+    return {
+        "is_gunicorn": is_gunicorn,
+        "worker_count": worker_count,
+        "worker_class": worker_class,
+        "max_workers": max_config,
+    }
+
+
+def _measure_healthcheck_latency() -> dict:
+    """Measure latency for key health check operations."""
+    results = {}
+    
+    # Simple stats endpoint latency
+    start = time.perf_counter()
+    _ = base_engine.get_index_stats()
+    results["stats_endpoint_ms"] = round((time.perf_counter() - start) * 1000, 1)
+    
+    # Database/index latency
+    start = time.perf_counter()
+    _ = base_engine.query_index(page=1, per_page=1)
+    results["query_index_ms"] = round((time.perf_counter() - start) * 1000, 1)
+    
+    return results
 
 
 # ─── External API Status ─────────────────────────────────────
@@ -548,5 +744,6 @@ if __name__ == "__main__":
     
     logger.info("🚀 Oracle Intelligence API v2.0 starting on port %d", port)
     logger.info("📡 External API connectors available via IntelOrchestrator")
+    logger.info("📊 Deploy status endpoint at /api/deploy/status")
     
     app.run(host="0.0.0.0", port=port, debug=debug)

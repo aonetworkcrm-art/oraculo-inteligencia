@@ -1,0 +1,46 @@
+# ══════════════════════════════════════════════════════════════
+#  Render Blueprint — Oráculo de Inteligencia
+#  Deploy: Connect GitHub repo → Render auto-detects this file
+#  Docs:   https://render.com/docs/blueprint-spec
+# ══════════════════════════════════════════════════════════════
+
+services:
+  # ─── Web Service ──────────────────────────────────────────
+  - type: web
+    name: oraculo-inteligencia
+    env: python
+    region: ohio  # us-east (closest to most Latin America users)
+    plan: free
+    
+    # Build & Start
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn api:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 5 --access-logfile -
+    
+    # Health check — Render pings this every 5 seconds
+    healthCheckPath: /api/stats
+    
+    # Source
+    repo: https://github.com/aonetworkcrm-art/oraculo-inteligencia
+    branch: master
+    
+    # ─── Environment Variables ──────────────────────────
+    # Set your API keys in Render Dashboard → Environment
+    # These are just placeholders — replace with real values
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SAMPLE_DATA
+        value: "true"
+      # ── External APIs (optional — system works without them) ──
+      # - key: SHODAN_API_KEY
+      #   value: your_key_here
+      # - key: HUNTER_API_KEY
+      #   value: your_key_here
+      # - key: HIBP_API_KEY
+      #   value: your_key_here
+      # - key: VT_API_KEY
+      #   value: your_key_here
+      # - key: CENSYS_TOKEN
+      #   value: your_key_here

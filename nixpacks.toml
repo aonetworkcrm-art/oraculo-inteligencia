@@ -1,5 +1,0 @@
-[variables]
-pythonVersion = "3.12"
-
-[phases.install]
-cmds = ["pip install -r requirements.txt"]

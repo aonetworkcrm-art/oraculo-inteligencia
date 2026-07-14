@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.oracle_cache/
+*.egg
+
+# Git
+.git/
+.gitignore
+
+# OS
+*.bat
+*.ps1
+*.exe
+Thumbs.db
+.DS_Store
+
+# Railway leftovers (we use Render now)
+railway.json
+nixpacks.toml
+
+# Docs & misc
+README.md
+PROJECT_STATE.md
+*.log
+.env
+*.md
+
+# IDE
+.vscode/
+.idea/
