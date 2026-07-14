@@ -311,6 +311,8 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
       
       <div class="sidebar-section">Inteligencia</div>
       <a class="sidebar-item" data-section="stats"><span class="icon">📈</span><span>Estadísticas</span></a>
+      <a class="sidebar-item" data-section="proxy"><span class="icon">🌐</span><span>Proxy Intelligence</span><span class="badge" id="sidebarProxyCount">0</span></a>
+      <a class="sidebar-item" data-section="combo"><span class="icon">🔐</span><span>Combo Intelligence</span><span class="badge" id="sidebarComboCount">0</span></a>
       <a class="sidebar-item" data-section="history"><span class="icon">🕐</span><span>Historial</span></a>
       
       <div class="sidebar-section">Operaciones</div>
@@ -480,6 +482,84 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
         <div class="pagination" id="recordsPagination"></div>
       </section>
 
+      <!-- ═══ SECTION: COMBO INTELLIGENCE ═══ -->
+      <section class="sec" id="sec-combo">
+        <div class="sec-title">🔐 Combo Intelligence <span class="count" id="comboTotalLabel">(0 combos indexados)</span></div>
+        
+        <div class="search-panel">
+          <div class="search-bar">
+            <input type="text" id="comboKeyword" placeholder='Ej: comcast, netflix, spotify, "user:pass"...' onkeydown="if(event.key==='Enter')executeComboLeech()">
+            <button id="comboBtn" onclick="executeComboLeech()" style="background:linear-gradient(135deg,var(--purple),var(--accent));color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;display:flex;align-items:center;gap:6px">
+              <span class="spinner" id="comboSpinner" style="display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:radarSpin 0.8s linear infinite"></span>
+              <span>🔐 Leecher</span>
+            </button>
+          </div>
+          <div class="search-options" style="margin-top:10px">
+            <label><input type="checkbox" id="comboSourcePaste" checked> 📋 Paste sites</label>
+            <label><input type="checkbox" id="comboSourceTelegram" checked> 💬 Telegram</label>
+            <label><input type="checkbox" id="comboSourceDiscord" checked> 💬 Discord</label>
+            <label><input type="checkbox" id="comboSourceForum" checked> 📢 Foros</label>
+            <label><input type="checkbox" id="comboSourceDorking" checked> 🔍 OSINT Dorking</label>
+            <label><input type="checkbox" id="comboValidate"> 🔐 Validar combos (lento)</label>
+            <span style="color:var(--text3);font-size:8px;margin-left:8px">SMTP check | max 20</span>
+          </div>
+          <div class="scanning-bar" id="comboScanBar"><div class="fill" id="comboScanFill"></div></div>
+        </div>
+
+        <!-- Combo Results -->
+        <div class="results-panel" id="comboResults">
+          <div class="results-header">
+            <div class="left">
+              <span id="comboResultsKeyword"></span>
+              <span id="comboResultsCount" style="background:var(--bg3);padding:2px 10px;border-radius:10px"></span>
+              <span id="comboResultsTime" style="color:var(--text3);font-size:9px"></span>
+            </div>
+            <div class="right">
+              <button class="filter-btn" onclick="exportCombo('txt')">📥 TXT</button>
+              <button class="filter-btn" onclick="exportCombo('csv')">📥 CSV</button>
+              <button class="filter-btn" onclick="exportCombo('json')">📥 JSON</button>
+            </div>
+          </div>
+
+          <div class="kpi-row" style="margin-bottom:12px">
+            <div class="kpi-card ok" style="padding:10px 14px"><div class="kpi-label">Válidos</div><div class="kpi-value" id="comboValidCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card err" style="padding:10px 14px"><div class="kpi-label">Inválidos</div><div class="kpi-value" id="comboInvalidCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card warn" style="padding:10px 14px"><div class="kpi-label">Sin validar</div><div class="kpi-value" id="comboUnknownCount" style="font-size:18px">0</div></div>
+            <div class="kpi-card info" style="padding:10px 14px"><div class="kpi-label">Fuentes</div><div class="kpi-value" id="comboSourcesCount" style="font-size:18px">—</div></div>
+            <div class="kpi-card cyber" style="padding:10px 14px"><div class="kpi-label">Tiempo</div><div class="kpi-value" id="comboTimeCount" style="font-size:18px">—</div></div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="records" id="comboTable">
+              <thead>
+                <tr>
+                  <th>Estado</th><th>Email / Usuario</th><th>Contraseña</th><th>Dominio</th><th>Fuente</th><th>Calidad</th>
+                </tr>
+              </thead>
+              <tbody id="comboBody">
+                <tr><td colspan="6" class="empty">🔐 Ejecuta un leech para extraer combos</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid" style="margin-top:16px">
+          <div class="stat-card">
+            <h4>📊 Por Fuente</h4>
+            <div id="comboBySource"><div class="empty-state" style="padding:5px"><p>Ejecuta un leech</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>🌐 Top Dominios</h4>
+            <div id="comboByDomain"><div class="empty-state" style="padding:5px"><p>Ejecuta un leech</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>⚡ Estado del Motor</h4>
+            <div id="comboEngineStats"><div class="empty-state" style="padding:5px"><p>Cargando...</p></div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══ SECTION: STATS ═══ -->
       <section class="sec" id="sec-stats">
         <div class="sec-title">📈 Estadísticas de Inteligencia</div>
@@ -588,6 +668,64 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
             <h4>📋 Acciones Rápidas</h4>
             <div id="deployActions" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0">
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SECTION: PROXY INTELLIGENCE ═══ -->
+      <section class="sec" id="sec-proxy">
+        <div class="sec-title">🌐 Proxy Intelligence <span class="count">(Pool de proxies)</span></div>
+        
+        <div class="kpi-row">
+          <div class="kpi-card accent" style="padding:12px 16px"><div class="kpi-label">Total Proxies</div><div class="kpi-value" id="proxyTotal" style="font-size:20px">0</div></div>
+          <div class="kpi-card ok" style="padding:12px 16px"><div class="kpi-label">Vivos</div><div class="kpi-value" id="proxyAlive" style="font-size:20px;color:var(--green)">0</div></div>
+          <div class="kpi-card err" style="padding:12px 16px"><div class="kpi-label">Muertos</div><div class="kpi-value" id="proxyDead" style="font-size:20px;color:var(--red)">0</div></div>
+          <div class="kpi-card warn" style="padding:12px 16px"><div class="kpi-label">Sin testear</div><div class="kpi-value" id="proxyUntested" style="font-size:20px;color:var(--yellow)">0</div></div>
+          <div class="kpi-card info" style="padding:12px 16px"><div class="kpi-label">Modo</div><div class="kpi-value" id="proxyMode" style="font-size:16px">auto</div></div>
+        </div>
+
+        <div class="search-panel">
+          <div class="sec-title" style="margin-top:0;border:none;padding-bottom:6px">⚙️ Control de Proxies</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button id="proxyScrapeBtn" onclick="executeProxyScrape()" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+              <span id="proxyScrapeSpinner" style="display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:radarSpin 0.8s linear infinite"></span>
+              🕸️ Scrapear Proxies
+            </button>
+            <button onclick="executeProxyTest()" style="background:linear-gradient(135deg,var(--green),var(--accent2));color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+              🧪 Testear Proxies
+            </button>
+            <select id="proxyModeSelect" onchange="changeProxyMode()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:10px;cursor:pointer">
+              <option value="auto">🔄 Auto (proxy → directo)</option>
+              <option value="proxy">🔌 Solo proxy</option>
+              <option value="proxyless">🌐 Solo directo</option>
+            </select>
+            <button onclick="clearProxies()" style="background:var(--bg3);border:1px solid var(--red);color:var(--red);padding:9px 14px;border-radius:8px;font-size:10px;cursor:pointer">🗑️ Limpiar Pool</button>
+          </div>
+          
+          <div style="margin-top:12px">
+            <div class="sec-title" style="margin-top:0;border:none;padding-bottom:6px">📥 Agregar Proxies Manualmente</div>
+            <div style="display:flex;gap:8px">
+              <textarea id="proxyManualInput" placeholder="http://user:pass@host:port&#10;socks5://host:1080&#10;host:3128 (uno por línea)" style="flex:1;min-height:60px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;font-size:10px;font-family:var(--mono);border-radius:8px;outline:none;resize:vertical"></textarea>
+              <button onclick="addManualProxies()" style="align-self:flex-end;background:var(--green-dim);border:1px solid var(--green);color:var(--green);padding:9px 16px;border-radius:8px;font-size:10px;cursor:pointer;white-space:nowrap">➕ Agregar</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>📊 Pool Stats</h4>
+            <div id="proxyPoolStats"><div class="empty-state" style="padding:5px"><p>Cargando...</p></div></div>
+          </div>
+          <div class="stat-card">
+            <h4>🔍 VPN Detection</h4>
+            <div id="proxyVpnInfo">
+              <div class="empty-state" style="padding:5px"><p>Haz clic en "Detectar VPN"</p></div>
+            </div>
+            <button onclick="detectVpn()" style="margin-top:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:9px;cursor:pointer">🔍 Detectar VPN</button>
+          </div>
+          <div class="stat-card">
+            <h4>📡 Fuentes de Scraping</h4>
+            <div id="proxySources"><div class="empty-state" style="padding:5px"><p>Scrapea para ver fuentes</p></div></div>
           </div>
         </div>
       </section>
@@ -705,6 +843,8 @@ function navigateTo(section) {
   if (section === 'records') renderRecords();
   if (section === 'stats') renderStats();
   if (section === 'history') renderHistory();
+  if (section === 'combo') refreshComboStats();
+  if (section === 'proxy') refreshProxyStats();
   if (section === 'deploy') {
     fetchDeployStatus();
     // Auto-refresh every 30 seconds
@@ -717,16 +857,6 @@ function navigateTo(section) {
       deployRefreshInterval = null;
     }
   }
-}
-  document.querySelectorAll('.sidebar-item').forEach(n => n.classList.remove('active'));
-  document.querySelector(`.sidebar-item[data-section="${section}"]`).classList.add('active');
-  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
-  document.getElementById(`sec-${section}`).classList.add('active');
-  state.currentSection = section;
-  
-  if (section === 'records') renderRecords();
-  if (section === 'stats') renderStats();
-  if (section === 'history') renderHistory();
 }
 
 // ─── Notifications ───
@@ -1403,8 +1533,8 @@ function renderDeployStatus(d) {
 
   // ── Sidebar badge ──
   const badge = document.getElementById('sidebarDeployStatus');
-  const deploy = d.deploy || {};
-  const platform = deploy.detected_platform || 'local';
+  const deployInfo2 = d.deploy || {};
+  let platform = deployInfo2.detected_platform || 'local';
   
   if (platform === 'render') {
     badge.textContent = 'Render';
@@ -1422,7 +1552,7 @@ function renderDeployStatus(d) {
   
   // ── Connection Info (Render / Railway / Local) ──
   const deployInfo = d.deploy || {};
-  const platform = deployInfo.detected_platform || 'local';
+  platform = deployInfo.detected_platform || 'local';  // re-assign OK (let)
   
   let connHtml = '';
   
@@ -1575,15 +1705,37 @@ function renderDeployStatus(d) {
   
   // ── Quick Actions ──
   const actionsContainer = document.getElementById('deployActions');
-  const serviceId = rw.service_id || rw.service_name || '';
-  const railUrl = isRailway ? `https://railway.app/project/${rw.project_id}/service/${serviceId}` : 'https://railway.app/dashboard';
+  
+  // Build platform-specific dashboard/logs URLs
+  let dashboardUrl = 'https://dashboard.render.com';
+  let dashboardLabel = '📊 Dashboard Render';
+  let logsUrl = 'https://dashboard.render.com';
+  let logsLabel = '📋 Logs en Vivo';
+  
+  if (platform === 'render') {
+    const rInfo = deployInfo.render || {};
+    const serviceSlug = rInfo.service_name || 'oraculo-inteligencia';
+    dashboardUrl = `https://dashboard.render.com/web/${rInfo.service_id || ''}`;
+    logsUrl = dashboardUrl;
+    dashboardLabel = '📊 Dashboard Render';
+    logsLabel = '📋 Logs de Render';
+  } else if (platform === 'railway') {
+    const rwInfo = deployInfo.railway || {};
+    const projectId = rwInfo.project_id || '';
+    const serviceId = rwInfo.service_id || '';
+    dashboardUrl = `https://railway.app/project/${projectId}/service/${serviceId}`;
+    logsUrl = dashboardUrl;
+    dashboardLabel = '📊 Dashboard Railway';
+    logsLabel = '📋 Logs Railway';
+  }
+  
   actionsContainer.innerHTML = `
-    <a href="${dashboardUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" 
+    <a href="${dashboardUrl}" target="_blank" class="action-btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" 
        onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg4)'" 
        onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
       ${dashboardLabel}
     </a>
-    <a href="${logsUrl}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"
+    <a href="${logsUrl}" target="_blank" class="action-btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"
        onmouseover="this.style.borderColor='var(--accent2)';this.style.background='var(--bg4)'" 
        onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg3)'">
       ${logsLabel}
@@ -1636,6 +1788,305 @@ function formatISODate(iso) {
   }
 }
 
+
+// ─── Combo Intelligence ───
+let comboData = [];
+
+async function executeComboLeech() {
+  const keyword = document.getElementById('comboKeyword').value.trim();
+  if (!keyword) { showToast('❌ Ingresa una palabra clave', 'var(--red)'); return; }
+  
+  const sources = [];
+  if (document.getElementById('comboSourcePaste').checked) sources.push('paste');
+  if (document.getElementById('comboSourceTelegram').checked) sources.push('telegram');
+  if (document.getElementById('comboSourceDiscord').checked) sources.push('discord');
+  if (document.getElementById('comboSourceForum').checked) sources.push('forum');
+  if (document.getElementById('comboSourceDorking').checked) sources.push('dorking');
+  const validate = document.getElementById('comboValidate').checked;
+  
+  const btn = document.getElementById('comboBtn');
+  const spinner = document.getElementById('comboSpinner');
+  const scanBar = document.getElementById('comboScanBar');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  scanBar.classList.add('active');
+  document.getElementById('comboResults').classList.remove('active');
+  
+  try {
+    const resp = await fetch('/api/combo/leech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword, sources, validate, max_per_source: 20 }),
+      signal: AbortSignal.timeout(30000),
+    });
+    
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+    if (!json.success) throw new Error(json.error || 'API error');
+    
+    renderComboResults(json.data, keyword);
+    showToast(`✅ ${json.data.total} combos encontrados para "${keyword}"`, 'var(--green)');
+  } catch (err) {
+    console.error('Combo leech error:', err);
+    showToast('❌ Error: ' + err.message, 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    scanBar.classList.remove('active');
+  }
+}
+
+function renderComboResults(data, keyword) {
+  comboData = data.combos || [];
+  
+  document.getElementById('comboResultsKeyword').innerHTML = `🔐 <strong>"${escapeHtml(keyword)}"</strong>`;
+  document.getElementById('comboResultsCount').textContent = `${data.total} combos`;
+  document.getElementById('comboResultsTime').textContent = `· ${data.took_seconds || '—'}s`;
+  
+  animateValue('comboValidCount', data.valid_count || 0);
+  animateValue('comboInvalidCount', data.invalid_count || 0);
+  animateValue('comboUnknownCount', (data.total || 0) - (data.valid_count || 0) - (data.invalid_count || 0));
+  document.getElementById('comboSourcesCount').textContent = (data.sources || []).join(', ') || '—';
+  document.getElementById('comboTimeCount').textContent = (data.took_seconds || '—') + 's';
+  
+  const tbody = document.getElementById('comboBody');
+  if (comboData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">🔍 No se encontraron combos</td></tr>';
+  } else {
+    tbody.innerHTML = comboData.map(c => {
+      const q = c.quality || 'unknown';
+      const statusIcon = q === 'valid' ? '✅' : (q === 'invalid' ? '❌' : '❓');
+      const pwHidden = c.password ? c.password.substring(0, 10) + '***' : '—';
+      return `<tr>
+        <td>${statusIcon}</td>
+        <td class="email-cell">${escapeHtml(c.email || c.username || '—')}</td>
+        <td style="font-family:var(--mono);font-size:9px;color:var(--text2)">${escapeHtml(pwHidden)}</td>
+        <td class="domain">${escapeHtml(c.domain || '—')}</td>
+        <td class="source-cell">${escapeHtml(c.source_type || '—')}</td>
+        <td>${q}</td>
+      </tr>`;
+    }).join('');
+  }
+  
+  document.getElementById('comboResults').classList.add('active');
+  document.getElementById('sidebarComboCount').textContent = data.total || 0;
+  
+  // Stats
+  const bySource = data.stats?.by_source || {};
+  document.getElementById('comboBySource').innerHTML = Object.entries(bySource)
+    .sort((a,b) => b[1] - a[1])
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:5px"><p>Sin datos</p></div>';
+  
+  const byDomain = data.stats?.by_domain || {};
+  document.getElementById('comboByDomain').innerHTML = Object.entries(byDomain)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl">${v}</span></div>`)
+    .join('') || '<div class="empty-state" style="padding:5px"><p>Sin datos</p></div>';
+}
+
+async function refreshComboStats() {
+  try {
+    const resp = await fetch('/api/combo/stats', { signal: AbortSignal.timeout(5000) });
+    if (!resp.ok) return;
+    const json = await resp.json();
+    if (!json.success) return;
+    const s = json.data;
+    document.getElementById('comboEngineStats').innerHTML = `
+      <div class="stat-row"><span class="lb">📦 Combinaciones indexadas</span><span class="vl accent">${s.total_combos_indexed || 0}</span></div>
+      <div class="stat-row"><span class="lb">🔐 Validadas</span><span class="vl">${s.total_validated || 0}</span></div>
+      <div class="stat-row"><span class="lb">📡 Fuentes usadas</span><span class="vl">${(s.sources_used || []).join(', ') || 'ninguna'}</span></div>
+      <div class="stat-row"><span class="lb">🔄 Último leech</span><span class="vl green">${s.last_leech ? escapeHtml(s.last_leech.keyword) + ' — ' + s.last_leech.total + ' combos' : '—'}</span></div>
+      <div class="stat-row"><span class="lb">🧵 Proxies vivos</span><span class="vl">${s.proxies_alive || 0}/${s.proxies_available || 0}</span></div>
+      ${s.oracle_stats ? `<div class="stat-row"><span class="lb">🗄️ Total en Oracle</span><span class="vl accent">${s.oracle_stats.total_records || 0}</span></div>` : ''}
+    `;
+    document.getElementById('comboTotalLabel').textContent = `(${s.total_combos_indexed || 0} combos indexados)`;
+    document.getElementById('sidebarComboCount').textContent = s.total_combos_indexed || 0;
+  } catch (e) {
+    document.getElementById('comboEngineStats').innerHTML = `<div class="empty-state" style="padding:5px"><p>⚠️ Motor no disponible</p></div>`;
+  }
+}
+
+async function exportCombo(fmt) {
+  const keyword = document.getElementById('comboKeyword').value.trim();
+  try {
+    const url = `/api/combo/export/${fmt}${keyword ? '?keyword=' + encodeURIComponent(keyword) : ''}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const blob = await resp.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `combos_${keyword || 'all'}.${fmt}`;
+    link.click();
+    showToast(`📥 Exportados a ${fmt.toUpperCase()}`, 'var(--accent2)');    } catch (e) {
+    showToast('❌ Error de exportación: ' + (e.message || e), 'var(--red)');
+  }
+}
+
+
+// ─── Proxy Intelligence ───
+let proxyInited = false;
+
+async function refreshProxyStats() {
+  try {
+    const resp = await fetch('/api/proxy/stats', { signal: AbortSignal.timeout(5000) });
+    if (!resp.ok) return;
+    const json = await resp.json();
+    if (!json.success) return;
+    renderProxyStats(json.data);
+  } catch (e) {
+    document.getElementById('proxyPoolStats').innerHTML = `<div class="empty-state" style="padding:5px"><p>⚠️ ProxyEngine no disponible</p></div>`;
+  }
+}
+
+function renderProxyStats(data) {
+  if (!data || !data.pool) return;
+  const pool = data.pool;
+  
+  animateValue('proxyTotal', pool.total || 0);
+  animateValue('proxyAlive', pool.alive || 0);
+  animateValue('proxyDead', pool.dead || 0);
+  animateValue('proxyUntested', pool.untested || 0);
+  document.getElementById('proxyMode').textContent = data.mode || 'auto';
+  document.getElementById('sidebarProxyCount').textContent = pool.alive || 0;
+  document.getElementById('proxyModeSelect').value = data.mode || 'auto';
+  
+  // Pool stats
+  let pHtml = `
+    <div class="stat-row"><span class="lb">🧪 Vivos</span><span class="vl green">${pool.alive || 0}</span></div>
+    <div class="stat-row"><span class="lb">💀 Muertos</span><span class="vl red">${pool.dead || 0}</span></div>
+    <div class="stat-row"><span class="lb">❓ Sin testear</span><span class="vl warn" style="color:var(--yellow)">${pool.untested || 0}</span></div>
+    <div class="stat-row"><span class="lb">📦 Total en pool</span><span class="vl accent">${pool.total || 0}</span></div>
+    <div class="stat-row"><span class="lb">🌐 Proxyless</span><span class="vl ${pool.proxyless_available ? 'green' : 'red'}">${pool.proxyless_available ? '✅ Disponible' : '❌ No'}</span></div>
+  `;
+  if (pool.by_source && Object.keys(pool.by_source).length > 0) {
+    pHtml += '<div class="stat-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:6px"><span class="lb"><strong>Por fuente:</strong></span><span class="vl"></span></div>';
+    Object.entries(pool.by_source).slice(0, 10).forEach(([k, v]) => {
+      pHtml += `<div class="stat-row" style="font-size:8px;padding:2px 0"><span class="lb">  ${k}</span><span class="vl accent">${v}</span></div>`;
+    });
+  }
+  document.getElementById('proxyPoolStats').innerHTML = pHtml;
+}
+
+async function executeProxyScrape() {
+  const btn = document.getElementById('proxyScrapeBtn');
+  const spinner = document.getElementById('proxyScrapeSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  
+  try {
+    const resp = await fetch('/api/proxy/scrape', {
+      method: 'POST',
+      signal: AbortSignal.timeout(60000),
+    });
+    const json = await resp.json();
+    if (json.success) {
+      showToast(`🕸️ ${json.data.total} proxies scrapeados de ${Object.keys(json.data.by_source || {}).length} fuentes`, 'var(--green)');
+      refreshProxyStats();
+      
+      // Show sources
+      const bySource = json.data.by_source || {};
+      document.getElementById('proxySources').innerHTML = Object.entries(bySource)
+        .sort((a,b) => b[1] - a[1])
+        .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
+        .join('') || '<div class="empty-state" style="padding:5px"><p>Sin fuentes</p></div>';
+    } else {
+      showToast('❌ Error: ' + (json.error || 'desconocido'), 'var(--red)');
+    }
+  } catch (e) {
+    showToast('❌ Error de scrape: ' + e.message, 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+async function executeProxyTest() {
+  try {
+    showToast('🧪 Testeando proxies... esto puede tomar tiempo', 'var(--yellow)');
+    const resp = await fetch('/api/proxy/test', {
+      method: 'POST',
+      signal: AbortSignal.timeout(120000),
+    });
+    const json = await resp.json();
+    if (json.success) {
+      const s = json.data;
+      showToast(`✅ Test completo: ${s.alive} vivos, ${s.dead} muertos, ${s.untested} sin testear`, 'var(--green)');
+      refreshProxyStats();
+    }
+  } catch (e) {
+    showToast('❌ Error: ' + e.message, 'var(--red)');
+  }
+}
+
+async function changeProxyMode() {
+  const mode = document.getElementById('proxyModeSelect').value;
+  try {
+    const resp = await fetch('/api/proxy/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode }),
+    });
+    const json = await resp.json();
+    if (json.success) {
+      document.getElementById('proxyMode').textContent = mode;
+      showToast(`🔄 Modo cambiado a: ${mode}`, 'var(--accent2)');
+    }
+  } catch (e) {
+    showToast('❌ Error: ' + e.message, 'var(--red)');
+  }
+}
+
+async function addManualProxies() {
+  const text = document.getElementById('proxyManualInput').value.trim();
+  if (!text) { showToast('❌ Ingresa proxies primero', 'var(--red)'); return; }
+  try {
+    const resp = await fetch('/api/proxy/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proxies: text }),
+    });
+    const json = await resp.json();
+    if (json.success) {
+      showToast(`✅ ${json.data.added} proxies agregados (total: ${json.data.total})`, 'var(--green)');
+      document.getElementById('proxyManualInput').value = '';
+      refreshProxyStats();
+    }
+  } catch (e) {
+    showToast('❌ Error: ' + e.message, 'var(--red)');
+  }
+}
+
+async function clearProxies() {
+  try {
+    const resp = await fetch('/api/proxy/clear', { method: 'POST' });
+    await resp.json();
+    showToast('🗑️ Pool de proxies limpiado', 'var(--yellow)');
+    refreshProxyStats();
+  } catch (e) {
+    showToast('❌ Error: ' + e.message, 'var(--red)');
+  }
+}
+
+async function detectVpn() {
+  try {
+    const resp = await fetch('/api/proxy/vpn', { signal: AbortSignal.timeout(10000) });
+    const json = await resp.json();
+    if (json.success) {
+      const v = json.data;
+      document.getElementById('proxyVpnInfo').innerHTML = `
+        <div class="stat-row"><span class="lb">🌐 IP</span><span class="vl" style="font-family:var(--mono)">${v.ip || '—'}</span></div>
+        <div class="stat-row"><span class="lb">🌍 País</span><span class="vl">${v.country || '—'}</span></div>
+        <div class="stat-row"><span class="lb">🏢 ISP</span><span class="vl">${v.isp || '—'}</span></div>
+        <div class="stat-row"><span class="lb">🔒 VPN</span><span class="vl ${v.vpn ? 'red' : 'green'}">${v.vpn ? '❌ Detectada' : '✅ No detectada'}</span></div>
+        <div class="stat-row"><span class="lb">🖥️ Hosting</span><span class="vl">${v.hosting ? '✅ Sí' : '❌ No'}</span></div>
+      `;
+    }
+  } catch (e) {
+    document.getElementById('proxyVpnInfo').innerHTML = `<div class="stat-row"><span class="lb">❌ Error</span><span class="vl red">${escapeHtml(e.message)}</span></div>`;
+  }
+}
 
 // ─── Init ───
 document.addEventListener('DOMContentLoaded', () => {

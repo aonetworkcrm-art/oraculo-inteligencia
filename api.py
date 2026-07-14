@@ -14,14 +14,165 @@ from datetime import datetime
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 
 from oracle_engine import OracleEngine, SampleDataGenerator, EnhancedOracleEngine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OracleAPI")
 
+# ─── Flask App Initialization ────────────────────────────────
+
 app = Flask(__name__, static_folder="static")
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+
+# ─── ProxyEngine Singleton ──────────────────────────────────
+
+PROXY_ENGINE_INSTANCE = None
+
+def _get_proxy_engine_ws():
+    """Lazy-load the ProxyEngine singleton with WebSocket support."""
+    global PROXY_ENGINE_INSTANCE
+    if PROXY_ENGINE_INSTANCE is None:
+        try:
+            from proxy_engine import ProxyEngine
+            PROXY_ENGINE_INSTANCE = ProxyEngine(ws_emit=_ws_emit)
+            logger.info("🔌 ProxyEngine initialized with WebSocket support")
+        except ImportError as e:
+            logger.warning(f"ProxyEngine not available: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"ProxyEngine init error: {e}")
+            return None
+    return PROXY_ENGINE_INSTANCE
+
+
+# ─── WebSocket Event Handlers ───────────────────────────────
+
+def _ws_emit(event: str, data: dict):
+    """Emit a WebSocket event to all connected clients."""
+    try:
+        socketio.emit(event, data)
+    except Exception:
+        pass
+
+
+@socketio.on("connect")
+def ws_connect():
+    logger.info("🔌 WebSocket client connected")
+    emit("connected", {"message": "Connected to Oracle Intelligence WebSocket"})
+
+
+@socketio.on("disconnect")
+def ws_disconnect():
+    logger.info("🔌 WebSocket client disconnected")
+
+
+@socketio.on("request_proxy_stats")
+def ws_request_proxy_stats():
+    """Client requests proxy stats via WebSocket."""
+    engine = _get_proxy_engine_ws()
+    if engine:
+        emit("proxy_stats", engine.get_stats())
+    else:
+        emit("error", {"message": "ProxyEngine not available"})
+
+
+@socketio.on("request_combo_stats")
+def ws_request_combo_stats():
+    """Client requests combo engine stats via WebSocket."""
+    engine = _get_combo_engine()
+    if engine:
+        emit("combo_stats", engine.get_stats())
+    else:
+        emit("error", {"message": "ComboEngine not available"})
+
+
+# ─── Proxy/WebSocket API Endpoints ────────────────────────
+
+@app.route("/api/proxy/stats", methods=["GET"])
+def api_proxy_stats():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    return jsonify({"success": True, "data": engine.get_stats()})
+
+
+@app.route("/api/proxy/scrape", methods=["POST"])
+def api_proxy_scrape():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    try:
+        result = engine.scrape_proxies()
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/proxy/test", methods=["POST"])
+def api_proxy_test():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    try:
+        stats = engine.test_proxies()
+        return jsonify({"success": True, "data": stats})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/proxy/mode", methods=["POST"])
+def api_proxy_mode():
+    data = request.get_json(silent=True) or {}
+    mode = data.get("mode", "auto")
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    engine.mode = mode
+    return jsonify({"success": True, "data": {"mode": mode}})
+
+
+@app.route("/api/proxy/vpn", methods=["GET"])
+def api_proxy_vpn():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    info = engine.detect_vpn()
+    return jsonify({"success": True, "data": info})
+
+
+@app.route("/api/proxy/add", methods=["POST"])
+def api_proxy_add():
+    data = request.get_json(silent=True) or {}
+    text = data.get("proxies", "")
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    count = engine.pool.add_list(text, source="manual")
+    return jsonify({"success": True, "data": {"added": count, "total": engine.pool.stats()["total"]}})
+
+
+@app.route("/api/proxy/clear", methods=["POST"])
+def api_proxy_clear():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    engine.pool.clear()
+    return jsonify({"success": True, "data": {"message": "Pool cleared"}})
+
+
+@app.route("/api/proxy/abort", methods=["POST"])
+def api_proxy_abort():
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    engine.abort()
+    return jsonify({"success": True, "data": {"message": "Aborted"}})
+
+
+# ─── Combo Intelligence Endpoints ──────────────────────────
 
 # Track server start time for uptime reporting
 SERVER_START_TIME = time.time()
@@ -632,6 +783,130 @@ def api_censys_host():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+# ─── Combo Intelligence Endpoints ──────────────────────────
+
+COMBO_ENGINE = None
+
+def _get_combo_engine():
+    """Lazy-load the ComboLeecherEngine singleton."""
+    global COMBO_ENGINE
+    if COMBO_ENGINE is None:
+        try:
+            from combo_leecher_engine import ComboLeecherEngine
+            COMBO_ENGINE = ComboLeecherEngine(oracle_engine=base_engine)
+            logger.info("🔐 Combo Intelligence Engine initialized")
+        except Exception as e:
+            logger.error(f"Combo engine init error: {e}")
+            return None
+    return COMBO_ENGINE
+
+
+@app.route("/api/combo/leech", methods=["POST"])
+def api_combo_leech():
+    """
+    Execute a combo leech operation — scrape, parse, validate, index.
+    
+    Body: {
+        "keyword": "comcast",
+        "sources": ["paste", "telegram", "dorking"],
+        "validate": false,
+        "max_per_source": 20
+    }
+    """
+    data = request.get_json(silent=True) or {}
+    keyword = data.get("keyword", "").strip()
+    
+    if not keyword:
+        return jsonify({"success": False, "error": "Keyword is required"}), 400
+    
+    engine = _get_combo_engine()
+    if not engine:
+        return jsonify({"success": False, "error": "Combo engine not available"}), 500
+    
+    sources = data.get("sources", ["paste", "telegram", "dorking"])
+    validate = data.get("validate", False)
+    max_per_source = data.get("max_per_source", 20)
+    
+    try:
+        result = engine.leech(
+            keyword=keyword,
+            sources=sources,
+            validate=validate,
+            max_per_source=max_per_source,
+        )
+        return jsonify({
+            "success": True,
+            "data": result.to_dict(),
+        })
+    except Exception as e:
+        logger.exception("Combo leech error")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/combo/stats", methods=["GET"])
+def api_combo_stats():
+    """Get combo intelligence engine statistics."""
+    engine = _get_combo_engine()
+    if not engine:
+        return jsonify({"success": False, "error": "Combo engine not available"}), 500
+    return jsonify({"success": True, "data": engine.get_stats()})
+
+
+@app.route("/api/combo/export/<fmt>", methods=["GET"])
+def api_combo_export(fmt: str):
+    """Export indexed combos in various formats."""
+    engine = _get_combo_engine()
+    if not engine:
+        return jsonify({"success": False, "error": "Combo engine not available"}), 500
+    
+    keyword = request.args.get("keyword", None)
+    fmt = fmt.lower()
+    
+    if fmt == "txt":
+        content = engine.export_txt(keyword)
+        mimetype = "text/plain"
+        filename = f"combos_{keyword or 'all'}.txt"
+    elif fmt == "csv":
+        content = engine.export_csv(keyword)
+        mimetype = "text/csv"
+        filename = f"combos_{keyword or 'all'}.csv"
+    elif fmt == "json":
+        content = engine.export_json(keyword)
+        mimetype = "application/json"
+        filename = f"combos_{keyword or 'all'}.json"
+    else:
+        return jsonify({"success": False, "error": f"Unknown format: {fmt}"}), 400
+    
+    response = app.response_class(
+        response=content,
+        status=200,
+        mimetype=mimetype,
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+    return response
+
+
+@app.route("/api/combo/validate", methods=["POST"])
+def api_combo_validate():
+    """Validate a single combo via SMTP."""
+    data = request.get_json(silent=True) or {}
+    email = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+    
+    if not email or not password:
+        return jsonify({"success": False, "error": "Email and password required"}), 400
+    
+    engine = _get_combo_engine()
+    if not engine:
+        return jsonify({"success": False, "error": "Combo engine not available"}), 500
+    
+    try:
+        result = engine.validator.validate_smtp(email, password)
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 # ─── Chat Endpoint ───────────────────────────────────────────
 
 @app.route("/api/chat", methods=["POST"])
@@ -746,4 +1021,6 @@ if __name__ == "__main__":
     logger.info("📡 External API connectors available via IntelOrchestrator")
     logger.info("📊 Deploy status endpoint at /api/deploy/status")
     
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    # Use socketio.run for WebSocket support
+    logger.info("🔌 WebSocket support available at /socket.io/")
+    socketio.run(app, host="0.0.0.0", port=port, debug=debug)
