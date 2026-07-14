@@ -26,6 +26,32 @@ import requests
 
 from combo_leecher_engine import ComboParser, ComboEntry, ProxyManager, random_ua
 
+# ═══════════════════════════════════════════════════════════════
+#  TOR PROXY — for .onion and deep web access
+# ═══════════════════════════════════════════════════════════════
+
+# Default Tor SOCKS5 proxy (install Tor Browser or tor service)
+TOR_PROXY = os.environ.get("TOR_PROXY", "socks5h://127.0.0.1:9050")
+TOR_AVAILABLE = False
+
+def _check_tor():
+    """Check if Tor proxy is reachable."""
+    global TOR_AVAILABLE
+    try:
+        r = requests.get("http://check.torproject.org/", proxies={"http": TOR_PROXY, "https": TOR_PROXY}, timeout=5)
+        TOR_AVAILABLE = "Congratulations" in r.text or "Your IP" in r.text
+    except Exception:
+        TOR_AVAILABLE = False
+    return TOR_AVAILABLE
+
+def _tor_session():
+    """Create a requests Session routed through Tor."""
+    s = requests.Session()
+    s.proxies = {"http": TOR_PROXY, "https": TOR_PROXY}
+    return s
+
+# Tor detection is lazy — only checked when actually needed (fetching .onion URLs)
+
 logger = logging.getLogger("DumpFinder")
 
 # ═══════════════════════════════════════════════════════════════
@@ -91,6 +117,22 @@ DUMP_DORKS = [
     # ── Discord ──
     {"name": "discord_dump",   "dork": "site:discord.com/channels \"{keyword}\" (\"combo\" OR \"dump\" OR \"leak\" OR \"password\")"},
     {"name": "discord_gg",     "dork": "site:discord.gg \"{keyword}\" (\"combo\" OR \"leak\" OR \"password\")"},
+
+    # ── Deep Web: .onion (Tor) ──
+    {"name": "onion_paste",    "dork": "site:pastebin.com \"{keyword}\" \".onion\" (\"combo\" OR \"leak\" OR \"dump\" OR \"creds\")"},
+    {"name": "onion_forum",    "dork": "site:pastebin.com \"{keyword}\" \"onion\" (\"forum\" OR \"market\" OR \"shop\" OR \"exchange\")"},
+    {"name": "onion_creds",    "dork": "inurl:\"{keyword}\" \".onion\" (\"email\" OR \"password\" OR \"login\" OR \"credentials\")"},
+    {"name": "onion_dump",     "dork": "filetype:txt \"{keyword}\" \".onion\" (\"dump\" OR \"leak\" OR \"combolist\")"},
+    {"name": "onion_db",       "dork": "\"{keyword}\" \".onion\" (\"database\" OR \"sql\" OR \"mysql\" OR \"dump\")"},
+    {"name": "onion_breach",   "dork": "\"{keyword}\" \".onion\" (\"breach\" OR \"leak\" OR \"leaked\" OR \"compromised\")"},
+
+    # ── Deep Web: .i2p ──
+    {"name": "i2p_sites",      "dork": "inurl:\"{keyword}\" \".i2p\" (\"forum\" OR \"market\" OR \"creds\" OR \"login\")"},
+    {"name": "i2p_creds",      "dork": "\"{keyword}\" \".i2p\" (\"password\" OR \"credentials\" OR \"database\" OR \"dump\")"},
+
+    # ── Deep Web: general hidden services ──
+    {"name": "hidden_service",  "dork": "inurl:\"{keyword}\" (\"hidden\" OR \"tor\" OR \"onion\") (\"email:pass\" OR \"combo\" OR \"leak\" OR \"dump\")"},
+    {"name": "tor_exit_nodes",  "dork": "inurl:\"{keyword}\" \"tor exit\" (\"log\" OR \"credentials\" OR \"password\" OR \"capture\")"},
 ]
 
 # ═══════════════════════════════════════════════════════════════
@@ -238,10 +280,10 @@ class PasteDirectScraper:
             try:
                 self.session.headers.update(_stealth_headers())
                 proxy = self.proxy_mgr.get_random()
-            resp = self.session.get(url, timeout=8, proxies=proxy)
-            if resp.status_code != 200:
-                continue
-            for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
+                resp = self.session.get(url, timeout=8, proxies=proxy)
+                if resp.status_code != 200:
+                    continue
+                for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
                     url_val = match.group(1)
                     if url_val not in seen and "http" in url_val:
                         seen.add(url_val)
@@ -513,13 +555,28 @@ class URLFetcher:
         self.proxy_mgr = ProxyManager()
 
     def fetch(self, url: str, timeout: int = 10, retries: int = 2) -> Optional[str]:
-        """Fetch URL content with retry. Returns None on failure."""
+        """Fetch URL content with retry. Routes .onion/.i2p URLs through Tor."""
+        is_onion = ".onion" in url.lower() or ".i2p" in url.lower()
+        
         for attempt in range(retries + 1):
             self.rate_limiter.wait(source=f"fetch_{hash(url) % 100}")
             try:
-                self.session.headers.update(_stealth_headers())
-                proxy = self.proxy_mgr.get_random()
-                resp = self.session.get(url, timeout=timeout, proxies=proxy)
+                if is_onion:
+                    # Check Tor availability lazily
+                    if not TOR_AVAILABLE:
+                        _check_tor()
+                    if TOR_AVAILABLE:
+                        tor_sess = _tor_session()
+                        tor_sess.headers.update(_stealth_headers())
+                        resp = tor_sess.get(url, timeout=timeout + 10, verify=False)
+                    else:
+                        logger.debug(f"Tor not available, skipping onion URL: {url[:50]}")
+                        return None
+                else:
+                    self.session.headers.update(_stealth_headers())
+                    proxy = self.proxy_mgr.get_random()
+                    resp = self.session.get(url, timeout=timeout, proxies=proxy)
+                
                 if resp.status_code == 200 and len(resp.text) > 50:
                     return resp.text
             except Exception as e:
