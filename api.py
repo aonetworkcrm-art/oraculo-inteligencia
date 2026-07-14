@@ -1105,15 +1105,32 @@ def api_ping():
 DUMP_FINDER_INSTANCE = None
 
 def _get_dump_finder():
-    """Lazy-load the DumpFinder singleton."""
+    """Lazy-load the DumpFinder singleton with timeout."""
     global DUMP_FINDER_INSTANCE
     if DUMP_FINDER_INSTANCE is None:
-        try:
-            DUMP_FINDER_INSTANCE = DumpFinder()
-            logger.info("🛡️ DumpFinder initialized")
-        except Exception as e:
-            logger.error(f"DumpFinder init error: {e}")
+        import threading
+        result = [None]
+        error = [None]
+        done = threading.Event()
+        
+        def _init():
+            try:
+                result[0] = DumpFinder()
+            except Exception as e:
+                error[0] = e
+            finally:
+                done.set()
+        
+        t = threading.Thread(target=_init, daemon=True)
+        t.start()
+        if not done.wait(timeout=8):
+            logger.error("🛡️ DumpFinder init timed out (>8s)")
             return None
+        if error[0]:
+            logger.error(f"🛡️ DumpFinder init error: {error[0]}")
+            return None
+        DUMP_FINDER_INSTANCE = result[0]
+        logger.info("🛡️ DumpFinder initialized")
     return DUMP_FINDER_INSTANCE
 
 

@@ -199,7 +199,7 @@ class PasteDirectScraper:
         try:
             self.session.headers.update(_stealth_headers())
             proxy = self.proxy_mgr.get_random()
-            resp = self.session.get(url, timeout=15, proxies=proxy)
+            resp = self.session.get(url, timeout=8, proxies=proxy)
             if resp.status_code != 200:
                 return []
 
@@ -238,10 +238,10 @@ class PasteDirectScraper:
             try:
                 self.session.headers.update(_stealth_headers())
                 proxy = self.proxy_mgr.get_random()
-                resp = self.session.get(url, timeout=15, proxies=proxy)
-                if resp.status_code != 200:
-                    continue
-                for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
+            resp = self.session.get(url, timeout=8, proxies=proxy)
+            if resp.status_code != 200:
+                continue
+            for match in re.finditer(r'href="(https?://[^"]+)"[^>]*>', resp.text):
                     url_val = match.group(1)
                     if url_val not in seen and "http" in url_val:
                         seen.add(url_val)
@@ -327,7 +327,7 @@ class DorkEngine:
 
         return results
 
-    def _stealth_get(self, url: str, timeout: int = 15) -> Optional[requests.Response]:
+    def _stealth_get(self, url: str, timeout: int = 8) -> Optional[requests.Response]:
         """HTTP GET with full stealth headers + proxy rotation."""
         self.session.headers.update(_stealth_headers())
         proxy = self.proxy_mgr.get_random()
@@ -512,7 +512,7 @@ class URLFetcher:
         self.rate_limiter = _RateLimiter(requests_per_minute=12)
         self.proxy_mgr = ProxyManager()
 
-    def fetch(self, url: str, timeout: int = 20, retries: int = 2) -> Optional[str]:
+    def fetch(self, url: str, timeout: int = 10, retries: int = 2) -> Optional[str]:
         """Fetch URL content with retry. Returns None on failure."""
         for attempt in range(retries + 1):
             self.rate_limiter.wait(source=f"fetch_{hash(url) % 100}")
