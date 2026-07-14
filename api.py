@@ -106,6 +106,7 @@ def api_proxy_scrape():
         return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
     try:
         result = engine.scrape_proxies()
+        result["sources_total"] = len(engine.scraper.SOURCES)
         return jsonify({"success": True, "data": result})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -170,6 +171,62 @@ def api_proxy_abort():
         return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
     engine.abort()
     return jsonify({"success": True, "data": {"message": "Aborted"}})
+
+
+@app.route("/api/proxy/autopopulate", methods=["POST"])
+def api_proxy_autopopulate():
+    """
+    Auto-poblar el pool de proxies: scrape + test en cadena.
+    Ejecuta scrape de todas las fuentes y luego testea los proxies obtenidos.
+    """
+    engine = _get_proxy_engine_ws()
+    if not engine:
+        return jsonify({"success": False, "error": "ProxyEngine not available"}), 500
+    try:
+        start = time.time()
+
+        # Paso 1: Scrape
+        logger.info("🕸️ [AutoPopulate] Scraping proxies from all sources...")
+        scrape_result = engine.scrape_proxies()
+        scraped = scrape_result.get("total", 0)
+        sources_count = len(scrape_result.get("by_source", {}))
+
+        # Paso 2: Test (solo si hay proxies nuevos)
+        pool_before = engine.pool.stats()
+        untested_before = pool_before.get("untested", 0)
+
+        if untested_before > 0:
+            logger.info(f"🧪 [AutoPopulate] Testing {untested_before} proxies...")
+            test_stats = engine.test_proxies()
+        else:
+            test_stats = {"message": "No new proxies to test"}
+
+        elapsed = round(time.time() - start, 2)
+        pool_after = engine.pool.stats()
+
+        logger.info(f"✅ [AutoPopulate] Complete in {elapsed}s — {scraped} scraped, {pool_after.get('alive',0)} alive")
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "scrape": {
+                    "total_scraped": scraped,
+                    "sources_count": sources_count,
+                    "by_source": scrape_result.get("by_source", {}),
+                },
+                "test": {
+                    "total_tested": untested_before,
+                    "alive": pool_after.get("alive", 0),
+                    "dead": pool_after.get("dead", 0),
+                    "untested": pool_after.get("untested", 0),
+                },
+                "pool_after": pool_after,
+                "took_seconds": elapsed,
+            }
+        })
+    except Exception as e:
+        logger.exception("AutoPopulate error")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # ─── Combo Intelligence Endpoints ──────────────────────────

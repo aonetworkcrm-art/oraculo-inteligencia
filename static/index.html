@@ -694,6 +694,10 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
             <button onclick="executeProxyTest()" style="background:linear-gradient(135deg,var(--green),var(--accent2));color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
               🧪 Testear Proxies
             </button>
+            <button id="autoPopulateBtn" onclick="executeAutoPopulate()" style="background:linear-gradient(135deg,var(--purple),var(--accent3));color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative">
+              <span id="autoPopulateSpinner" style="display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:radarSpin 0.8s linear infinite"></span>
+              <span id="autoPopulateLabel">⚡ Auto-poblar Pool</span>
+            </button>
             <select id="proxyModeSelect" onchange="changeProxyMode()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:10px;cursor:pointer">
               <option value="auto">🔄 Auto (proxy → directo)</option>
               <option value="proxy">🔌 Solo proxy</option>
@@ -725,7 +729,7 @@ table.records .empty{text-align:center;padding:40px!important;color:var(--text3)
           </div>
           <div class="stat-card">
             <h4>📡 Fuentes de Scraping</h4>
-            <div id="proxySources"><div class="empty-state" style="padding:5px"><p>Scrapea para ver fuentes</p></div></div>
+            <div id="proxySources"><div class="stat-row" style="color:var(--text3);font-size:9px;border:none;padding:2px 0"><span class="lb">📦 Motor configurado con <strong>31+</strong> fuentes de scraping</span></div></div>
           </div>
         </div>
       </section>
@@ -1959,7 +1963,9 @@ function renderProxyStats(data) {
     <div class="stat-row"><span class="lb">❓ Sin testear</span><span class="vl warn" style="color:var(--yellow)">${pool.untested || 0}</span></div>
     <div class="stat-row"><span class="lb">📦 Total en pool</span><span class="vl accent">${pool.total || 0}</span></div>
     <div class="stat-row"><span class="lb">🌐 Proxyless</span><span class="vl ${pool.proxyless_available ? 'green' : 'red'}">${pool.proxyless_available ? '✅ Disponible' : '❌ No'}</span></div>
-  `;
+  
+    <div class="stat-row"><span class="lb">📡 Fuentes scraping</span><span class="vl accent">${data.scrape_sources || 31} disponibles</span></div>
+  ;
   if (pool.by_source && Object.keys(pool.by_source).length > 0) {
     pHtml += '<div class="stat-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:6px"><span class="lb"><strong>Por fuente:</strong></span><span class="vl"></span></div>';
     Object.entries(pool.by_source).slice(0, 10).forEach(([k, v]) => {
@@ -1987,10 +1993,21 @@ async function executeProxyScrape() {
       
       // Show sources
       const bySource = json.data.by_source || {};
-      document.getElementById('proxySources').innerHTML = Object.entries(bySource)
-        .sort((a,b) => b[1] - a[1])
-        .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
-        .join('') || '<div class="empty-state" style="padding:5px"><p>Sin fuentes</p></div>';
+            // Show sources
+      const bySource = json.data.by_source || {};
+      const sourceKeys = Object.keys(bySource);
+      const totalAvail = json.data.sources_total || 31;
+      let srcHtml = `<div class="stat-row" style="color:var(--text3);font-size:9px;border:none;padding:2px 0">
+        <span class="lb">📡 <strong>${sourceKeys.length}</strong> activas de <strong>${totalAvail}</strong> disponibles</span>
+      </div>`;
+      if (sourceKeys.length > 0) {
+        srcHtml += Object.entries(bySource).sort((a,b) => b[1] - a[1])
+          .map(([k,v]) => `<div class="stat-row"><span class="lb">${k}</span><span class="vl accent">${v}</span></div>`)
+          .join('');
+      } else {
+        srcHtml += '<div class="empty-state" style="padding:5px"><p>Sin fuentes</p></div>';
+      }
+      document.getElementById('proxySources').innerHTML = srcHtml;
     } else {
       showToast('❌ Error: ' + (json.error || 'desconocido'), 'var(--red)');
     }
@@ -2085,6 +2102,59 @@ async function detectVpn() {
     }
   } catch (e) {
     document.getElementById('proxyVpnInfo').innerHTML = `<div class="stat-row"><span class="lb">❌ Error</span><span class="vl red">${escapeHtml(e.message)}</span></div>`;
+  }
+}
+
+// ─── Auto-Poblar Pool (scrape + test en cadena) ───
+
+let autoPopulateRunning = false;
+
+async function executeAutoPopulate() {
+  if (autoPopulateRunning) return;
+  autoPopulateRunning = true;
+
+  const btn = document.getElementById('autoPopulateBtn');
+  const spinner = document.getElementById('autoPopulateSpinner');
+  const label = document.getElementById('autoPopulateLabel');
+
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  label.textContent = '\u{1F578}\u{FE0F} Scrapeando...';
+
+  try {
+    const resp = await fetch('/api/proxy/autopopulate', {
+      method: 'POST',
+      signal: AbortSignal.timeout(180000),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' - Server error');
+    const json = await resp.json();
+
+    if (json.success) {
+      const d = json.data;
+      const scraped = d.scrape?.total_scraped || 0;
+      const alive = d.test?.alive || 0;
+      const dead = d.test?.dead || 0;
+      const sources = d.scrape?.sources_count || 0;
+      const took = d.took_seconds || 0;
+
+      label.textContent = `\u2705 ${scraped} scrapeados \u00b7 ${alive} vivos \u00b7 ${took}s`;
+      showToast(`\u26A1 Pool auto-poblado: ${scraped} proxies de ${sources} fuentes, ${alive} vivos, ${dead} muertos (${took}s)`, 'var(--green)');
+
+      setTimeout(refreshProxyStats, 500);
+    } else {
+      label.textContent = '\u274C Error';
+      showToast('\u274C Error: ' + (json.error || 'desconocido'), 'var(--red)');
+    }
+  } catch (e) {
+    label.textContent = '\u274C Error';
+    showToast('\u274C Error de auto-poblado: ' + e.message, 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    autoPopulateRunning = false;
+    setTimeout(() => {
+      if (!autoPopulateRunning) label.textContent = '\u26A1 Auto-poblar Pool';
+    }, 5000);
   }
 }
 
