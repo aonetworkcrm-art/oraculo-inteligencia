@@ -255,6 +255,9 @@ def serve_index():
 
 @app.route("/<path:path>")
 def serve_static(path):
+    # No atrapar rutas de API
+    if path.startswith("api/"):
+        return jsonify({"success": False, "error": "Not found"}), 404
     if not path:
         return send_from_directory("static", "index.html")
     full_path = os.path.join("static", path)
