@@ -1226,24 +1226,29 @@ def api_dump_export():
 def api_dump_cron():
     """
     Ejecuta búsqueda en background para pre-poblar cache.
-    Diseñado para ser llamado por UptimeRobot o cron job cada 30 min.
+    Máximo 3 keywords para no exceder timeout de Render (30s).
+    Diseñado para ser llamado por UptimeRobot cada 30 min.
     """
     data = request.get_json(silent=True) or {}
     keyword = data.get("keyword", "").strip()
 
     if not keyword:
-        # Si no hay keyword, ejecutar búsquedas predefinidas
-        predefined = ["comcast", "xfinity", "verizon", "att", "netflix", "spotify", "facebook", "instagram", "tiktok", "paypal"]
+        # Solo 3 keywords por request (cada cache miss ~15s × 3 ≈ 45s ≈ timeout Render)
+        predefined = ["comcast", "xfinity", "verizon"]
+        results = []
         for kw in predefined:
             try:
                 finder = _get_dump_finder()
                 if finder:
-                    # Forzar cache miss con parámetros diferentes
-                    logger.info(f"⏰ [CRON] Pre-caching '{kw}'...")
-                    finder.search_fast(keyword=kw, save_to_disk=True)
+                    r = finder.search_fast(keyword=kw, save_to_disk=True)
+                    combos = r.get("filtered_combos_count", 0)
+                    elapsed = r.get("took_seconds", 0)
+                    cached = r.get("_from_cache", False)
+                    results.append({"keyword": kw, "combos": combos, "took_seconds": elapsed, "from_cache": cached})
+                    logger.info(f"⏰ [CRON] '{kw}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
             except Exception as e:
-                logger.error(f"⏰ [CRON] Error pre-caching '{kw}': {e}")
-        return jsonify({"success": True, "data": {"message": f"Cron completed for {len(predefined)} keywords"}})
+                logger.error(f"⏰ [CRON] Error '{kw}': {e}")
+        return jsonify({"success": True, "data": {"results": results, "total": len(results)}})
 
     # Keyword específica
     finder = _get_dump_finder()
@@ -1255,18 +1260,15 @@ def api_dump_cron():
         result = finder.search_fast(keyword=keyword, save_to_disk=True)
         elapsed = result.get("took_seconds", 0)
         combos = result.get("filtered_combos_count", 0)
-        if result.get("_from_cache"):
-            logger.info(f"⏰ [CRON] '{keyword}' — CACHE HIT ({combos} combos)")
-        else:
-            logger.info(f"⏰ [CRON] '{keyword}' — {combos} combos en {elapsed}s")
+        cached = result.get("_from_cache", False)
+        logger.info(f"⏰ [CRON] '{keyword}' — {'CACHE' if cached else 'FRESH'} {combos} combos en {elapsed}s")
         return jsonify({
             "success": True,
             "data": {
                 "keyword": keyword,
                 "combos": combos,
                 "took_seconds": elapsed,
-                "from_cache": result.get("_from_cache", False),
-                "message": f"Cron completed for '{keyword}' — {combos} combos in {elapsed}s",
+                "from_cache": cached,
             }
         })
     except Exception as e:

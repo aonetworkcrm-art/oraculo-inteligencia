@@ -893,9 +893,34 @@ class DumpFinder:
             _fast_mode=True,  # Solo DuckDuckGo sin Google/Bing
         )
 
-        # 3. Cache the result
+        # 3. Cache the result with full combos for export
         if result.get("filtered_combos_count", 0) > 0:
-            DiskCache.set(keyword, result, year, month)
+            # Save full combo data in cache (not just 50 sample)
+            # This ensures export() can read all combos on cache hit
+            cached_result = dict(result)
+            cached_result["_cached_combos"] = result.get("combos_sample", [])
+            # Try to read full_dump.txt for complete combo list
+            files_saved = result.get("files_saved", {}).get("files_created", [])
+            for fp in files_saved:
+                if "full_dump" in fp and os.path.exists(fp):
+                    try:
+                        with open(fp, "r", encoding="utf-8") as fh:
+                            content = fh.read()
+                        full_combos = []
+                        for line in content.split("\n"):
+                            line = line.strip()
+                            if line and "#" not in line and ":" in line:
+                                parts = line.split(":", 1)
+                                full_combos.append({
+                                    "email": parts[0].strip(),
+                                    "password": parts[1].split("  #")[0].strip() if "  #" in parts[1] else parts[1].strip(),
+                                })
+                        if full_combos:
+                            cached_result["_cached_combos"] = full_combos
+                            cached_result["_cached_full_count"] = len(full_combos)
+                    except Exception:
+                        pass
+            DiskCache.set(keyword, cached_result, year, month)
 
         return result
 
@@ -1201,7 +1226,11 @@ class DumpFinder:
                 except Exception:
                     pass
 
-        # Fallback: use the combos_sample from the search result
+        # Fallback: use cached_combos (full list saved in cache)
+        if not full_combos:
+            full_combos = result.get("_cached_combos", [])
+
+        # Final fallback: use the combos_sample from the search result
         if not full_combos:
             full_combos = result.get("combos_sample", [])
 
