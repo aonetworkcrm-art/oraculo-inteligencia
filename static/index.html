@@ -1965,7 +1965,7 @@ function renderProxyStats(data) {
     <div class="stat-row"><span class="lb">🌐 Proxyless</span><span class="vl ${pool.proxyless_available ? 'green' : 'red'}">${pool.proxyless_available ? '✅ Disponible' : '❌ No'}</span></div>
   
     <div class="stat-row"><span class="lb">📡 Fuentes scraping</span><span class="vl accent">${data.scrape_sources || 31} disponibles</span></div>
-  ;
+  `;
   if (pool.by_source && Object.keys(pool.by_source).length > 0) {
     pHtml += '<div class="stat-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:6px"><span class="lb"><strong>Por fuente:</strong></span><span class="vl"></span></div>';
     Object.entries(pool.by_source).slice(0, 10).forEach(([k, v]) => {
@@ -1991,11 +1991,7 @@ async function executeProxyScrape() {
       showToast(`🕸️ ${json.data.total} proxies scrapeados de ${Object.keys(json.data.by_source || {}).length} fuentes`, 'var(--green)');
       refreshProxyStats();
       
-      // Show sources
-      const bySource = json.data.by_source || {};
-            // Show sources
-      const bySource = json.data.by_source || {};
-      const sourceKeys = Object.keys(bySource);
+
       const totalAvail = json.data.sources_total || 31;
       let srcHtml = `<div class="stat-row" style="color:var(--text3);font-size:9px;border:none;padding:2px 0">
         <span class="lb">📡 <strong>${sourceKeys.length}</strong> activas de <strong>${totalAvail}</strong> disponibles</span>
