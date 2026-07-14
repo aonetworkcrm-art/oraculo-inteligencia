@@ -867,11 +867,13 @@ class DumpFinder:
                      month: Optional[int] = None,
                      date_from: Optional[str] = None,
                      date_to: Optional[str] = None,
-                     save_to_disk: bool = True) -> Dict[str, Any]:
+                     save_to_disk: bool = True,
+                     max_dorks: int = 5,
+                     max_fetches: int = 5) -> Dict[str, Any]:
         """
         Búsqueda RÁPIDA — usa cache si existe, si no, ejecuta búsqueda ligera.
         - Cache hit → instantáneo
-        - Cache miss → solo DuckDuckGo + paste scraping (5 dorks, ~15s)
+        - Cache miss → solo DuckDuckGo + paste scraping (~15s)
         """
         # 1. Try cache first
         cached = DiskCache.get(keyword, year, month)
@@ -887,8 +889,8 @@ class DumpFinder:
             month=month,
             date_from=date_from,
             date_to=date_to,
-            max_dorks=5,
-            max_fetches=5,
+            max_dorks=max_dorks,
+            max_fetches=max_fetches,
             save_to_disk=save_to_disk,
             _fast_mode=True,  # Solo DuckDuckGo sin Google/Bing
         )
