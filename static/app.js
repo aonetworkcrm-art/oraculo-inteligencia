@@ -1497,7 +1497,22 @@ function exportDumpResults() {
   showToast(`📥 Exportados ${dumpData.length} combos a CSV (solo muestra)`, 'var(--accent2)');
 }
 
-async function exportDumpFile(fmt) {
+async function exportDumpAllTxt() {
+  const keyword = document.getElementById('dumpKeyword').value.trim();
+  if (!keyword) { showToast('❌ Ingresa una palabra clave', 'var(--red)'); return; }
+  const now = new Date();
+  const ts = now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0') + '_' +
+    String(now.getHours()).padStart(2, '0') + '-' +
+    String(now.getMinutes()).padStart(2, '0') + '-' +
+    String(now.getSeconds()).padStart(2, '0');
+  const filename = `dump_${keyword}_${ts}.txt`;
+  showToast(`📥 Exportando todos los combos a TXT...`, 'var(--yellow)');
+  await exportDumpFile('txt', filename);
+}
+
+async function exportDumpFile(fmt, customFilename) {
   const keyword = document.getElementById('dumpKeyword').value.trim();
   if (!keyword) { showToast('❌ Ingresa una palabra clave para exportar', 'var(--red)'); return; }
   
@@ -1517,7 +1532,7 @@ async function exportDumpFile(fmt) {
     const blob = await resp.blob();
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `dump_${keyword}_${fmt}.${fmt}`;
+    link.download = customFilename || `dump_${keyword}_${fmt}.${fmt}`;
     link.click();
     showToast(`📥 Dump completo exportado a ${fmt.toUpperCase()}`, 'var(--green)');
   } catch (err) {
